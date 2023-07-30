@@ -1,0 +1,13 @@
+<resources>
+
+    <style name="Base.Theme.Trace" parent="Theme.Material3.Light">
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorSurface">@color/colorOnSurface</item>
+        <item name="colorOnSurface">@android:color/white</item>
+        <item name="android:navigationBarColor">@android:color/white</item>
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
+
+    <style name="Theme.Trace" parent="Base.Theme.Trace" />
+
+</resources>
