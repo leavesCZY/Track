@@ -4,6 +4,7 @@ import com.android.build.api.instrumentation.AsmClassVisitorFactory
 import com.android.build.api.instrumentation.ClassContext
 import com.android.build.api.instrumentation.ClassData
 import com.android.build.api.instrumentation.InstrumentationParameters
+import github.leavesczy.trace.utils.LogPrint
 import github.leavesczy.trace.utils.filterLambda
 import github.leavesczy.trace.utils.getClassDesc
 import github.leavesczy.trace.utils.hasAnnotation
@@ -113,8 +114,13 @@ private class ViewClickClassVisitor(
                 }
             }
         }
-        shouldHookMethodList.forEach {
-            hookMethod(modeNode = it)
+        if (shouldHookMethodList.isNotEmpty()) {
+            shouldHookMethodList.forEach {
+                hookMethod(modeNode = it)
+            }
+            LogPrint.normal(tag = "ClickTrace") {
+                "$name 发现 ${shouldHookMethodList.size} 个 View.OnClickListener 指令，完成处理..."
+            }
         }
     }
 

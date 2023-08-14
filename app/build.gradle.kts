@@ -38,7 +38,7 @@ toastTrace {
 
 android {
     namespace = "github.leavesczy.trace"
-    compileSdk = 33
+    compileSdk = 34
     defaultConfig {
         applicationId = "github.leavesczy.trace"
         minSdk = 23
@@ -130,7 +130,7 @@ dependencies {
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("com.google.android.material:material:1.9.0")
-    val composeBom = platform("androidx.compose:compose-bom:2023.06.01")
+    val composeBom = platform("androidx.compose:compose-bom:2023.08.00")
     implementation(composeBom)
     implementation("androidx.compose.material3:material3")
     implementation("androidx.activity:activity-compose:1.7.2")

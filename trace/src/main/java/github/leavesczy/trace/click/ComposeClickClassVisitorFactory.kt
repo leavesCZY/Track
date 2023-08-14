@@ -5,6 +5,7 @@ import com.android.build.api.instrumentation.ClassContext
 import com.android.build.api.instrumentation.ClassData
 import com.android.build.api.instrumentation.InstrumentationParameters
 import github.leavesczy.trace.utils.InitMethodName
+import github.leavesczy.trace.utils.LogPrint
 import github.leavesczy.trace.utils.replaceDotBySlash
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
@@ -35,9 +36,9 @@ internal interface ComposeClickConfigParameters : InstrumentationParameters {
 internal abstract class ComposeClickClassVisitorFactory :
     AsmClassVisitorFactory<ComposeClickConfigParameters> {
 
-    private companion object {
+    companion object {
 
-        private const val ComposeClickClassName = "androidx.compose.foundation.ClickableKt"
+        const val ComposeClickClassName = "androidx.compose.foundation.ClickableKt"
 
     }
 
@@ -87,6 +88,9 @@ private class ComposeClickClassVisitor(
 
     override fun visitEnd() {
         super.visitEnd()
+        LogPrint.normal(tag = "ClickTrace") {
+            "找到 ${ComposeClickClassVisitorFactory.ComposeClickClassName} 类，完成处理..."
+        }
         accept(nextClassVisitor)
     }
 

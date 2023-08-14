@@ -4,6 +4,7 @@ import com.android.build.api.instrumentation.AsmClassVisitorFactory
 import com.android.build.api.instrumentation.ClassContext
 import com.android.build.api.instrumentation.ClassData
 import com.android.build.api.instrumentation.InstrumentationParameters
+import github.leavesczy.trace.utils.LogPrint
 import github.leavesczy.trace.utils.matches
 import github.leavesczy.trace.utils.replaceDotBySlash
 import org.gradle.api.provider.Property
@@ -74,6 +75,9 @@ private class ReplaceClassClassVisitor(
             replaceDotBySlash(className = config.targetClass),
             interfaces
         )
+        LogPrint.normal(tag = "ReplaceClassTrace") {
+            "$name 的父类符合 ReplaceClass 规则，完成处理..."
+        }
     }
 
     override fun visitEnd() {

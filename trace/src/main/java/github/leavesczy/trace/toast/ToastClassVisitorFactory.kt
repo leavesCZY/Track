@@ -4,6 +4,7 @@ import com.android.build.api.instrumentation.AsmClassVisitorFactory
 import com.android.build.api.instrumentation.ClassContext
 import com.android.build.api.instrumentation.ClassData
 import com.android.build.api.instrumentation.InstrumentationParameters
+import github.leavesczy.trace.utils.LogPrint
 import github.leavesczy.trace.utils.replaceDotBySlash
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
@@ -11,7 +12,6 @@ import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.Opcodes
 import org.objectweb.asm.tree.ClassNode
 import org.objectweb.asm.tree.MethodInsnNode
-import org.objectweb.asm.tree.MethodNode
 
 /**
  * @Author: leavesCZY
@@ -59,29 +59,27 @@ private class ToastClassVisitor(
 
     override fun visitEnd() {
         super.visitEnd()
-        methods.forEach {
-            hook(methodNode = it)
-        }
-        accept(nextClassVisitor)
-    }
-
-    private fun hook(methodNode: MethodNode) {
-        val instructions = methodNode.instructions
-        if (instructions != null && instructions.size() > 0) {
-            instructions.mapNotNull {
+        val toastMethodInsnNodeList = mutableListOf<MethodInsnNode>()
+        methods.forEach { method ->
+            method.instructions?.forEach {
                 if (it is MethodInsnNode && it.opcode == Opcodes.INVOKEVIRTUAL && it.owner == TOAST && it.name == "show" && it.desc == "()V") {
-                    it
-                } else {
-                    null
+                    toastMethodInsnNodeList.add(element = it)
                 }
-            }.forEach {
+            }
+        }
+        if (toastMethodInsnNodeList.isNotEmpty()) {
+            toastMethodInsnNodeList.forEach {
                 it.opcode = Opcodes.INVOKESTATIC
                 it.owner = replaceDotBySlash(className = config.toasterClass)
                 it.name = config.showToastMethodName
                 it.desc = "(L$TOAST;)V"
                 it.itf = false
             }
+            LogPrint.normal(tag = "ToastTrace") {
+                name + " 发现 ${toastMethodInsnNodeList.size} 个 Toast.show 指令，完成处理..."
+            }
         }
+        accept(nextClassVisitor)
     }
 
 }
