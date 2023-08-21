@@ -75,7 +75,7 @@ private class ToastClassVisitor(
                 it.desc = "(L$TOAST;)V"
                 it.itf = false
             }
-            LogPrint.normal(tag = "ToastTrace") {
+            LogPrint.normal(tag = "toastTrace") {
                 name + " 发现 ${toastMethodInsnNodeList.size} 个 Toast.show 指令，完成处理..."
             }
         }

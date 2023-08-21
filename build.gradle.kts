@@ -3,7 +3,7 @@ plugins {
     val agpVersion = "7.4.2"
     val kotlinVersion = "1.8.22"
     val pluginPublishVersion = "1.2.0"
-    val tracePluginVersion = "0.0.3-beta01"
+    val tracePluginVersion = "0.0.3-beta02"
     id("com.android.application").version(agpVersion).apply(false)
     id("com.android.library").version(agpVersion).apply(false)
     id("org.jetbrains.kotlin.android").version(kotlinVersion).apply(false)

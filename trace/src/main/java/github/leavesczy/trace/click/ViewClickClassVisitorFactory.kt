@@ -118,7 +118,7 @@ private class ViewClickClassVisitor(
             shouldHookMethodList.forEach {
                 hookMethod(modeNode = it)
             }
-            LogPrint.normal(tag = "ClickTrace") {
+            LogPrint.normal(tag = "clickTrace") {
                 "$name 发现 ${shouldHookMethodList.size} 个 View.OnClickListener 指令，完成处理..."
             }
         }

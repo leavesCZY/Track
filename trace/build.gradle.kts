@@ -14,7 +14,7 @@ java {
 }
 
 group = "io.github.leavesczy"
-version = "0.0.3-beta01"
+version = "0.0.3-beta02"
 
 gradlePlugin {
     website.set("https://github.com/leavesCZY/Trace")

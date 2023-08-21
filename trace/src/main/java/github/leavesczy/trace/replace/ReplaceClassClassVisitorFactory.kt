@@ -75,7 +75,7 @@ private class ReplaceClassClassVisitor(
             replaceDotBySlash(className = config.targetClass),
             interfaces
         )
-        LogPrint.normal(tag = "ReplaceClassTrace") {
+        LogPrint.normal(tag = "replaceClassTrace") {
             "$name 的父类符合 ReplaceClass 规则，完成处理..."
         }
     }

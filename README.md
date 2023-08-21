@@ -1,6 +1,6 @@
 # Trace
 
-Trace 是一个适用于 Android 的字节码插桩库
+一个适用于 Android 的字节码插桩库
 
 目前一共包含三个功能点：
 

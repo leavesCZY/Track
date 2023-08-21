@@ -88,7 +88,7 @@ private class ComposeClickClassVisitor(
 
     override fun visitEnd() {
         super.visitEnd()
-        LogPrint.normal(tag = "ClickTrace") {
+        LogPrint.normal(tag = "clickTrace") {
             "找到 ${ComposeClickClassVisitorFactory.ComposeClickClassName} 类，完成处理..."
         }
         accept(nextClassVisitor)
