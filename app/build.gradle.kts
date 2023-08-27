@@ -10,25 +10,24 @@ plugins {
     id("io.github.leavesczy.trace")
 }
 
-clickTrace {
-    view {
-        onClickClass = "github.leavesczy.trace.click.view.ViewClickMonitor"
-        onClickMethodName = "isEnabled"
-        uncheckViewOnClickAnnotation = "github.leavesczy.trace.click.view.UncheckViewOnClick"
-        include = listOf()
-        exclude = listOf()
-    }
-    compose {
-        onClickClass = "github.leavesczy.trace.click.compose.ComposeOnClick"
-        onClickWhiteList = "notCheck"
-    }
+viewClickTrace {
+    onClickClass = "github.leavesczy.trace.click.view.ViewClickMonitor"
+    onClickMethodName = "isEnabled"
+    uncheckViewOnClickAnnotation = "github.leavesczy.trace.click.view.UncheckViewOnClick"
+    include = setOf()
+    exclude = setOf()
+}
+
+composeClickTrace {
+    onClickClass = "github.leavesczy.trace.click.compose.ComposeOnClick"
+    onClickWhiteList = "notCheck"
 }
 
 replaceClassTrace {
     originClass = "android.widget.ImageView"
     targetClass = "github.leavesczy.trace.replace.MonitorImageView"
-    include = listOf()
-    exclude = listOf(".*\\.IgnoreImageView\$")
+    include = setOf()
+    exclude = setOf(".*\\.IgnoreImageView\$")
 }
 
 toastTrace {

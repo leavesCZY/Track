@@ -46,7 +46,7 @@ internal fun MethodNode.filterLambda(filter: (InvokeDynamicInsnNode) -> Boolean)
     return dynamicList
 }
 
-internal fun ClassData.matches(rules: List<String>): Boolean {
+internal fun ClassData.matches(rules: Collection<String>): Boolean {
     if (rules.isEmpty()) {
         return false
     }

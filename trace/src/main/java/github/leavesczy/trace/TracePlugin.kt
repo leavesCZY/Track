@@ -4,10 +4,12 @@ import com.android.build.api.instrumentation.FramesComputationMode
 import com.android.build.api.instrumentation.InstrumentationScope
 import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.api.variant.Variant
-import github.leavesczy.trace.click.ClickConfig
-import github.leavesczy.trace.click.ClickPluginParameter
-import github.leavesczy.trace.click.ComposeClickClassVisitorFactory
-import github.leavesczy.trace.click.ViewClickClassVisitorFactory
+import github.leavesczy.trace.click.compose.ComposeClickClassVisitorFactory
+import github.leavesczy.trace.click.compose.ComposeClickConfig
+import github.leavesczy.trace.click.compose.ComposeClickPluginParameter
+import github.leavesczy.trace.click.view.ViewClickClassVisitorFactory
+import github.leavesczy.trace.click.view.ViewClickConfig
+import github.leavesczy.trace.click.view.ViewClickPluginParameter
 import github.leavesczy.trace.replace.ReplaceClassClassVisitorFactory
 import github.leavesczy.trace.replace.ReplaceClassConfig
 import github.leavesczy.trace.replace.ReplaceClassPluginParameter
@@ -26,8 +28,12 @@ class TracePlugin : Plugin<Project> {
 
     override fun apply(project: Project) {
         project.extensions.create(
-            "clickTrace",
-            ClickPluginParameter::class.java
+            "viewClickTrace",
+            ViewClickPluginParameter::class.java
+        )
+        project.extensions.create(
+            "composeClickTrace",
+            ComposeClickPluginParameter::class.java
         )
         project.extensions.create(
             "replaceClassTrace",
@@ -39,39 +45,47 @@ class TracePlugin : Plugin<Project> {
         )
         val androidComponents = project.extensions.getByType(AndroidComponentsExtension::class.java)
         androidComponents.onVariants { variant ->
-            handleClickTrace(project = project, variant = variant)
+            handleViewClickTrace(project = project, variant = variant)
+            handleComposeClickTrace(project = project, variant = variant)
             handleReplaceClassTrace(project = project, variant = variant)
             handleToastTrace(project = project, variant = variant)
             variant.instrumentation.setAsmFramesComputationMode(FramesComputationMode.COMPUTE_FRAMES_FOR_INSTRUMENTED_METHODS)
         }
     }
 
-    private fun handleClickTrace(project: Project, variant: Variant) {
-        val pluginParameter = project.extensions.findByType(ClickPluginParameter::class.java)
-        val clickConfig = if (pluginParameter == null) {
+    private fun handleViewClickTrace(project: Project, variant: Variant) {
+        val pluginParameter = project.extensions.findByType(ViewClickPluginParameter::class.java)
+        val viewClickConfig = if (pluginParameter == null) {
             null
         } else {
-            ClickConfig(pluginParameter = pluginParameter)
+            ViewClickConfig(pluginParameter = pluginParameter)
         }
-        if (clickConfig != null) {
-            val viewClickConfig = clickConfig.viewClickConfig
-            val composeClickConfig = clickConfig.composeClickConfig
+        if (viewClickConfig != null) {
             variant.instrumentation.apply {
-                if (viewClickConfig != null) {
-                    transformClassesWith(
-                        ViewClickClassVisitorFactory::class.java,
-                        InstrumentationScope.ALL
-                    ) { params ->
-                        params.config.set(viewClickConfig)
-                    }
+                transformClassesWith(
+                    ViewClickClassVisitorFactory::class.java,
+                    InstrumentationScope.ALL
+                ) { params ->
+                    params.config.set(viewClickConfig)
                 }
-                if (composeClickConfig != null) {
-                    transformClassesWith(
-                        ComposeClickClassVisitorFactory::class.java,
-                        InstrumentationScope.ALL
-                    ) { params ->
-                        params.config.set(composeClickConfig)
-                    }
+            }
+        }
+    }
+
+    private fun handleComposeClickTrace(project: Project, variant: Variant) {
+        val pluginParameter = project.extensions.findByType(ComposeClickPluginParameter::class.java)
+        val composeClickConfig = if (pluginParameter == null) {
+            null
+        } else {
+            ComposeClickConfig(pluginParameter = pluginParameter)
+        }
+        if (composeClickConfig != null) {
+            variant.instrumentation.apply {
+                transformClassesWith(
+                    ComposeClickClassVisitorFactory::class.java,
+                    InstrumentationScope.ALL
+                ) { params ->
+                    params.config.set(composeClickConfig)
                 }
             }
         }

@@ -10,8 +10,8 @@ import java.io.Serializable
 internal data class ReplaceClassConfig(
     val originClass: String,
     val targetClass: String,
-    val include: List<String>,
-    val exclude: List<String>
+    val include: Set<String>,
+    val exclude: Set<String>
 ) : Serializable {
 
     companion object {
@@ -37,6 +37,6 @@ internal data class ReplaceClassConfig(
 open class ReplaceClassPluginParameter(
     var originClass: String = "",
     var targetClass: String = "",
-    var include: List<String> = listOf(),
-    var exclude: List<String> = listOf()
+    var include: Set<String> = setOf(),
+    var exclude: Set<String> = setOf()
 )

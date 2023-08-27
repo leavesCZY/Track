@@ -1,4 +1,4 @@
-package github.leavesczy.trace.click
+package github.leavesczy.trace.click.compose
 
 import com.android.build.api.instrumentation.AsmClassVisitorFactory
 import com.android.build.api.instrumentation.ClassContext
@@ -88,7 +88,7 @@ private class ComposeClickClassVisitor(
 
     override fun visitEnd() {
         super.visitEnd()
-        LogPrint.normal(tag = "clickTrace") {
+        LogPrint.normal(tag = "composeClickTrace") {
             "找到 ${ComposeClickClassVisitorFactory.ComposeClickClassName} 类，完成处理..."
         }
         accept(nextClassVisitor)

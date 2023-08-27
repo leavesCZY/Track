@@ -1,4 +1,4 @@
-package github.leavesczy.trace.click
+package github.leavesczy.trace.click.view
 
 import com.android.build.api.instrumentation.AsmClassVisitorFactory
 import com.android.build.api.instrumentation.ClassContext
@@ -118,7 +118,7 @@ private class ViewClickClassVisitor(
             shouldHookMethodList.forEach {
                 hookMethod(modeNode = it)
             }
-            LogPrint.normal(tag = "clickTrace") {
+            LogPrint.normal(tag = "viewClickTrace") {
                 "$name 发现 ${shouldHookMethodList.size} 个 View.OnClickListener 指令，完成处理..."
             }
         }
