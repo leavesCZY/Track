@@ -5,34 +5,9 @@ import java.util.Calendar
 import java.util.TimeZone
 
 plugins {
-    id("com.android.application")
-    id("org.jetbrains.kotlin.android")
-    id("io.github.leavesczy.trace")
-}
-
-viewClickTrace {
-    onClickClass = "github.leavesczy.trace.click.view.ViewClickMonitor"
-    onClickMethodName = "isEnabled"
-    uncheckViewOnClickAnnotation = "github.leavesczy.trace.click.view.UncheckViewOnClick"
-    include = setOf()
-    exclude = setOf()
-}
-
-composeClickTrace {
-    onClickClass = "github.leavesczy.trace.click.compose.ComposeOnClick"
-    onClickWhiteList = "notCheck"
-}
-
-replaceClassTrace {
-    originClass = "android.widget.ImageView"
-    targetClass = "github.leavesczy.trace.replace.MonitorImageView"
-    include = setOf()
-    exclude = setOf(".*\\.IgnoreImageView\$")
-}
-
-toastTrace {
-    toasterClass = "github.leavesczy.trace.toast.Toaster"
-    showToastMethodName = "showToast"
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.leavesczy.trace)
 }
 
 android {
@@ -101,7 +76,7 @@ android {
     kotlinOptions {
         jvmTarget = "11"
     }
-    packagingOptions {
+    packaging {
         resources {
             excludes += setOf(
                 "**/*.md",
@@ -119,18 +94,43 @@ android {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.4.8"
+        kotlinCompilerExtensionVersion = libs.versions.compose.compiler.get()
     }
 }
 
 dependencies {
-    testImplementation("junit:junit:4.13.2")
-    androidTestImplementation("androidx.test.ext:junit:1.1.5")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
-    implementation("androidx.appcompat:appcompat:1.6.1")
-    implementation("com.google.android.material:material:1.9.0")
-    val composeBom = platform("androidx.compose:compose-bom:2023.08.00")
-    implementation(composeBom)
-    implementation("androidx.compose.material3:material3")
-    implementation("androidx.activity:activity-compose:1.7.2")
+    testImplementation(libs.test.junit)
+    androidTestImplementation(libs.test.androidx.junit)
+    androidTestImplementation(libs.test.androidx.espresso)
+    implementation(libs.androidx.appcompat)
+    implementation(libs.androidx.activity.compose)
+    implementation(libs.google.material)
+    val composePlatform = platform(libs.compose.bom)
+    implementation(composePlatform)
+    implementation(libs.compose.material3)
+}
+
+viewClickTrace {
+    onClickClass = "github.leavesczy.trace.click.view.ViewClickMonitor"
+    onClickMethodName = "isEnabled"
+    uncheckViewOnClickAnnotation = "github.leavesczy.trace.click.view.UncheckViewOnClick"
+    include = setOf()
+    exclude = setOf()
+}
+
+composeClickTrace {
+    onClickClass = "github.leavesczy.trace.click.compose.ComposeOnClick"
+    onClickWhiteList = "notCheck"
+}
+
+replaceClassTrace {
+    originClass = "android.widget.ImageView"
+    targetClass = "github.leavesczy.trace.replace.MonitorImageView"
+    include = setOf()
+    exclude = setOf(".*\\.IgnoreImageView\$")
+}
+
+toastTrace {
+    toasterClass = "github.leavesczy.trace.toast.Toaster"
+    showToastMethodName = "showToast"
 }

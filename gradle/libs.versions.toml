@@ -1,0 +1,44 @@
+[versions]
+android-plugin = "8.1.2"
+kotlin-plugin = "1.9.10"
+plugin-publish-plugin = "1.2.1"
+trace-plugin = "0.0.5"
+
+junit-junit = "4.13.2"
+androidx-junit = "1.1.5"
+androidx-espresso = "3.5.1"
+
+androidx-appcompat = "1.6.1"
+androidx-activity-compose = "1.8.0"
+
+google-material = "1.10.0"
+
+asm-commons = "9.5"
+
+compose-bom = "2023.10.01"
+compose-compiler = "1.5.3"
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "android-plugin" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin-plugin" }
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin-plugin" }
+java-library = { id = "java-library" }
+plugin-publish = { id = "com.gradle.plugin-publish", version.ref = "plugin-publish-plugin" }
+leavesczy-trace = { id = "io.github.leavesczy.trace", version.ref = "trace-plugin" }
+
+[libraries]
+android-gradle = { module = "com.android.tools.build:gradle", version.ref = "android-plugin" }
+android-gradle-api = { module = "com.android.tools.build:gradle-api", version.ref = "android-plugin" }
+asm-commons = { module = "org.ow2.asm:asm-commons", version.ref = "asm-commons" }
+
+test-junit = { module = "junit:junit", version.ref = "junit-junit" }
+test-androidx-junit = { module = "androidx.test.ext:junit", version.ref = "androidx-junit" }
+test-androidx-espresso = { module = "androidx.test.espresso:espresso-core", version.ref = "androidx-espresso" }
+
+androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "androidx-appcompat" }
+androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activity-compose" }
+
+google-material = { module = "com.google.android.material:material", version.ref = "google-material" }
+
+compose-bom = { module = "androidx.compose:compose-bom", version.ref = "compose-bom" }
+compose-material3 = { module = "androidx.compose.material3:material3" }

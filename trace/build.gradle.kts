@@ -1,24 +1,24 @@
 @file:Suppress("UnstableApiUsage")
 
 plugins {
-    id("java-library")
-    id("org.jetbrains.kotlin.jvm")
-    id("com.gradle.plugin-publish")
+    alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.plugin.publish)
+    id(libs.plugins.java.library.get().pluginId)
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_11
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
     withJavadocJar()
     withSourcesJar()
 }
 
 group = "io.github.leavesczy"
-version = "0.0.3"
+version = "0.0.5"
 
 gradlePlugin {
     website.set("https://github.com/leavesCZY/Trace")
-    vcsUrl.set("https://github.com/leavesCZY/Trace")
+    vcsUrl.set("https://github.com/leavesCZY/Trace.git")
     plugins {
         create("TracePlugin") {
             id = "${group}.trace"
@@ -31,9 +31,7 @@ gradlePlugin {
 }
 
 dependencies {
-    val agpVersion = "7.4.2"
-    val asmVersion = "9.2"
-    compileOnly("com.android.tools.build:gradle:${agpVersion}")
-    compileOnly("com.android.tools.build:gradle-api:${agpVersion}")
-    compileOnly("org.ow2.asm:asm-commons:${asmVersion}")
+    compileOnly(libs.android.gradle)
+    compileOnly(libs.android.gradle.api)
+    compileOnly(libs.asm.commons)
 }
