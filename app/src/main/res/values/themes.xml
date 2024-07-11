@@ -1,13 +1,17 @@
-<resources>
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
 
-    <style name="Base.Theme.Trace" parent="Theme.Material3.Light">
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorSurface">@color/colorOnSurface</item>
+    <style name="Theme.Track" parent="Theme.Material3.Light">
+        <item name="colorPrimary">@color/color_top_bar</item>
         <item name="colorOnSurface">@android:color/white</item>
+        <item name="toolbarStyle">@style/Theme.Track.Toolbar</item>
         <item name="android:navigationBarColor">@android:color/white</item>
-        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightStatusBar" tools:targetApi="m">false</item>
+        <item name="android:windowLightNavigationBar" tools:targetApi="o_mr1">true</item>
     </style>
 
-    <style name="Theme.Trace" parent="Base.Theme.Trace" />
+    <style name="Theme.Track.Toolbar" parent="Widget.Material3.Toolbar">
+        <item name="android:background">@color/color_top_bar</item>
+    </style>
 
 </resources>

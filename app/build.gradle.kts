@@ -6,17 +6,17 @@ import java.util.TimeZone
 
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.leavesczy.trace)
+    alias(libs.plugins.jetbrains.kotlin.android)
+    alias(libs.plugins.leavesczy.track)
 }
 
 android {
-    namespace = "github.leavesczy.trace"
+    namespace = "github.leavesczy.track"
     compileSdk = 34
     defaultConfig {
-        applicationId = "github.leavesczy.trace"
-        minSdk = 23
-        targetSdk = 33
+        applicationId = "github.leavesczy.track"
+        minSdk = 21
+        targetSdk = 34
         versionCode = 1
         versionName = "1.0.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -65,7 +65,7 @@ android {
                 simpleDateFormat.timeZone = TimeZone.getTimeZone("Asia/Shanghai")
                 val time = simpleDateFormat.format(Calendar.getInstance().time)
                 this.outputFileName =
-                    "trace_${variant.name}_versionCode_${variant.versionCode}_versionName_${variant.versionName}_${time}.apk"
+                    "track_${variant.name}_versionCode_${variant.versionCode}_versionName_${variant.versionName}_${time}.apk"
             }
         }
     }
@@ -94,43 +94,43 @@ android {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = libs.versions.compose.compiler.get()
+        kotlinCompilerExtensionVersion = libs.versions.androidx.compose.compiler.get()
     }
 }
 
 dependencies {
-    testImplementation(libs.test.junit)
-    androidTestImplementation(libs.test.androidx.junit)
-    androidTestImplementation(libs.test.androidx.espresso)
+    testImplementation(libs.junit.junit)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso)
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.activity.compose)
-    implementation(libs.google.material)
-    val composePlatform = platform(libs.compose.bom)
+    val composePlatform = platform(libs.androidx.compose.bom)
     implementation(composePlatform)
-    implementation(libs.compose.material3)
+    implementation(libs.androidx.compose.material3)
+    implementation(libs.google.material)
 }
 
-viewClickTrace {
-    onClickClass = "github.leavesczy.trace.click.view.ViewClickMonitor"
+viewClickTrack {
+    onClickClass = "github.leavesczy.track.click.view.ViewClickMonitor"
     onClickMethodName = "isEnabled"
-    uncheckViewOnClickAnnotation = "github.leavesczy.trace.click.view.UncheckViewOnClick"
+    uncheckViewOnClickAnnotation = "github.leavesczy.track.click.view.UncheckViewOnClick"
     include = setOf()
     exclude = setOf()
 }
 
-composeClickTrace {
-    onClickClass = "github.leavesczy.trace.click.compose.ComposeOnClick"
+composeClickTrack {
+    onClickClass = "github.leavesczy.track.click.compose.ComposeOnClick"
     onClickWhiteList = "notCheck"
 }
 
-replaceClassTrace {
+replaceClassTrack {
     originClass = "android.widget.ImageView"
-    targetClass = "github.leavesczy.trace.replace.MonitorImageView"
+    targetClass = "github.leavesczy.track.replace.MonitorImageView"
     include = setOf()
     exclude = setOf(".*\\.IgnoreImageView\$")
 }
 
-toastTrace {
-    toasterClass = "github.leavesczy.trace.toast.Toaster"
+toastTrack {
+    toasterClass = "github.leavesczy.track.toast.Toaster"
     showToastMethodName = "showToast"
 }

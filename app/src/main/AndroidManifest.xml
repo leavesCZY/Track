@@ -3,16 +3,11 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <application
-        android:name=".MainApplication"
         android:allowBackup="true"
-        android:dataExtractionRules="@xml/data_extraction_rules"
-        android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
-        android:supportsRtl="true"
-        android:theme="@style/Theme.Trace"
-        tools:targetApi="33">
+        android:theme="@style/Theme.Track">
         <activity
             android:name=".MainActivity"
             android:exported="true">
@@ -23,29 +18,29 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".click.view.ViewClickTraceActivity"
+            android:name=".click.view.ViewClickTrackActivity"
             android:configChanges="keyboard|keyboardHidden|screenLayout|screenSize|orientation|uiMode"
             android:exported="false"
             android:screenOrientation="portrait"
-            tools:ignore="LockedOrientationActivity" />
+            tools:ignore="DiscouragedApi,LockedOrientationActivity" />
         <activity
-            android:name=".click.compose.ComposeClickTraceActivity"
+            android:name=".click.compose.ComposeClickTrackActivity"
             android:configChanges="keyboard|keyboardHidden|screenLayout|screenSize|orientation|uiMode"
             android:exported="false"
             android:screenOrientation="portrait"
-            tools:ignore="LockedOrientationActivity" />
+            tools:ignore="DiscouragedApi,LockedOrientationActivity" />
         <activity
-            android:name=".replace.ReplaceClassTraceActivity"
+            android:name=".replace.ReplaceClassTrackActivity"
             android:configChanges="keyboard|keyboardHidden|screenLayout|screenSize|orientation|uiMode"
             android:exported="false"
             android:screenOrientation="portrait"
-            tools:ignore="LockedOrientationActivity" />
+            tools:ignore="DiscouragedApi,LockedOrientationActivity" />
         <activity
-            android:name=".toast.ToastTraceActivity"
+            android:name=".toast.ToastTrackActivity"
             android:configChanges="keyboard|keyboardHidden|screenLayout|screenSize|orientation|uiMode"
             android:exported="false"
             android:screenOrientation="portrait"
-            tools:ignore="LockedOrientationActivity" />
+            tools:ignore="DiscouragedApi,LockedOrientationActivity" />
     </application>
 
 </manifest>

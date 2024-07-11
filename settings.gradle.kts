@@ -1,11 +1,11 @@
 @file:Suppress("UnstableApiUsage")
 
 pluginManagement {
+    includeBuild("track")
     repositories {
         google()
         mavenCentral()
         gradlePluginPortal()
-//        mavenLocal()
     }
 }
 
@@ -17,6 +17,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Trace"
+rootProject.name = "Track"
 include(":app")
-include(":trace")
