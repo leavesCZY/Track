@@ -1,5 +1,18 @@
 # Track
 
+A bytecode instrumentation library for Android
+
+Currently, it includes four features:
+
+- View Click debounce
+- Jetpack Compose Click debounce
+- Replace the inheritance of a Class. Application scenarios include: non-intrusive implementation of
+  monitoring large image loading
+- Fix the system bug of Toast on Android 7.1. This is used to solve the problem where Toast causes
+  the application to crash due to WindowToken invalidation on Android 7.1
+
+Integration guide: [Wiki](https://github.com/leavesCZY/Track/wiki)
+
 一个适用于 Android 的字节码插桩库
 
 目前一共包含四个功能点：
