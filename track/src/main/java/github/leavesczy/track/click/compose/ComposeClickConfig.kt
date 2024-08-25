@@ -1,11 +1,14 @@
 package github.leavesczy.track.click.compose
 
-import java.io.Serializable
+import github.leavesczy.track.BaseTrackConfig
 
 internal data class ComposeClickConfig(
+    override val isEnabled: Boolean,
+    override val include: Set<String>,
+    override val exclude: Set<String>,
     val onClickClass: String,
     val onClickWhiteList: String
-) : Serializable {
+) : BaseTrackConfig {
 
     companion object {
 
@@ -16,6 +19,9 @@ internal data class ComposeClickConfig(
                 null
             } else {
                 ComposeClickConfig(
+                    isEnabled = pluginParameter.isEnabled,
+                    include = emptySet(),
+                    exclude = emptySet(),
                     onClickClass = onClickClass,
                     onClickWhiteList = onClickWhiteList
                 )
@@ -27,6 +33,7 @@ internal data class ComposeClickConfig(
 }
 
 open class ComposeClickPluginParameter(
+    var isEnabled: Boolean = true,
     var onClickClass: String = "",
     var onClickWhiteList: String = ""
 )

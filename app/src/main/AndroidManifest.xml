@@ -41,6 +41,12 @@
             android:exported="false"
             android:screenOrientation="portrait"
             tools:ignore="DiscouragedApi,LockedOrientationActivity" />
+        <activity
+            android:name=".thread.OptimizedThreadTrackActivity"
+            android:configChanges="keyboard|keyboardHidden|screenLayout|screenSize|orientation|uiMode"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            tools:ignore="DiscouragedApi,LockedOrientationActivity" />
     </application>
 
 </manifest>

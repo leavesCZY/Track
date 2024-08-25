@@ -1,18 +1,16 @@
 package github.leavesczy.track.click.compose
 
-import com.android.build.api.instrumentation.AsmClassVisitorFactory
 import com.android.build.api.instrumentation.ClassContext
 import com.android.build.api.instrumentation.ClassData
-import com.android.build.api.instrumentation.InstrumentationParameters
+import github.leavesczy.track.BaseTrackClassNode
+import github.leavesczy.track.BaseTrackClassVisitorFactory
+import github.leavesczy.track.BaseTrackConfigParameters
 import github.leavesczy.track.utils.InitMethodName
 import github.leavesczy.track.utils.LogPrint
 import github.leavesczy.track.utils.replaceDotBySlash
-import org.gradle.api.provider.Property
-import org.gradle.api.tasks.Input
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes
-import org.objectweb.asm.tree.ClassNode
 import org.objectweb.asm.tree.InsnList
 import org.objectweb.asm.tree.InsnNode
 import org.objectweb.asm.tree.JumpInsnNode
@@ -31,24 +29,19 @@ import org.objectweb.asm.tree.VarInsnNode
 private const val composeClickClassName = "androidx.compose.foundation.ClickableKt"
 
 internal abstract class ComposeClickClassVisitorFactory :
-    AsmClassVisitorFactory<ComposeClickClassVisitorFactory.ComposeClickConfigParameters> {
-
-    interface ComposeClickConfigParameters : InstrumentationParameters {
-        @get:Input
-        val config: Property<ComposeClickConfig>
-    }
+    BaseTrackClassVisitorFactory<BaseTrackConfigParameters, ComposeClickConfig> {
 
     override fun createClassVisitor(
         classContext: ClassContext,
         nextClassVisitor: ClassVisitor
-    ): ClassVisitor {
+    ): BaseTrackClassNode {
         return ComposeClickClassVisitor(
             nextClassVisitor = nextClassVisitor,
-            config = parameters.get().config.get()
+            config = trackConfig
         )
     }
 
-    override fun isInstrumentable(classData: ClassData): Boolean {
+    override fun isTrackEnabled(classData: ClassData): Boolean {
         return classData.className == composeClickClassName
     }
 
@@ -57,7 +50,7 @@ internal abstract class ComposeClickClassVisitorFactory :
 private class ComposeClickClassVisitor(
     private val nextClassVisitor: ClassVisitor,
     private val config: ComposeClickConfig,
-) : ClassNode(Opcodes.ASM5) {
+) : BaseTrackClassNode() {
 
     private val clickableMethodDesc =
         "(Landroidx/compose/ui/Modifier;Landroidx/compose/foundation/interaction/MutableInteractionSource;Landroidx/compose/foundation/Indication;ZLjava/lang/String;Landroidx/compose/ui/semantics/Role;Lkotlin/jvm/functions/Function0;)Landroidx/compose/ui/Modifier;"

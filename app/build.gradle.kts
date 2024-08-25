@@ -65,7 +65,7 @@ android {
                 simpleDateFormat.timeZone = TimeZone.getTimeZone("Asia/Shanghai")
                 val time = simpleDateFormat.format(Calendar.getInstance().time)
                 this.outputFileName =
-                    "track_${variant.name}_versionCode_${variant.versionCode}_versionName_${variant.versionName}_${time}.apk"
+                    "track_${variant.name}_v${variant.versionName}_${variant.versionCode}_${time}.apk"
             }
         }
     }
@@ -74,9 +74,16 @@ android {
         targetCompatibility = JavaVersion.VERSION_11
     }
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = JavaVersion.VERSION_11.toString()
     }
     packaging {
+        dex {
+            useLegacyPackaging = true
+        }
+        jniLibs {
+            useLegacyPackaging = true
+            excludes += setOf("META-INF/{AL2.0,LGPL2.1}")
+        }
         resources {
             excludes += setOf(
                 "**/*.md",
@@ -111,26 +118,47 @@ dependencies {
 }
 
 viewClickTrack {
+    isEnabled = true
+    include = setOf()
+    exclude = setOf()
     onClickClass = "github.leavesczy.track.click.view.ViewClickMonitor"
     onClickMethodName = "isEnabled"
     uncheckViewOnClickAnnotation = "github.leavesczy.track.click.view.UncheckViewOnClick"
-    include = setOf()
-    exclude = setOf()
 }
 
 composeClickTrack {
+    isEnabled = true
     onClickClass = "github.leavesczy.track.click.compose.ComposeOnClick"
     onClickWhiteList = "notCheck"
 }
 
 replaceClassTrack {
-    originClass = "android.widget.ImageView"
-    targetClass = "github.leavesczy.track.replace.MonitorImageView"
+    isEnabled = true
     include = setOf()
     exclude = setOf(".*\\.IgnoreImageView\$")
+    originClass = "android.widget.ImageView"
+    targetClass = "github.leavesczy.track.replace.MonitorImageView"
 }
 
 toastTrack {
+    isEnabled = true
+    include = setOf()
+    exclude = setOf()
     toasterClass = "github.leavesczy.track.toast.Toaster"
     showToastMethodName = "showToast"
+}
+
+optimizedThreadTrack {
+    isEnabled = true
+    include = setOf()
+    exclude = setOf()
+    optimizedThreadClass = "github.leavesczy.track.thread.OptimizedThread"
+    optimizedExecutorsClass = "github.leavesczy.track.thread.OptimizedExecutors"
+    executorsMethodNames = setOf(
+        "newFixedThreadPool",
+        "newSingleThreadExecutor",
+        "newCachedThreadPool",
+        "newSingleThreadScheduledExecutor",
+        "newScheduledThreadPool"
+    )
 }

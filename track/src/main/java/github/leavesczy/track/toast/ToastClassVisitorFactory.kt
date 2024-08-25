@@ -1,16 +1,14 @@
 package github.leavesczy.track.toast
 
-import com.android.build.api.instrumentation.AsmClassVisitorFactory
 import com.android.build.api.instrumentation.ClassContext
 import com.android.build.api.instrumentation.ClassData
-import com.android.build.api.instrumentation.InstrumentationParameters
+import github.leavesczy.track.BaseTrackClassNode
+import github.leavesczy.track.BaseTrackClassVisitorFactory
+import github.leavesczy.track.BaseTrackConfigParameters
 import github.leavesczy.track.utils.LogPrint
 import github.leavesczy.track.utils.replaceDotBySlash
-import org.gradle.api.provider.Property
-import org.gradle.api.tasks.Input
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.Opcodes
-import org.objectweb.asm.tree.ClassNode
 import org.objectweb.asm.tree.MethodInsnNode
 
 /**
@@ -19,29 +17,20 @@ import org.objectweb.asm.tree.MethodInsnNode
  * @Desc:
  */
 internal abstract class ToastClassVisitorFactory :
-    AsmClassVisitorFactory<ToastClassVisitorFactory.ToastConfigParameters> {
-
-    interface ToastConfigParameters : InstrumentationParameters {
-        @get:Input
-        val config: Property<ToastConfig>
-    }
+    BaseTrackClassVisitorFactory<BaseTrackConfigParameters, ToastConfig> {
 
     override fun createClassVisitor(
         classContext: ClassContext,
         nextClassVisitor: ClassVisitor
-    ): ClassVisitor {
+    ): BaseTrackClassNode {
         return ToastClassVisitor(
-            config = parameters.get().config.get(),
+            config = trackConfig,
             nextClassVisitor = nextClassVisitor
         )
     }
 
-    override fun isInstrumentable(classData: ClassData): Boolean {
-        val config = parameters.get().config.get()
-        if (classData.className == config.toasterClass) {
-            return false
-        }
-        return true
+    override fun isTrackEnabled(classData: ClassData): Boolean {
+        return classData.className != trackConfig.toasterClass
     }
 
 }
@@ -49,7 +38,7 @@ internal abstract class ToastClassVisitorFactory :
 private class ToastClassVisitor(
     private val config: ToastConfig,
     private val nextClassVisitor: ClassVisitor
-) : ClassNode(Opcodes.ASM5) {
+) : BaseTrackClassNode() {
 
     private val toastClass = "android/widget/Toast"
 

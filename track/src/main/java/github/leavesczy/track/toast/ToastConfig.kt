@@ -1,6 +1,6 @@
 package github.leavesczy.track.toast
 
-import java.io.Serializable
+import github.leavesczy.track.BaseTrackConfig
 
 /**
  * @Author: leavesCZY
@@ -8,9 +8,12 @@ import java.io.Serializable
  * @Desc:
  */
 internal data class ToastConfig(
+    override val isEnabled: Boolean,
+    override val include: Set<String>,
+    override val exclude: Set<String>,
     val toasterClass: String,
     val showToastMethodName: String
-) : Serializable {
+) : BaseTrackConfig {
 
     companion object {
 
@@ -21,8 +24,11 @@ internal data class ToastConfig(
                 return null
             }
             return ToastConfig(
+                isEnabled = pluginParameter.isEnabled,
+                include = pluginParameter.include,
+                exclude = pluginParameter.exclude,
                 toasterClass = toasterClass,
-                showToastMethodName = showToastMethodName
+                showToastMethodName = showToastMethodName,
             )
         }
 
@@ -31,6 +37,9 @@ internal data class ToastConfig(
 }
 
 open class ToastPluginParameter(
+    var isEnabled: Boolean = true,
+    var include: Set<String> = emptySet(),
+    var exclude: Set<String> = emptySet(),
     var toasterClass: String = "",
     var showToastMethodName: String = ""
 )

@@ -1,6 +1,6 @@
 package github.leavesczy.track.replace
 
-import java.io.Serializable
+import github.leavesczy.track.BaseTrackConfig
 
 /**
  * @Author: leavesCZY
@@ -8,11 +8,12 @@ import java.io.Serializable
  * @Desc:
  */
 internal data class ReplaceClassConfig(
+    override val isEnabled: Boolean,
+    override val include: Set<String>,
+    override val exclude: Set<String>,
     val originClass: String,
-    val targetClass: String,
-    val include: Set<String>,
-    val exclude: Set<String>
-) : Serializable {
+    val targetClass: String
+) : BaseTrackConfig {
 
     companion object {
 
@@ -23,10 +24,11 @@ internal data class ReplaceClassConfig(
                 return null
             }
             return ReplaceClassConfig(
-                originClass = originClass,
-                targetClass = targetClass,
+                isEnabled = pluginParameter.isEnabled,
                 include = pluginParameter.include,
-                exclude = pluginParameter.exclude
+                exclude = pluginParameter.exclude,
+                originClass = originClass,
+                targetClass = targetClass
             )
         }
 
@@ -35,8 +37,9 @@ internal data class ReplaceClassConfig(
 }
 
 open class ReplaceClassPluginParameter(
+    var isEnabled: Boolean = true,
+    var include: Set<String> = emptySet(),
+    var exclude: Set<String> = emptySet(),
     var originClass: String = "",
-    var targetClass: String = "",
-    var include: Set<String> = setOf(),
-    var exclude: Set<String> = setOf()
+    var targetClass: String = ""
 )

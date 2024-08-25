@@ -1,24 +1,21 @@
 package github.leavesczy.track.click.view
 
-import com.android.build.api.instrumentation.AsmClassVisitorFactory
 import com.android.build.api.instrumentation.ClassContext
 import com.android.build.api.instrumentation.ClassData
-import com.android.build.api.instrumentation.InstrumentationParameters
+import github.leavesczy.track.BaseTrackClassNode
+import github.leavesczy.track.BaseTrackClassVisitorFactory
+import github.leavesczy.track.BaseTrackConfigParameters
 import github.leavesczy.track.utils.LogPrint
 import github.leavesczy.track.utils.filterLambda
 import github.leavesczy.track.utils.getClassDesc
 import github.leavesczy.track.utils.hasAnnotation
 import github.leavesczy.track.utils.isStatic
-import github.leavesczy.track.utils.matches
 import github.leavesczy.track.utils.nameWithDesc
 import github.leavesczy.track.utils.replaceDotBySlash
-import org.gradle.api.provider.Property
-import org.gradle.api.tasks.Input
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.Handle
 import org.objectweb.asm.Opcodes
 import org.objectweb.asm.Type
-import org.objectweb.asm.tree.ClassNode
 import org.objectweb.asm.tree.InsnList
 import org.objectweb.asm.tree.InsnNode
 import org.objectweb.asm.tree.JumpInsnNode
@@ -33,32 +30,20 @@ import org.objectweb.asm.tree.VarInsnNode
  * @Desc:
  */
 internal abstract class ViewClickClassVisitorFactory :
-    AsmClassVisitorFactory<ViewClickClassVisitorFactory.ViewClickConfigParameters> {
-
-    interface ViewClickConfigParameters : InstrumentationParameters {
-        @get:Input
-        val config: Property<ViewClickConfig>
-    }
+    BaseTrackClassVisitorFactory<BaseTrackConfigParameters, ViewClickConfig> {
 
     override fun createClassVisitor(
         classContext: ClassContext,
         nextClassVisitor: ClassVisitor
-    ): ClassVisitor {
+    ): BaseTrackClassNode {
         return ViewClickClassVisitor(
             nextClassVisitor = nextClassVisitor,
-            config = parameters.get().config.get()
+            config = trackConfig
         )
     }
 
-    override fun isInstrumentable(classData: ClassData): Boolean {
-        val config = parameters.get().config.get()
-        val include = config.include
-        val exclude = config.exclude
-        if (include.isEmpty()) {
-            return !classData.matches(rules = exclude)
-        }
-        return classData.matches(rules = include) &&
-                !classData.matches(rules = exclude)
+    override fun isTrackEnabled(classData: ClassData): Boolean {
+        return true
     }
 
 }
@@ -66,7 +51,7 @@ internal abstract class ViewClickClassVisitorFactory :
 private class ViewClickClassVisitor(
     private val nextClassVisitor: ClassVisitor,
     private val config: ViewClickConfig,
-) : ClassNode(Opcodes.ASM5) {
+) : BaseTrackClassNode() {
 
     private val viewClassDesc = getClassDesc(className = "android.view.View")
 

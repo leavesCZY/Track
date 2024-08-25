@@ -11,8 +11,6 @@ import android.view.View
  */
 object ViewClickMonitor {
 
-    private const val MIN_DURATION = 500L
-
     private var lastClickTime = 0L
 
     private var clickIndex = 0
@@ -21,7 +19,7 @@ object ViewClickMonitor {
     fun isEnabled(view: View): Boolean {
         clickIndex++
         val currentTime = SystemClock.elapsedRealtime()
-        val isEnabled = currentTime - lastClickTime > MIN_DURATION
+        val isEnabled = currentTime - lastClickTime > 250L
         if (isEnabled) {
             lastClickTime = currentTime
         }
