@@ -19,25 +19,25 @@ class OptimizedThreadTrackActivity : AppCompatActivity() {
         findViewById<Button>(R.id.btnSubmitTask)
     }
 
-    private val btnAnonymousThread by lazy {
-        findViewById<Button>(R.id.btnAnonymousThread)
-    }
-
     private val tvLog by lazy {
         findViewById<TextView>(R.id.tvLog)
     }
-
-    private val newFixedThreadPool = Executors.newFixedThreadPool(1)
 
     private val newSingleThreadExecutor = Executors.newSingleThreadExecutor()
 
     private val newCachedThreadPool = Executors.newCachedThreadPool()
 
-    private val newSingleThreadScheduledExecutor = Executors.newSingleThreadScheduledExecutor()
+    private val newFixedThreadPool = Executors.newFixedThreadPool(1)
 
     private val newScheduledThreadPool = Executors.newScheduledThreadPool(1) {
         val thread = Thread(it)
         thread.name = "newScheduledThreadPool"
+        thread
+    }
+
+    private val newSingleThreadScheduledExecutor = Executors.newSingleThreadScheduledExecutor {
+        val thread = Thread(it)
+        thread.name = "newSingleThreadScheduledExecutor"
         thread
     }
 
@@ -46,34 +46,30 @@ class OptimizedThreadTrackActivity : AppCompatActivity() {
         setContentView(R.layout.activity_optimized_thread_track)
         title = "OptimizedThreadTrack"
         btnSubmitTask.setOnClickListener {
-            newFixedThreadPool.execute {
-                printThreadName("newFixedThreadPool")
-            }
             newSingleThreadExecutor.execute {
                 printThreadName("newSingleThreadExecutor")
             }
             newCachedThreadPool.execute {
                 printThreadName("newCachedThreadPool")
             }
-            newSingleThreadScheduledExecutor.execute {
-                printThreadName("newSingleThreadScheduledExecutor")
+            newFixedThreadPool.execute {
+                printThreadName("newFixedThreadPool")
             }
             newScheduledThreadPool.execute {
                 printThreadName("newScheduledThreadPool")
             }
-        }
-        btnAnonymousThread.setOnClickListener {
-            Thread {
-                printThreadName("newThread")
-            }.start()
+            newSingleThreadScheduledExecutor.execute {
+                printThreadName("newSingleThreadScheduledExecutor")
+            }
         }
     }
 
     private fun printThreadName(threadType: String) {
-        Thread.sleep(Random.nextLong(400))
+        Thread.sleep(Random.nextLong(100, 400))
         val threadName = Thread.currentThread().name
         runOnUiThread {
-            tvLog.append("\n\n${threadType}: \n${threadName}")
+            tvLog.append("${threadType}: \n${threadName}")
+            tvLog.append("\n\n")
         }
     }
 

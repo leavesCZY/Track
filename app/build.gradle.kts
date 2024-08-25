@@ -152,13 +152,12 @@ optimizedThreadTrack {
     isEnabled = true
     include = setOf()
     exclude = setOf()
-    optimizedThreadClass = "github.leavesczy.track.thread.OptimizedThread"
     optimizedExecutorsClass = "github.leavesczy.track.thread.OptimizedExecutors"
     executorsMethodNames = setOf(
-        "newFixedThreadPool",
         "newSingleThreadExecutor",
         "newCachedThreadPool",
-        "newSingleThreadScheduledExecutor",
-        "newScheduledThreadPool"
+        "newFixedThreadPool",
+        "newScheduledThreadPool",
+        "newSingleThreadScheduledExecutor"
     )
 }

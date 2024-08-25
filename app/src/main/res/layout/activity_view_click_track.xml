@@ -12,8 +12,7 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:padding="5dp"
-        android:textSize="24sp"
-        tools:text="111" />
+        android:textSize="24sp" />
 
     <Button
         android:id="@+id/btnObjectUnCheck"

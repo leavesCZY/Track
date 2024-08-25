@@ -1,6 +1,5 @@
 package github.leavesczy.track.thread
 
-import android.util.Log
 import java.util.concurrent.BlockingQueue
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.LinkedBlockingQueue
@@ -22,82 +21,82 @@ internal object OptimizedExecutors {
     private const val DEFAULT_THREAD_KEEP_ALIVE_TIME = 3000L
 
     @JvmStatic
-    fun newFixedThreadPool(nThreads: Int, className: String): ExecutorService {
-        return newFixedThreadPool(nThreads, null, className)
-    }
-
-    @JvmStatic
-    fun newFixedThreadPool(
-        nThreads: Int,
-        threadFactory: ThreadFactory?,
-        className: String
-    ): ExecutorService {
-        return getOptimizedExecutorService(
-            nThreads, nThreads,
-            0L, TimeUnit.MILLISECONDS,
-            LinkedBlockingQueue(),
-            threadFactory, className
-        )
-    }
-
-    @JvmStatic
-    fun newSingleThreadExecutor(className: String): ExecutorService {
-        return newSingleThreadExecutor(null, className)
-    }
-
-    @JvmStatic
+    @JvmOverloads
     fun newSingleThreadExecutor(
-        threadFactory: ThreadFactory?,
+        threadFactory: ThreadFactory? = null,
         className: String
     ): ExecutorService {
         return getOptimizedExecutorService(
-            1, 1,
-            0L, TimeUnit.MILLISECONDS,
-            LinkedBlockingQueue(),
-            threadFactory, className
+            corePoolSize = 1,
+            maximumPoolSize = 1,
+            keepAliveTime = 0L,
+            unit = TimeUnit.MILLISECONDS,
+            workQueue = LinkedBlockingQueue(),
+            threadFactory = threadFactory,
+            className = className
         )
     }
 
     @JvmStatic
-    fun newCachedThreadPool(className: String): ExecutorService {
-        return newCachedThreadPool(null, className)
-    }
-
-    @JvmStatic
-    fun newCachedThreadPool(threadFactory: ThreadFactory?, className: String): ExecutorService {
-        return getOptimizedExecutorService(
-            0, Integer.MAX_VALUE,
-            60L, TimeUnit.SECONDS,
-            SynchronousQueue(),
-            threadFactory, className
-        )
-    }
-
-    @JvmStatic
-    fun newSingleThreadScheduledExecutor(className: String): ScheduledExecutorService {
-        return newSingleThreadScheduledExecutor(null, className)
-    }
-
-    @JvmStatic
-    fun newSingleThreadScheduledExecutor(
-        threadFactory: ThreadFactory?,
+    @JvmOverloads
+    fun newCachedThreadPool(
+        threadFactory: ThreadFactory? = null,
         className: String
-    ): ScheduledExecutorService {
-        return getOptimizedScheduledExecutorService(1, threadFactory, className)
+    ): ExecutorService {
+        return getOptimizedExecutorService(
+            corePoolSize = 0,
+            maximumPoolSize = Integer.MAX_VALUE,
+            keepAliveTime = 60L,
+            unit = TimeUnit.SECONDS,
+            workQueue = SynchronousQueue(),
+            threadFactory = threadFactory,
+            className = className
+        )
     }
 
     @JvmStatic
-    fun newScheduledThreadPool(corePoolSize: Int, className: String): ScheduledExecutorService {
-        return newScheduledThreadPool(corePoolSize, null, className)
+    @JvmOverloads
+    fun newFixedThreadPool(
+        corePoolSize: Int,
+        threadFactory: ThreadFactory? = null,
+        className: String
+    ): ExecutorService {
+        return getOptimizedExecutorService(
+            corePoolSize = corePoolSize,
+            maximumPoolSize = corePoolSize,
+            keepAliveTime = 0L,
+            unit = TimeUnit.MILLISECONDS,
+            workQueue = LinkedBlockingQueue(),
+            threadFactory = threadFactory,
+            className = className
+        )
     }
 
     @JvmStatic
+    @JvmOverloads
     fun newScheduledThreadPool(
         corePoolSize: Int,
-        threadFactory: ThreadFactory?,
+        threadFactory: ThreadFactory? = null,
         className: String
     ): ScheduledExecutorService {
-        return getOptimizedScheduledExecutorService(corePoolSize, threadFactory, className)
+        return getOptimizedScheduledExecutorService(
+            corePoolSize = corePoolSize,
+            threadFactory = threadFactory,
+            className = className
+        )
+    }
+
+    @JvmStatic
+    @JvmOverloads
+    fun newSingleThreadScheduledExecutor(
+        threadFactory: ThreadFactory? = null,
+        className: String
+    ): ScheduledExecutorService {
+        return newScheduledThreadPool(
+            corePoolSize = 1,
+            threadFactory = threadFactory,
+            className = className
+        )
     }
 
     private fun getOptimizedExecutorService(
@@ -121,12 +120,12 @@ internal object OptimizedExecutors {
     }
 
     private fun getOptimizedScheduledExecutorService(
-        threadSize: Int,
+        corePoolSize: Int,
         threadFactory: ThreadFactory?,
         className: String
     ): ScheduledExecutorService {
         val executor = ScheduledThreadPoolExecutor(
-            threadSize,
+            corePoolSize,
             NamedThreadFactory(threadFactory, className)
         )
         executor.setKeepAliveTime(DEFAULT_THREAD_KEEP_ALIVE_TIME, TimeUnit.MILLISECONDS)
@@ -142,21 +141,14 @@ internal object OptimizedExecutors {
         private val threadId = AtomicInteger(0)
 
         override fun newThread(runnable: Runnable): Thread {
-            val runnableWrap = Runnable {
-                Log.e(
-                    "OptimizedExecutors",
-                    "className: " + className + " currentThreadName: " + Thread.currentThread().name
-                )
-                runnable.run()
+            val thread = threadFactory?.newThread(runnable) ?: Thread(runnable)
+            val threadName = buildString {
+                append("[className : $className]")
+                append(" - ")
+                append("[threadId : ${threadId.getAndIncrement()}]")
+                append(" - ")
+                append("[threadName : ${thread.name}]")
             }
-            val originalThread = threadFactory?.newThread(runnableWrap)
-            val originalThreadName = if (originalThread == null) {
-                "emptyThreadName"
-            } else {
-                originalThread.name
-            }
-            val thread = originalThread ?: Thread(runnableWrap)
-            val threadName = className + "-" + threadId.getAndIncrement() + "-" + originalThreadName
             thread.name = threadName
             if (thread.isDaemon) {
                 thread.isDaemon = false
