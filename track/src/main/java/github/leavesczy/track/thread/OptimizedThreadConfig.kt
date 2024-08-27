@@ -20,7 +20,7 @@ internal data class OptimizedThreadConfig(
 
         operator fun invoke(pluginParameter: OptimizedThreadPluginParameter): OptimizedThreadConfig? {
             val optimizedExecutorsClass = replaceDotBySlash(pluginParameter.optimizedExecutorsClass)
-            val executorsMethodNames = pluginParameter.executorsMethodNames
+            val executorsMethodNames = pluginParameter.executorsMethods
             if (optimizedExecutorsClass.isBlank() || executorsMethodNames.isEmpty()) {
                 return null
             }
@@ -42,7 +42,7 @@ open class OptimizedThreadPluginParameter(
     var include: Set<String> = emptySet(),
     var exclude: Set<String> = emptySet(),
     var optimizedExecutorsClass: String = "",
-    var executorsMethodNames: Set<String> = setOf(
+    var executorsMethods: Set<String> = setOf(
         "newSingleThreadExecutor",
         "newCachedThreadPool",
         "newFixedThreadPool",

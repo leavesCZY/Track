@@ -11,32 +11,32 @@ internal data class ReplaceMethodConfig(
     override val isEnabled: Boolean,
     override val include: Set<String>,
     override val exclude: Set<String>,
-    val toOwner: String,
+    val proxyOwner: String,
     val methods: List<String>
 ) : BaseTrackConfig {
 
     companion object {
 
-        private fun ReplaceMethod.mapInstruction(): String {
-            if (fromOwner.isBlank() || fromName.isBlank() || fromDesc.isBlank()) {
-                throw RuntimeException("ReplaceMethodTrack 传入了非法指令")
-            }
-            return fromOwner + fromName + fromDesc
-        }
-
         operator fun invoke(pluginParameter: ReplaceMethodPluginParameter): ReplaceMethodConfig? {
-            val toOwner = pluginParameter.toOwner
-            val methods = pluginParameter.methods.map {
-                it.mapInstruction()
+            val proxyOwner = pluginParameter.proxyOwner
+            val methods = pluginParameter.methods.mapNotNull {
+                val owner = it.owner
+                val name = it.name
+                val desc = it.desc
+                if (owner.isBlank() || name.isBlank() || desc.isBlank()) {
+                    null
+                } else {
+                    owner + name + desc
+                }
             }
-            if (toOwner.isBlank() || methods.isEmpty()) {
+            if (proxyOwner.isBlank() || methods.isEmpty()) {
                 return null
             }
             return ReplaceMethodConfig(
                 isEnabled = pluginParameter.isEnabled,
                 include = pluginParameter.include,
                 exclude = pluginParameter.exclude,
-                toOwner = toOwner,
+                proxyOwner = proxyOwner,
                 methods = methods
             )
         }
@@ -49,12 +49,12 @@ open class ReplaceMethodPluginParameter(
     var isEnabled: Boolean = true,
     var include: Set<String> = emptySet(),
     var exclude: Set<String> = emptySet(),
-    var toOwner: String = "",
-    var methods: Set<ReplaceMethod> = emptySet()
+    var proxyOwner: String = "",
+    var methods: Set<MethodInstruction> = emptySet()
 )
 
-open class ReplaceMethod(
-    var fromOwner: String,
-    var fromName: String,
-    var fromDesc: String
+open class MethodInstruction(
+    var owner: String,
+    var name: String,
+    var desc: String
 )

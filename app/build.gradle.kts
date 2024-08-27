@@ -1,7 +1,7 @@
 @file:Suppress("UnstableApiUsage")
 
-import github.leavesczy.track.replace.field.ReplaceFieldInstruction
-import github.leavesczy.track.replace.method.ReplaceMethod
+import github.leavesczy.track.replace.field.FieldInstruction
+import github.leavesczy.track.replace.method.MethodInstruction
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.TimeZone
@@ -147,7 +147,7 @@ optimizedThreadTrack {
     include = setOf()
     exclude = setOf()
     optimizedExecutorsClass = "github.leavesczy.track.thread.OptimizedExecutors"
-    executorsMethodNames = setOf(
+    executorsMethods = setOf(
         "newSingleThreadExecutor",
         "newCachedThreadPool",
         "newFixedThreadPool",
@@ -168,12 +168,12 @@ replaceFieldTrack {
     isEnabled = true
     include = setOf()
     exclude = setOf()
-    toOwner = "github.leavesczy.track.replace.instruction.FieldProxy"
+    proxyOwner = "github.leavesczy.track.replace.instruction.FieldProxy"
     fields = setOf(
-        ReplaceFieldInstruction(
-            fromOwner = "android/os/Build",
-            fromName = "BRAND",
-            fromDesc = "Ljava/lang/String;"
+        FieldInstruction(
+            owner = "android/os/Build",
+            name = "BRAND",
+            desc = "Ljava/lang/String;"
         )
     )
 }
@@ -182,22 +182,22 @@ replaceMethodTrack {
     isEnabled = true
     include = setOf("^github.leavesczy.track.replace.instruction.ReplaceInstructionTrackActivity.*")
     exclude = setOf()
-    toOwner = "github.leavesczy.track.replace.instruction.MethodProxy"
+    proxyOwner = "github.leavesczy.track.replace.instruction.MethodProxy"
     methods = setOf(
-        ReplaceMethod(
-            fromOwner = "android/telephony/TelephonyManager",
-            fromName = "getDeviceId",
-            fromDesc = "()Ljava/lang/String;"
+        MethodInstruction(
+            owner = "android/telephony/TelephonyManager",
+            name = "getDeviceId",
+            desc = "()Ljava/lang/String;"
         ),
-        ReplaceMethod(
-            fromOwner = "android/telephony/TelephonyManager",
-            fromName = "getImei",
-            fromDesc = "(I)Ljava/lang/String;"
+        MethodInstruction(
+            owner = "android/telephony/TelephonyManager",
+            name = "getImei",
+            desc = "(I)Ljava/lang/String;"
         ),
-        ReplaceMethod(
-            fromOwner = "android/provider/Settings\$Secure",
-            fromName = "getString",
-            fromDesc = "(Landroid/content/ContentResolver;Ljava/lang/String;)Ljava/lang/String;"
+        MethodInstruction(
+            owner = "android/provider/Settings\$Secure",
+            name = "getString",
+            desc = "(Landroid/content/ContentResolver;Ljava/lang/String;)Ljava/lang/String;"
         )
     )
 }

@@ -11,32 +11,32 @@ internal data class ReplaceFieldConfig(
     override val isEnabled: Boolean,
     override val include: Set<String>,
     override val exclude: Set<String>,
-    val toOwner: String,
+    val proxyOwner: String,
     val fields: List<String>
 ) : BaseTrackConfig {
 
     companion object {
 
-        private fun ReplaceFieldInstruction.mapInstruction(): String {
-            if (fromOwner.isBlank() || fromName.isBlank() || fromDesc.isBlank()) {
-                throw RuntimeException("ReplaceFieldTrack 传入了非法指令")
-            }
-            return fromOwner + fromName + fromDesc
-        }
-
         operator fun invoke(pluginParameter: ReplaceFieldPluginParameter): ReplaceFieldConfig? {
-            val toOwner = pluginParameter.toOwner
-            val fields = pluginParameter.fields.map {
-                it.mapInstruction()
+            val proxyOwner = pluginParameter.proxyOwner
+            val fields = pluginParameter.fields.mapNotNull {
+                val owner = it.owner
+                val name = it.name
+                val desc = it.desc
+                if (owner.isBlank() || name.isBlank() || desc.isBlank()) {
+                    null
+                } else {
+                    owner + name + desc
+                }
             }
-            if (toOwner.isBlank() || fields.isEmpty()) {
+            if (proxyOwner.isBlank() || fields.isEmpty()) {
                 return null
             }
             return ReplaceFieldConfig(
                 isEnabled = pluginParameter.isEnabled,
                 include = pluginParameter.include,
                 exclude = pluginParameter.exclude,
-                toOwner = toOwner,
+                proxyOwner = proxyOwner,
                 fields = fields
             )
         }
@@ -49,12 +49,12 @@ open class ReplaceFieldPluginParameter(
     var isEnabled: Boolean = true,
     var include: Set<String> = emptySet(),
     var exclude: Set<String> = emptySet(),
-    var toOwner: String = "",
-    var fields: Set<ReplaceFieldInstruction> = emptySet()
+    var proxyOwner: String = "",
+    var fields: Set<FieldInstruction> = emptySet()
 )
 
-open class ReplaceFieldInstruction(
-    var fromOwner: String,
-    var fromName: String,
-    var fromDesc: String
+open class FieldInstruction(
+    var owner: String,
+    var name: String,
+    var desc: String
 )

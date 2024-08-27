@@ -11,7 +11,7 @@ internal object FieldProxy {
 
     @JvmField
     var BRAND = "这是一个假的 BRAND"
-    
+
     fun onProxyEnabledChanged() {
         BRAND = if (ReplaceInstructionTrackActivity.isProxyEnabled) {
             "这是一个假的 BRAND"
