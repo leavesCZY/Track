@@ -1,4 +1,4 @@
-package github.leavesczy.track.replace
+package github.leavesczy.track.replace.clazz
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity

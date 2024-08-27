@@ -7,7 +7,8 @@ import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import github.leavesczy.track.click.compose.ComposeClickTrackActivity
 import github.leavesczy.track.click.view.ViewClickTrackActivity
-import github.leavesczy.track.replace.ReplaceClassTrackActivity
+import github.leavesczy.track.replace.clazz.ReplaceClassTrackActivity
+import github.leavesczy.track.replace.instruction.ReplaceInstructionTrackActivity
 import github.leavesczy.track.thread.OptimizedThreadTrackActivity
 import github.leavesczy.track.toast.ToastTrackActivity
 
@@ -29,6 +30,9 @@ class MainActivity : AppCompatActivity() {
         }
         findViewById<View>(R.id.btnReplaceClassTrack).setOnClickListener {
             startActivity<ReplaceClassTrackActivity>()
+        }
+        findViewById<View>(R.id.btnReplaceInstructionTrack).setOnClickListener {
+            startActivity<ReplaceInstructionTrackActivity>()
         }
         findViewById<View>(R.id.btnToastTrack).setOnClickListener {
             startActivity<ToastTrackActivity>()

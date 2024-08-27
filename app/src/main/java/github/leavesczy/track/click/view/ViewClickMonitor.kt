@@ -9,7 +9,7 @@ import android.view.View
  * @Github: https://github.com/leavesCZY
  * @Desc:
  */
-object ViewClickMonitor {
+internal object ViewClickMonitor {
 
     private var lastClickTime = 0L
 

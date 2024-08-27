@@ -1,6 +1,7 @@
 package github.leavesczy.track.thread
 
 import github.leavesczy.track.BaseTrackConfig
+import github.leavesczy.track.utils.replaceDotBySlash
 
 /**
  * @Author: leavesCZY
@@ -18,10 +19,7 @@ internal data class OptimizedThreadConfig(
     companion object {
 
         operator fun invoke(pluginParameter: OptimizedThreadPluginParameter): OptimizedThreadConfig? {
-            val optimizedExecutorsClass = pluginParameter.optimizedExecutorsClass.replace(
-                ".",
-                "/"
-            )
+            val optimizedExecutorsClass = replaceDotBySlash(pluginParameter.optimizedExecutorsClass)
             val executorsMethodNames = pluginParameter.executorsMethodNames
             if (optimizedExecutorsClass.isBlank() || executorsMethodNames.isEmpty()) {
                 return null

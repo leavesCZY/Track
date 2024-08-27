@@ -14,14 +14,14 @@
         android:src="@drawable/icon_dog"
         tools:ignore="ContentDescription" />
 
-    <github.leavesczy.track.replace.CustomStyleImageView
+    <github.leavesczy.track.replace.clazz.CustomStyleImageView
         android:layout_width="160dp"
         android:layout_height="160dp"
         android:layout_margin="10dp"
         android:scaleType="centerCrop"
         android:src="@drawable/icon_dog" />
 
-    <github.leavesczy.track.replace.IgnoreImageView
+    <github.leavesczy.track.replace.clazz.IgnoreImageView
         android:layout_width="160dp"
         android:layout_height="160dp"
         android:layout_margin="10dp"

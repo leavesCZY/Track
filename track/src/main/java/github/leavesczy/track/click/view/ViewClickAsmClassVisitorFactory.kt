@@ -2,8 +2,8 @@ package github.leavesczy.track.click.view
 
 import com.android.build.api.instrumentation.ClassContext
 import com.android.build.api.instrumentation.ClassData
+import github.leavesczy.track.BaseTrackAsmClassVisitorFactory
 import github.leavesczy.track.BaseTrackClassNode
-import github.leavesczy.track.BaseTrackClassVisitorFactory
 import github.leavesczy.track.BaseTrackConfigParameters
 import github.leavesczy.track.utils.LogPrint
 import github.leavesczy.track.utils.filterLambda
@@ -29,8 +29,8 @@ import org.objectweb.asm.tree.VarInsnNode
  * @Github: https://github.com/leavesCZY
  * @Desc:
  */
-internal abstract class ViewClickClassVisitorFactory :
-    BaseTrackClassVisitorFactory<BaseTrackConfigParameters, ViewClickConfig> {
+internal abstract class ViewClickAsmClassVisitorFactory :
+    BaseTrackAsmClassVisitorFactory<BaseTrackConfigParameters, ViewClickConfig> {
 
     override fun createClassVisitor(
         classContext: ClassContext,

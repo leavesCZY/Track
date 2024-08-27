@@ -2,8 +2,8 @@ package github.leavesczy.track.toast
 
 import com.android.build.api.instrumentation.ClassContext
 import com.android.build.api.instrumentation.ClassData
+import github.leavesczy.track.BaseTrackAsmClassVisitorFactory
 import github.leavesczy.track.BaseTrackClassNode
-import github.leavesczy.track.BaseTrackClassVisitorFactory
 import github.leavesczy.track.BaseTrackConfigParameters
 import github.leavesczy.track.utils.LogPrint
 import github.leavesczy.track.utils.replaceDotBySlash
@@ -16,8 +16,8 @@ import org.objectweb.asm.tree.MethodInsnNode
  * @Github: https://github.com/leavesCZY
  * @Desc:
  */
-internal abstract class ToastClassVisitorFactory :
-    BaseTrackClassVisitorFactory<BaseTrackConfigParameters, ToastConfig> {
+internal abstract class ToastAsmClassVisitorFactory :
+    BaseTrackAsmClassVisitorFactory<BaseTrackConfigParameters, ToastConfig> {
 
     override fun createClassVisitor(
         classContext: ClassContext,

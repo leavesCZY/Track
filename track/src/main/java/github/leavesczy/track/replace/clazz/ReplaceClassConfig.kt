@@ -1,4 +1,4 @@
-package github.leavesczy.track.replace
+package github.leavesczy.track.replace.clazz
 
 import github.leavesczy.track.BaseTrackConfig
 

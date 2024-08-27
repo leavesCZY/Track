@@ -16,7 +16,7 @@ import java.io.Serializable
  * @Date: 2024/8/25 1:56
  * @Desc:
  */
-internal open class BaseTrackClassNode : ClassNode(Opcodes.ASM5)
+internal open class BaseTrackClassNode : ClassNode(Opcodes.ASM7)
 
 internal interface BaseTrackConfig : Serializable {
 
@@ -33,7 +33,7 @@ internal interface BaseTrackConfigParameters : InstrumentationParameters {
     val trackConfig: Property<BaseTrackConfig>
 }
 
-internal interface BaseTrackClassVisitorFactory<Parameters : BaseTrackConfigParameters, TrackConfig : BaseTrackConfig> :
+internal interface BaseTrackAsmClassVisitorFactory<Parameters : BaseTrackConfigParameters, TrackConfig : BaseTrackConfig> :
     AsmClassVisitorFactory<Parameters> {
 
     @get:Input

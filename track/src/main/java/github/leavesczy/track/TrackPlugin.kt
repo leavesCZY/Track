@@ -4,19 +4,25 @@ import com.android.build.api.instrumentation.FramesComputationMode
 import com.android.build.api.instrumentation.InstrumentationScope
 import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.api.variant.Variant
-import github.leavesczy.track.click.compose.ComposeClickClassVisitorFactory
+import github.leavesczy.track.click.compose.ComposeClickAsmClassVisitorFactory
 import github.leavesczy.track.click.compose.ComposeClickConfig
 import github.leavesczy.track.click.compose.ComposeClickPluginParameter
-import github.leavesczy.track.click.view.ViewClickClassVisitorFactory
+import github.leavesczy.track.click.view.ViewClickAsmClassVisitorFactory
 import github.leavesczy.track.click.view.ViewClickConfig
 import github.leavesczy.track.click.view.ViewClickPluginParameter
-import github.leavesczy.track.replace.ReplaceClassClassVisitorFactory
-import github.leavesczy.track.replace.ReplaceClassConfig
-import github.leavesczy.track.replace.ReplaceClassPluginParameter
-import github.leavesczy.track.thread.OptimizedThreadClassVisitorFactory
+import github.leavesczy.track.replace.clazz.ReplaceClassAsmClassVisitorFactory
+import github.leavesczy.track.replace.clazz.ReplaceClassConfig
+import github.leavesczy.track.replace.clazz.ReplaceClassPluginParameter
+import github.leavesczy.track.replace.field.ReplaceFieldAsmClassVisitorFactory
+import github.leavesczy.track.replace.field.ReplaceFieldConfig
+import github.leavesczy.track.replace.field.ReplaceFieldPluginParameter
+import github.leavesczy.track.replace.method.ReplaceMethodAsmClassVisitorFactory
+import github.leavesczy.track.replace.method.ReplaceMethodConfig
+import github.leavesczy.track.replace.method.ReplaceMethodPluginParameter
+import github.leavesczy.track.thread.OptimizedThreadAsmClassVisitorFactory
 import github.leavesczy.track.thread.OptimizedThreadConfig
 import github.leavesczy.track.thread.OptimizedThreadPluginParameter
-import github.leavesczy.track.toast.ToastClassVisitorFactory
+import github.leavesczy.track.toast.ToastAsmClassVisitorFactory
 import github.leavesczy.track.toast.ToastConfig
 import github.leavesczy.track.toast.ToastPluginParameter
 import org.gradle.api.Plugin
@@ -51,6 +57,14 @@ class TrackPlugin : Plugin<Project> {
                 "optimizedThreadTrack",
                 OptimizedThreadPluginParameter::class.java
             )
+            extensions.create(
+                "replaceFieldTrack",
+                ReplaceFieldPluginParameter::class.java
+            )
+            extensions.create(
+                "replaceMethodTrack",
+                ReplaceMethodPluginParameter::class.java
+            )
         }
         val androidComponents = project.extensions.getByType(AndroidComponentsExtension::class.java)
         androidComponents.onVariants { variant ->
@@ -59,6 +73,8 @@ class TrackPlugin : Plugin<Project> {
             handleReplaceClassTrack(project = project, variant = variant)
             handleToastTrack(project = project, variant = variant)
             handleOptimizedThreadTrack(project = project, variant = variant)
+            handleReplaceFiledTrack(project = project, variant = variant)
+            handleReplaceMethodTrack(project = project, variant = variant)
             variant.instrumentation.setAsmFramesComputationMode(FramesComputationMode.COPY_FRAMES)
         }
     }
@@ -73,7 +89,7 @@ class TrackPlugin : Plugin<Project> {
         if (config != null) {
             variant.instrumentation.apply {
                 transformClassesWith(
-                    ViewClickClassVisitorFactory::class.java,
+                    ViewClickAsmClassVisitorFactory::class.java,
                     InstrumentationScope.ALL
                 ) { params ->
                     params.trackConfig.set(config)
@@ -92,7 +108,7 @@ class TrackPlugin : Plugin<Project> {
         if (config != null) {
             variant.instrumentation.apply {
                 transformClassesWith(
-                    ComposeClickClassVisitorFactory::class.java,
+                    ComposeClickAsmClassVisitorFactory::class.java,
                     InstrumentationScope.ALL
                 ) { params ->
                     params.trackConfig.set(config)
@@ -112,7 +128,7 @@ class TrackPlugin : Plugin<Project> {
         if (config != null) {
             variant.instrumentation.apply {
                 transformClassesWith(
-                    ReplaceClassClassVisitorFactory::class.java,
+                    ReplaceClassAsmClassVisitorFactory::class.java,
                     InstrumentationScope.ALL
                 ) { params ->
                     params.trackConfig.set(config)
@@ -132,7 +148,7 @@ class TrackPlugin : Plugin<Project> {
         if (config != null) {
             variant.instrumentation.apply {
                 transformClassesWith(
-                    ToastClassVisitorFactory::class.java,
+                    ToastAsmClassVisitorFactory::class.java,
                     InstrumentationScope.ALL
                 ) { params ->
                     params.trackConfig.set(config)
@@ -152,7 +168,47 @@ class TrackPlugin : Plugin<Project> {
         if (config != null) {
             variant.instrumentation.apply {
                 transformClassesWith(
-                    OptimizedThreadClassVisitorFactory::class.java,
+                    OptimizedThreadAsmClassVisitorFactory::class.java,
+                    InstrumentationScope.ALL
+                ) { params ->
+                    params.trackConfig.set(config)
+                }
+            }
+        }
+    }
+
+    private fun handleReplaceFiledTrack(project: Project, variant: Variant) {
+        val pluginParameter =
+            project.extensions.findByType(ReplaceFieldPluginParameter::class.java)
+        val config = if (pluginParameter == null) {
+            null
+        } else {
+            ReplaceFieldConfig(pluginParameter = pluginParameter)
+        }
+        if (config != null) {
+            variant.instrumentation.apply {
+                transformClassesWith(
+                    ReplaceFieldAsmClassVisitorFactory::class.java,
+                    InstrumentationScope.ALL
+                ) { params ->
+                    params.trackConfig.set(config)
+                }
+            }
+        }
+    }
+
+    private fun handleReplaceMethodTrack(project: Project, variant: Variant) {
+        val pluginParameter =
+            project.extensions.findByType(ReplaceMethodPluginParameter::class.java)
+        val config = if (pluginParameter == null) {
+            null
+        } else {
+            ReplaceMethodConfig(pluginParameter = pluginParameter)
+        }
+        if (config != null) {
+            variant.instrumentation.apply {
+                transformClassesWith(
+                    ReplaceMethodAsmClassVisitorFactory::class.java,
                     InstrumentationScope.ALL
                 ) { params ->
                     params.trackConfig.set(config)

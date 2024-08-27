@@ -14,7 +14,7 @@ import org.objectweb.asm.tree.MethodNode
  */
 internal const val InitMethodName = "<init>"
 
-internal val ClassNode.simpleClassName: String
+internal val ClassNode.classSimpleName: String
     get() = name.substringAfterLast('/')
 
 internal val MethodNode.nameWithDesc: String

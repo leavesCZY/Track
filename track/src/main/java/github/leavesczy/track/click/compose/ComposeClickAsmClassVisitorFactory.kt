@@ -2,8 +2,8 @@ package github.leavesczy.track.click.compose
 
 import com.android.build.api.instrumentation.ClassContext
 import com.android.build.api.instrumentation.ClassData
+import github.leavesczy.track.BaseTrackAsmClassVisitorFactory
 import github.leavesczy.track.BaseTrackClassNode
-import github.leavesczy.track.BaseTrackClassVisitorFactory
 import github.leavesczy.track.BaseTrackConfigParameters
 import github.leavesczy.track.utils.InitMethodName
 import github.leavesczy.track.utils.LogPrint
@@ -28,8 +28,8 @@ import org.objectweb.asm.tree.VarInsnNode
  */
 private const val composeClickClassName = "androidx.compose.foundation.ClickableKt"
 
-internal abstract class ComposeClickClassVisitorFactory :
-    BaseTrackClassVisitorFactory<BaseTrackConfigParameters, ComposeClickConfig> {
+internal abstract class ComposeClickAsmClassVisitorFactory :
+    BaseTrackAsmClassVisitorFactory<BaseTrackConfigParameters, ComposeClickConfig> {
 
     override fun createClassVisitor(
         classContext: ClassContext,

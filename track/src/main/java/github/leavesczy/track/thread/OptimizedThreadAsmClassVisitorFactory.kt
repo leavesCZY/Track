@@ -2,12 +2,12 @@ package github.leavesczy.track.thread
 
 import com.android.build.api.instrumentation.ClassContext
 import com.android.build.api.instrumentation.ClassData
+import github.leavesczy.track.BaseTrackAsmClassVisitorFactory
 import github.leavesczy.track.BaseTrackClassNode
-import github.leavesczy.track.BaseTrackClassVisitorFactory
 import github.leavesczy.track.BaseTrackConfigParameters
 import github.leavesczy.track.utils.LogPrint
+import github.leavesczy.track.utils.classSimpleName
 import github.leavesczy.track.utils.insertArgument
-import github.leavesczy.track.utils.simpleClassName
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.Opcodes
 import org.objectweb.asm.tree.LdcInsnNode
@@ -19,8 +19,8 @@ import org.objectweb.asm.tree.MethodNode
  * @Github: https://github.com/leavesCZY
  * @Desc:
  */
-internal abstract class OptimizedThreadClassVisitorFactory :
-    BaseTrackClassVisitorFactory<BaseTrackConfigParameters, OptimizedThreadConfig> {
+internal abstract class OptimizedThreadAsmClassVisitorFactory :
+    BaseTrackAsmClassVisitorFactory<BaseTrackConfigParameters, OptimizedThreadConfig> {
 
     override fun createClassVisitor(
         classContext: ClassContext,
@@ -70,14 +70,12 @@ private class OptimizedThreadClassVisitor(
     ) {
         val pointMethod = config.executorsMethodNames.find { it == methodInsnNode.name }
         if (pointMethod != null) {
-            //将 Executors 替换为 OptimizedThreadPool
             methodInsnNode.owner = config.optimizedExecutorsClass
-            //为调用 newFixedThreadPool 等方法的指令多插入一个 String 类型的方法入参参数声明
             methodInsnNode.insertArgument(String::class.java)
-            //将 className 作为上述 String 参数的入参参数
-            methodNode.instructions.insertBefore(methodInsnNode, LdcInsnNode(simpleClassName))
+            val mClassSimpleName = classSimpleName
+            methodNode.instructions.insertBefore(methodInsnNode, LdcInsnNode(mClassSimpleName))
             LogPrint.normal(tag = "OptimizedThreadTrack") {
-                "在 $simpleClassName 中找到 ${methodInsnNode.name} 方法，完成替换..."
+                "在 $mClassSimpleName 中找到 ${methodInsnNode.name} 方法，完成替换..."
             }
         }
     }

@@ -1,9 +1,9 @@
-package github.leavesczy.track.replace
+package github.leavesczy.track.replace.clazz
 
 import com.android.build.api.instrumentation.ClassContext
 import com.android.build.api.instrumentation.ClassData
+import github.leavesczy.track.BaseTrackAsmClassVisitorFactory
 import github.leavesczy.track.BaseTrackClassNode
-import github.leavesczy.track.BaseTrackClassVisitorFactory
 import github.leavesczy.track.BaseTrackConfigParameters
 import github.leavesczy.track.utils.LogPrint
 import github.leavesczy.track.utils.replaceDotBySlash
@@ -14,8 +14,8 @@ import org.objectweb.asm.ClassVisitor
  * @Github: https://github.com/leavesCZY
  * @Desc:
  */
-internal abstract class ReplaceClassClassVisitorFactory :
-    BaseTrackClassVisitorFactory<BaseTrackConfigParameters, ReplaceClassConfig> {
+internal abstract class ReplaceClassAsmClassVisitorFactory :
+    BaseTrackAsmClassVisitorFactory<BaseTrackConfigParameters, ReplaceClassConfig> {
 
     override fun createClassVisitor(
         classContext: ClassContext,
