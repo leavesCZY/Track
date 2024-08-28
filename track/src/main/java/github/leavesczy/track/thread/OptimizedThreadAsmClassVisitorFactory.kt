@@ -6,7 +6,6 @@ import github.leavesczy.track.BaseTrackAsmClassVisitorFactory
 import github.leavesczy.track.BaseTrackClassNode
 import github.leavesczy.track.BaseTrackConfigParameters
 import github.leavesczy.track.utils.LogPrint
-import github.leavesczy.track.utils.classSimpleName
 import github.leavesczy.track.utils.insertArgument
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.Opcodes
@@ -72,10 +71,10 @@ private class OptimizedThreadClassVisitor(
         if (pointMethod != null) {
             methodInsnNode.owner = config.optimizedExecutorsClass
             methodInsnNode.insertArgument(String::class.java)
-            val mClassSimpleName = classSimpleName
+            val mClassSimpleName = name.substringAfterLast('/')
             methodNode.instructions.insertBefore(methodInsnNode, LdcInsnNode(mClassSimpleName))
             LogPrint.normal(tag = "OptimizedThreadTrack") {
-                "在 $mClassSimpleName 中找到 ${methodInsnNode.name} 方法，完成替换..."
+                "在 $mClassSimpleName 中找到 ${methodInsnNode.name} 方法，完成处理..."
             }
         }
     }

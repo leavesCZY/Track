@@ -168,36 +168,39 @@ replaceFieldTrack {
     isEnabled = true
     include = setOf()
     exclude = setOf()
-    proxyOwner = "github.leavesczy.track.replace.instruction.FieldProxy"
     fields = setOf(
         FieldInstruction(
             owner = "android/os/Build",
             name = "BRAND",
-            desc = "Ljava/lang/String;"
+            descriptor = "Ljava/lang/String;",
+            proxyOwner = "github.leavesczy.track.replace.instruction.FieldProxy"
         )
     )
 }
 
 replaceMethodTrack {
     isEnabled = true
-    include = setOf("^github.leavesczy.track.replace.instruction.ReplaceInstructionTrackActivity.*")
+    include = setOf()
     exclude = setOf()
-    proxyOwner = "github.leavesczy.track.replace.instruction.MethodProxy"
+    val proxyOwner = "github.leavesczy.track.replace.instruction.MethodProxy"
     methods = setOf(
         MethodInstruction(
             owner = "android/telephony/TelephonyManager",
             name = "getDeviceId",
-            desc = "()Ljava/lang/String;"
+            descriptor = "()Ljava/lang/String;",
+            proxyOwner = proxyOwner
         ),
         MethodInstruction(
             owner = "android/telephony/TelephonyManager",
             name = "getImei",
-            desc = "(I)Ljava/lang/String;"
+            descriptor = "(I)Ljava/lang/String;",
+            proxyOwner = proxyOwner
         ),
         MethodInstruction(
             owner = "android/provider/Settings\$Secure",
             name = "getString",
-            desc = "(Landroid/content/ContentResolver;Ljava/lang/String;)Ljava/lang/String;"
+            descriptor = "(Landroid/content/ContentResolver;Ljava/lang/String;)Ljava/lang/String;",
+            proxyOwner = proxyOwner
         )
     )
 }

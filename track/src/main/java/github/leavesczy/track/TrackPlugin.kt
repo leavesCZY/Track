@@ -70,9 +70,9 @@ class TrackPlugin : Plugin<Project> {
         androidComponents.onVariants { variant ->
             handleViewClickTrack(project = project, variant = variant)
             handleComposeClickTrack(project = project, variant = variant)
-            handleReplaceClassTrack(project = project, variant = variant)
             handleToastTrack(project = project, variant = variant)
             handleOptimizedThreadTrack(project = project, variant = variant)
+            handleReplaceClassTrack(project = project, variant = variant)
             handleReplaceFiledTrack(project = project, variant = variant)
             handleReplaceMethodTrack(project = project, variant = variant)
             variant.instrumentation.setAsmFramesComputationMode(FramesComputationMode.COPY_FRAMES)

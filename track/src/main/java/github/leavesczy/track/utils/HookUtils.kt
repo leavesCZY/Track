@@ -2,7 +2,6 @@ package github.leavesczy.track.utils
 
 import org.objectweb.asm.Opcodes
 import org.objectweb.asm.Type
-import org.objectweb.asm.tree.ClassNode
 import org.objectweb.asm.tree.InvokeDynamicInsnNode
 import org.objectweb.asm.tree.MethodInsnNode
 import org.objectweb.asm.tree.MethodNode
@@ -14,12 +13,6 @@ import org.objectweb.asm.tree.MethodNode
  */
 internal const val InitMethodName = "<init>"
 
-internal val ClassNode.classSimpleName: String
-    get() = name.substringAfterLast('/')
-
-internal val MethodNode.nameWithDesc: String
-    get() = name + desc
-
 internal val MethodNode.isStatic: Boolean
     get() = access and Opcodes.ACC_STATIC == Opcodes.ACC_STATIC
 
@@ -27,11 +20,9 @@ internal fun replaceDotBySlash(className: String): String {
     return className.replace(".", "/")
 }
 
-internal fun getClassDesc(className: String): String {
-    return "L" + className.replace(".", "/") + ";"
-}
-
-internal fun MethodNode.hasAnnotation(annotationDesc: String): Boolean {
+internal fun MethodNode.hasAnnotation(annotationClassName: String): Boolean {
+    val annotationDesc =
+        Type.getObjectType(replaceDotBySlash(className = annotationClassName)).descriptor
     return visibleAnnotations?.find { it.desc == annotationDesc } != null
 }
 

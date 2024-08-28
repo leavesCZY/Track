@@ -31,7 +31,9 @@ internal abstract class ReplaceFieldAsmClassVisitorFactory :
     }
 
     override fun isTrackEnabled(classData: ClassData): Boolean {
-        return classData.className != trackConfig.proxyOwner
+        return trackConfig.fields.find {
+            it.proxyOwner == classData.className
+        } == null
     }
 
 }
@@ -71,22 +73,20 @@ private class ReplaceFieldMethodVisitor(
     private val config: ReplaceFieldConfig
 ) : MethodVisitor(api, methodVisitor) {
 
-    private val toOwner = replaceDotBySlash(className = config.proxyOwner)
-
     override fun visitFieldInsn(
         opcode: Int,
         owner: String?,
         name: String?,
         descriptor: String?
     ) {
-        val ownerNameDesc = owner + name + descriptor
         val find = config.fields.find {
-            it == ownerNameDesc
+            it.owner == owner && it.name == name && it.descriptor == descriptor
         }
         if (find != null && opcode == Opcodes.GETSTATIC) {
-            super.visitFieldInsn(opcode, toOwner, name, descriptor)
+            val proxyOwner = replaceDotBySlash(className = find.proxyOwner)
+            super.visitFieldInsn(opcode, proxyOwner, name, descriptor)
             LogPrint.normal(tag = "ReplaceFieldTrack") {
-                "${classNode.name} 发现符合规则的指令：$owner $name $descriptor , 替换为 $toOwner $name $descriptor 完成处理..."
+                "${classNode.name} 发现符合规则的指令：$owner $name $descriptor , 替换为 $proxyOwner $name $descriptor ，完成处理..."
             }
         } else {
             super.visitFieldInsn(opcode, owner, name, descriptor)

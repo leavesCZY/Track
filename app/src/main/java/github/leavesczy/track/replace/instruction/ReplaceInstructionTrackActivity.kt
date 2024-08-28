@@ -25,8 +25,8 @@ class ReplaceInstructionTrackActivity : AppCompatActivity() {
 
     }
 
-    private val btnProxyEnabled by lazy {
-        findViewById<Button>(R.id.btnProxyEnabled)
+    private val btnProxyIsEnabled by lazy {
+        findViewById<Button>(R.id.btnProxyIsEnabled)
     }
 
     private val btnTest by lazy {
@@ -43,7 +43,7 @@ class ReplaceInstructionTrackActivity : AppCompatActivity() {
         title = "Replace Field or Method Track"
         isProxyEnabled = true
         onProxyEnabledChanged()
-        btnProxyEnabled.setOnClickListener {
+        btnProxyIsEnabled.setOnClickListener {
             isProxyEnabled = !isProxyEnabled
             onProxyEnabledChanged()
         }
@@ -63,7 +63,7 @@ class ReplaceInstructionTrackActivity : AppCompatActivity() {
 
     private fun onProxyEnabledChanged() {
         FieldProxy.onProxyEnabledChanged()
-        btnProxyEnabled.text = "isProxyEnabled : $isProxyEnabled"
+        btnProxyIsEnabled.text = "ProxyIsEnabled : $isProxyEnabled"
     }
 
     private fun getDeviceId(context: Context): String {

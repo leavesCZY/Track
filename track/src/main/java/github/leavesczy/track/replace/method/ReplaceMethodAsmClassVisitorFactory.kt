@@ -31,7 +31,9 @@ internal abstract class ReplaceMethodAsmClassVisitorFactory :
     }
 
     override fun isTrackEnabled(classData: ClassData): Boolean {
-        return classData.className != trackConfig.proxyOwner
+        return trackConfig.methods.find {
+            it.proxyOwner == classData.className
+        } == null
     }
 
 }
@@ -78,15 +80,14 @@ private class ReplaceMethodMethodVisitor(
         descriptor: String,
         isInterface: Boolean
     ) {
-        val ownerNameDesc = owner + name + descriptor
         val find = config.methods.find {
-            it == ownerNameDesc
+            it.owner == owner && it.name == name && it.descriptor == descriptor
         }
         val mOpcode: Int
         val mOwner: String
         val mDescriptor: String
         if (find != null) {
-            mOwner = replaceDotBySlash(className = config.proxyOwner)
+            mOwner = replaceDotBySlash(className = find.proxyOwner)
             if (opcode == Opcodes.INVOKEVIRTUAL) {
                 mOpcode = Opcodes.INVOKESTATIC
                 mDescriptor = insetAsFirstArgument(descriptor = descriptor, owner = owner)
@@ -95,7 +96,7 @@ private class ReplaceMethodMethodVisitor(
                 mDescriptor = descriptor
             }
             LogPrint.normal(tag = "ReplaceMethodTrack") {
-                "${classNode.name} 发现符合规则的指令：$owner $name $descriptor , 替换为 $mOwner $name $mDescriptor 完成处理..."
+                "${classNode.name} 发现符合规则的指令：$owner $name $descriptor , 替换为 $mOwner $name $mDescriptor ，完成处理..."
             }
         } else {
             mOpcode = opcode

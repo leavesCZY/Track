@@ -7,10 +7,8 @@ import github.leavesczy.track.BaseTrackClassNode
 import github.leavesczy.track.BaseTrackConfigParameters
 import github.leavesczy.track.utils.LogPrint
 import github.leavesczy.track.utils.filterLambda
-import github.leavesczy.track.utils.getClassDesc
 import github.leavesczy.track.utils.hasAnnotation
 import github.leavesczy.track.utils.isStatic
-import github.leavesczy.track.utils.nameWithDesc
 import github.leavesczy.track.utils.replaceDotBySlash
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.Handle
@@ -53,12 +51,17 @@ private class ViewClickClassVisitor(
     private val config: ViewClickConfig,
 ) : BaseTrackClassNode() {
 
-    private val viewClassDesc = getClassDesc(className = "android.view.View")
+    private val viewObjectDesc = "Landroid/view/View;"
 
-    private val onClickMethodDesc = "(Landroid/view/View;)Z"
+    private val onClickListenerInterfaceName = "android/view/View\$OnClickListener"
 
-    private val uncheckViewOnClickAnnotationDesc =
-        getClassDesc(className = config.uncheckViewOnClickAnnotation)
+    private val onClickListenerInterfaceObjectDes = "L${onClickListenerInterfaceName};"
+
+    private val onClickMethodName = "onClick"
+
+    private val onClickMethodDesc = "(Landroid/view/View;)V"
+
+    private val proxyOnClickMethodDesc = "(Landroid/view/View;)Z"
 
     override fun visitEnd() {
         super.visitEnd()
@@ -70,7 +73,7 @@ private class ViewClickClassVisitor(
         val shouldHookMethodList = mutableSetOf<MethodNode>()
         methods.forEach { methodNode ->
             when {
-                methodNode.hasUncheckViewOnClickAnnotation() -> {
+                methodNode.hasAnnotation(annotationClassName = config.uncheckViewOnClickAnnotation) -> {
 
                 }
 
@@ -79,18 +82,14 @@ private class ViewClickClassVisitor(
                 }
             }
             val dynamicNodes = methodNode.filterLambda {
-                val nodeName = it.name
-                val nodeDesc = it.desc
-                config.hookPointList.any { point ->
-                    nodeName == point.methodName && nodeDesc.endsWith(suffix = "L${point.interfaceName};")
-                }
+                it.name == onClickMethodName && it.desc.endsWith(suffix = onClickListenerInterfaceObjectDes)
             }
             dynamicNodes.forEach { node ->
                 val handle = node.bsmArgs[1] as? Handle
                 if (handle != null) {
                     val nameWithDesc = handle.name + handle.desc
                     val method = methods.find { method ->
-                        method.nameWithDesc == nameWithDesc
+                        method.name + method.desc == nameWithDesc
                     }
                     if (method != null) {
                         shouldHookMethodList.add(element = method)
@@ -111,7 +110,7 @@ private class ViewClickClassVisitor(
     private fun hookMethod(modeNode: MethodNode) {
         val argumentTypes = Type.getArgumentTypes(modeNode.desc)
         val viewArgumentIndex = argumentTypes?.indexOfFirst {
-            it.descriptor == viewClassDesc
+            it.descriptor == viewObjectDesc
         } ?: -1
         if (viewArgumentIndex >= 0) {
             val instructions = modeNode.instructions
@@ -132,7 +131,7 @@ private class ViewClickClassVisitor(
                         Opcodes.INVOKESTATIC,
                         replaceDotBySlash(className = config.onClickClass),
                         config.onClickMethodName,
-                        onClickMethodDesc
+                        proxyOnClickMethodDesc
                     )
                 )
                 val labelNode = LabelNode()
@@ -172,15 +171,8 @@ private class ViewClickClassVisitor(
         if (myInterfaces.isNullOrEmpty()) {
             return false
         }
-        val methodNameWithDesc = nameWithDesc
-        return config.hookPointList.any {
-            myInterfaces.contains(element = it.interfaceName) &&
-                    methodNameWithDesc == it.methodNameWithDesc
-        }
-    }
-
-    private fun MethodNode.hasUncheckViewOnClickAnnotation(): Boolean {
-        return hasAnnotation(annotationDesc = uncheckViewOnClickAnnotationDesc)
+        return interfaces.contains(element = onClickListenerInterfaceName)
+                && onClickMethodName == name && onClickMethodDesc == desc
     }
 
 }

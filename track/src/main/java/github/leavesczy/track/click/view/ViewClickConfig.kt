@@ -1,7 +1,6 @@
 package github.leavesczy.track.click.view
 
 import github.leavesczy.track.BaseTrackConfig
-import java.io.Serializable
 
 /**
  * @Author: leavesCZY
@@ -14,8 +13,7 @@ internal data class ViewClickConfig(
     override val exclude: Set<String>,
     val onClickClass: String,
     val onClickMethodName: String,
-    val uncheckViewOnClickAnnotation: String,
-    val hookPointList: Set<ViewClickHookPoint>
+    val uncheckViewOnClickAnnotation: String
 ) : BaseTrackConfig {
 
     companion object {
@@ -32,14 +30,7 @@ internal data class ViewClickConfig(
                     exclude = pluginParameter.exclude,
                     onClickClass = onClickClass,
                     onClickMethodName = onClickMethodName,
-                    uncheckViewOnClickAnnotation = pluginParameter.uncheckViewOnClickAnnotation,
-                    hookPointList = setOf(
-                        ViewClickHookPoint(
-                            interfaceName = "android/view/View\$OnClickListener",
-                            methodName = "onClick",
-                            methodNameWithDesc = "onClick(Landroid/view/View;)V"
-                        )
-                    )
+                    uncheckViewOnClickAnnotation = pluginParameter.uncheckViewOnClickAnnotation
                 )
             }
         }
@@ -47,12 +38,6 @@ internal data class ViewClickConfig(
     }
 
 }
-
-internal data class ViewClickHookPoint(
-    val interfaceName: String,
-    val methodName: String,
-    val methodNameWithDesc: String,
-) : Serializable
 
 open class ViewClickPluginParameter(
     var isEnabled: Boolean = true,

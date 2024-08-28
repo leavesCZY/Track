@@ -9,6 +9,7 @@ import github.leavesczy.track.utils.LogPrint
 import github.leavesczy.track.utils.replaceDotBySlash
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.Opcodes
+import org.objectweb.asm.Type
 import org.objectweb.asm.tree.MethodInsnNode
 
 /**
@@ -40,14 +41,23 @@ private class ToastClassVisitor(
     private val nextClassVisitor: ClassVisitor
 ) : BaseTrackClassNode() {
 
-    private val toastClass = "android/widget/Toast"
+    private val toastClassDesc = "android/widget/Toast"
+
+    private val showToastMethodName = "show"
+
+    private val showToastMethodDesc = "()V"
 
     override fun visitEnd() {
         super.visitEnd()
         val toastMethodInsnNodeList = mutableListOf<MethodInsnNode>()
         methods.forEach { method ->
             method.instructions?.forEach {
-                if (it is MethodInsnNode && it.opcode == Opcodes.INVOKEVIRTUAL && it.owner == toastClass && it.name == "show" && it.desc == "()V") {
+                if (it is MethodInsnNode &&
+                    it.opcode == Opcodes.INVOKEVIRTUAL &&
+                    it.owner == toastClassDesc &&
+                    it.name == showToastMethodName &&
+                    it.desc == showToastMethodDesc
+                ) {
                     toastMethodInsnNodeList.add(element = it)
                 }
             }
@@ -57,7 +67,10 @@ private class ToastClassVisitor(
                 it.opcode = Opcodes.INVOKESTATIC
                 it.owner = replaceDotBySlash(className = config.toasterClass)
                 it.name = config.showToastMethodName
-                it.desc = "(L$toastClass;)V"
+                it.desc = Type.getMethodDescriptor(
+                    Type.VOID_TYPE,
+                    Type.getObjectType(toastClassDesc)
+                )
                 it.itf = false
             }
             LogPrint.normal(tag = "ToastTrack") {
