@@ -11,6 +11,7 @@ internal data class ViewClickConfig(
     override val isEnabled: Boolean,
     override val include: Set<String>,
     override val exclude: Set<String>,
+    override val extensionName: String,
     val onClickClass: String,
     val onClickMethodName: String,
     val uncheckViewOnClickAnnotation: String
@@ -18,7 +19,10 @@ internal data class ViewClickConfig(
 
     companion object {
 
-        operator fun invoke(pluginParameter: ViewClickPluginParameter): ViewClickConfig? {
+        operator fun invoke(
+            pluginParameter: ViewClickPluginParameter,
+            extensionName: String
+        ): ViewClickConfig? {
             val onClickClass = pluginParameter.onClickClass
             val onClickMethodName = pluginParameter.onClickMethodName
             return if (onClickClass.isBlank() || onClickMethodName.isBlank()) {
@@ -28,6 +32,7 @@ internal data class ViewClickConfig(
                     isEnabled = pluginParameter.isEnabled,
                     include = pluginParameter.include,
                     exclude = pluginParameter.exclude,
+                    extensionName = extensionName,
                     onClickClass = onClickClass,
                     onClickMethodName = onClickMethodName,
                     uncheckViewOnClickAnnotation = pluginParameter.uncheckViewOnClickAnnotation

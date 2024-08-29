@@ -6,7 +6,6 @@ import github.leavesczy.track.BaseTrackAsmClassVisitorFactory
 import github.leavesczy.track.BaseTrackClassNode
 import github.leavesczy.track.BaseTrackConfigParameters
 import github.leavesczy.track.utils.InitMethodName
-import github.leavesczy.track.utils.LogPrint
 import github.leavesczy.track.utils.replaceDotBySlash
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.MethodVisitor
@@ -37,7 +36,7 @@ internal abstract class ComposeClickAsmClassVisitorFactory :
     ): BaseTrackClassNode {
         return ComposeClickClassVisitor(
             nextClassVisitor = nextClassVisitor,
-            config = trackConfig
+            trackConfig = trackConfig
         )
     }
 
@@ -49,8 +48,8 @@ internal abstract class ComposeClickAsmClassVisitorFactory :
 
 private class ComposeClickClassVisitor(
     private val nextClassVisitor: ClassVisitor,
-    private val config: ComposeClickConfig,
-) : BaseTrackClassNode() {
+    override val trackConfig: ComposeClickConfig
+) : BaseTrackClassNode(trackConfig = trackConfig) {
 
     private val clickableMethodDesc =
         "(Landroidx/compose/ui/Modifier;Landroidx/compose/foundation/interaction/MutableInteractionSource;Landroidx/compose/foundation/Indication;ZLjava/lang/String;Landroidx/compose/ui/semantics/Role;Lkotlin/jvm/functions/Function0;)Landroidx/compose/ui/Modifier;"
@@ -73,7 +72,7 @@ private class ComposeClickClassVisitor(
 
     override fun visitEnd() {
         super.visitEnd()
-        LogPrint.normal(tag = "ComposeClickTrack") {
+        nLog {
             "找到 $composeClickClassName 类，完成处理..."
         }
         accept(nextClassVisitor)
@@ -96,7 +95,7 @@ private class ComposeClickClassVisitor(
         if (onClickArgumentIndex > 0) {
             val onClickLabelArgumentIndex = 4
             val input = InsnList()
-            input.add(LdcInsnNode(config.onClickWhiteList))
+            input.add(LdcInsnNode(trackConfig.onClickWhiteList))
             input.add(VarInsnNode(Opcodes.ALOAD, onClickLabelArgumentIndex))
             input.add(
                 MethodInsnNode(
@@ -107,7 +106,7 @@ private class ComposeClickClassVisitor(
                     false
                 )
             )
-            val onClickClassFormat = replaceDotBySlash(className = config.onClickClass)
+            val onClickClassFormat = replaceDotBySlash(className = trackConfig.onClickClass)
             val label = LabelNode()
             input.add(JumpInsnNode(Opcodes.IFNE, label))
             input.add(TypeInsnNode(Opcodes.NEW, onClickClassFormat))

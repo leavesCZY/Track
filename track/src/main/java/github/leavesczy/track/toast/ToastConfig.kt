@@ -11,13 +11,17 @@ internal data class ToastConfig(
     override val isEnabled: Boolean,
     override val include: Set<String>,
     override val exclude: Set<String>,
+    override val extensionName: String,
     val toasterClass: String,
     val showToastMethodName: String
 ) : BaseTrackConfig {
 
     companion object {
 
-        operator fun invoke(pluginParameter: ToastPluginParameter): ToastConfig? {
+        operator fun invoke(
+            pluginParameter: ToastPluginParameter,
+            extensionName: String
+        ): ToastConfig? {
             val toasterClass = pluginParameter.toasterClass
             val showToastMethodName = pluginParameter.showToastMethodName
             if (toasterClass.isBlank() || showToastMethodName.isBlank()) {
@@ -27,6 +31,7 @@ internal data class ToastConfig(
                 isEnabled = pluginParameter.isEnabled,
                 include = pluginParameter.include,
                 exclude = pluginParameter.exclude,
+                extensionName = extensionName,
                 toasterClass = toasterClass,
                 showToastMethodName = showToastMethodName,
             )

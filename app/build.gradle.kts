@@ -1,7 +1,6 @@
 @file:Suppress("UnstableApiUsage")
 
-import github.leavesczy.track.replace.field.FieldInstruction
-import github.leavesczy.track.replace.method.MethodInstruction
+import github.leavesczy.track.replace.instruction.ReplaceInstruction
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.TimeZone
@@ -168,9 +167,9 @@ replaceFieldTrack {
     isEnabled = true
     include = setOf()
     exclude = setOf()
-    fields = setOf(
-        FieldInstruction(
-            owner = "android/os/Build",
+    instructions = setOf(
+        ReplaceInstruction(
+            owner = "android.os.Build",
             name = "BRAND",
             descriptor = "Ljava/lang/String;",
             proxyOwner = "github.leavesczy.track.replace.instruction.FieldProxy"
@@ -182,25 +181,25 @@ replaceMethodTrack {
     isEnabled = true
     include = setOf()
     exclude = setOf()
-    val proxyOwner = "github.leavesczy.track.replace.instruction.MethodProxy"
-    methods = setOf(
-        MethodInstruction(
-            owner = "android/telephony/TelephonyManager",
+    val systemMethodProxyOwner = "github.leavesczy.track.replace.instruction.MethodProxy"
+    instructions = setOf(
+        ReplaceInstruction(
+            owner = "android.telephony.TelephonyManager",
             name = "getDeviceId",
             descriptor = "()Ljava/lang/String;",
-            proxyOwner = proxyOwner
+            proxyOwner = systemMethodProxyOwner
         ),
-        MethodInstruction(
-            owner = "android/telephony/TelephonyManager",
+        ReplaceInstruction(
+            owner = "android.telephony.TelephonyManager",
             name = "getImei",
             descriptor = "(I)Ljava/lang/String;",
-            proxyOwner = proxyOwner
+            proxyOwner = systemMethodProxyOwner
         ),
-        MethodInstruction(
-            owner = "android/provider/Settings\$Secure",
+        ReplaceInstruction(
+            owner = "android.provider.Settings\$Secure",
             name = "getString",
             descriptor = "(Landroid/content/ContentResolver;Ljava/lang/String;)Ljava/lang/String;",
-            proxyOwner = proxyOwner
+            proxyOwner = systemMethodProxyOwner
         )
     )
 }

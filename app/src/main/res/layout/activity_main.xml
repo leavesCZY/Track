@@ -41,7 +41,7 @@
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="20dp"
         android:layout_marginVertical="10dp"
-        android:text="Replace Field or Method Track"
+        android:text="Replace Field &amp; Method Track"
         tools:ignore="HardcodedText" />
 
     <Button

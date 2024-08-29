@@ -5,7 +5,6 @@ import com.android.build.api.instrumentation.ClassData
 import github.leavesczy.track.BaseTrackAsmClassVisitorFactory
 import github.leavesczy.track.BaseTrackClassNode
 import github.leavesczy.track.BaseTrackConfigParameters
-import github.leavesczy.track.utils.LogPrint
 import github.leavesczy.track.utils.replaceDotBySlash
 import org.objectweb.asm.ClassVisitor
 
@@ -22,8 +21,8 @@ internal abstract class ReplaceClassAsmClassVisitorFactory :
         nextClassVisitor: ClassVisitor
     ): BaseTrackClassNode {
         return ReplaceClassClassVisitor(
-            config = trackConfig,
-            nextClassVisitor = nextClassVisitor
+            nextClassVisitor = nextClassVisitor,
+            trackConfig = trackConfig
         )
     }
 
@@ -36,9 +35,9 @@ internal abstract class ReplaceClassAsmClassVisitorFactory :
 }
 
 private class ReplaceClassClassVisitor(
-    private val config: ReplaceClassConfig,
-    private val nextClassVisitor: ClassVisitor
-) : BaseTrackClassNode() {
+    private val nextClassVisitor: ClassVisitor,
+    override val trackConfig: ReplaceClassConfig
+) : BaseTrackClassNode(trackConfig = trackConfig) {
 
     override fun visit(
         version: Int,
@@ -53,10 +52,10 @@ private class ReplaceClassClassVisitor(
             access,
             name,
             signature,
-            replaceDotBySlash(className = config.targetClass),
+            replaceDotBySlash(className = trackConfig.targetClass),
             interfaces
         )
-        LogPrint.normal(tag = "ReplaceClassTrack") {
+        nLog {
             "$name 的父类符合 ReplaceClass 规则，完成处理..."
         }
     }

@@ -5,7 +5,6 @@ import com.android.build.api.instrumentation.ClassData
 import github.leavesczy.track.BaseTrackAsmClassVisitorFactory
 import github.leavesczy.track.BaseTrackClassNode
 import github.leavesczy.track.BaseTrackConfigParameters
-import github.leavesczy.track.utils.LogPrint
 import github.leavesczy.track.utils.filterLambda
 import github.leavesczy.track.utils.hasAnnotation
 import github.leavesczy.track.utils.isStatic
@@ -36,7 +35,7 @@ internal abstract class ViewClickAsmClassVisitorFactory :
     ): BaseTrackClassNode {
         return ViewClickClassVisitor(
             nextClassVisitor = nextClassVisitor,
-            config = trackConfig
+            trackConfig = trackConfig
         )
     }
 
@@ -48,8 +47,8 @@ internal abstract class ViewClickAsmClassVisitorFactory :
 
 private class ViewClickClassVisitor(
     private val nextClassVisitor: ClassVisitor,
-    private val config: ViewClickConfig,
-) : BaseTrackClassNode() {
+    override val trackConfig: ViewClickConfig
+) : BaseTrackClassNode(trackConfig = trackConfig) {
 
     private val viewObjectDesc = "Landroid/view/View;"
 
@@ -73,7 +72,7 @@ private class ViewClickClassVisitor(
         val shouldHookMethodList = mutableSetOf<MethodNode>()
         methods.forEach { methodNode ->
             when {
-                methodNode.hasAnnotation(annotationClassName = config.uncheckViewOnClickAnnotation) -> {
+                methodNode.hasAnnotation(annotationClassName = trackConfig.uncheckViewOnClickAnnotation) -> {
 
                 }
 
@@ -101,7 +100,7 @@ private class ViewClickClassVisitor(
             shouldHookMethodList.forEach {
                 hookMethod(modeNode = it)
             }
-            LogPrint.normal(tag = "ViewClickTrack") {
+            nLog {
                 "$name 发现 ${shouldHookMethodList.size} 个 View.OnClickListener 指令，完成处理..."
             }
         }
@@ -129,8 +128,8 @@ private class ViewClickClassVisitor(
                 list.add(
                     MethodInsnNode(
                         Opcodes.INVOKESTATIC,
-                        replaceDotBySlash(className = config.onClickClass),
-                        config.onClickMethodName,
+                        replaceDotBySlash(className = trackConfig.onClickClass),
+                        trackConfig.onClickMethodName,
                         proxyOnClickMethodDesc
                     )
                 )

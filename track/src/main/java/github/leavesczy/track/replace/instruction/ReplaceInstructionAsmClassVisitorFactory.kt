@@ -1,4 +1,4 @@
-package github.leavesczy.track.replace.method
+package github.leavesczy.track.replace.instruction
 
 import com.android.build.api.instrumentation.ClassContext
 import com.android.build.api.instrumentation.ClassData
@@ -17,31 +17,30 @@ import org.objectweb.asm.tree.ClassNode
  * @Github: https://github.com/leavesCZY
  * @Desc:
  */
-internal abstract class ReplaceMethodAsmClassVisitorFactory :
-    BaseTrackAsmClassVisitorFactory<BaseTrackConfigParameters, ReplaceMethodConfig> {
+internal abstract class ReplaceInstructionAsmClassVisitorFactory :
+    BaseTrackAsmClassVisitorFactory<BaseTrackConfigParameters, ReplaceInstructionConfig> {
 
     override fun createClassVisitor(
         classContext: ClassContext,
         nextClassVisitor: ClassVisitor
     ): BaseTrackClassNode {
-        return ReplaceMethodClassVisitor(
-            config = trackConfig,
-            nextClassVisitor = nextClassVisitor
+        return ReplaceInstructionClassVisitor(
+            nextClassVisitor = nextClassVisitor,
+            trackConfig = trackConfig
         )
     }
 
     override fun isTrackEnabled(classData: ClassData): Boolean {
-        return trackConfig.methods.find {
-            it.proxyOwner == classData.className
-        } == null
+        val className = classData.className
+        return trackConfig.instructions.find { it.proxyOwner == className } == null
     }
 
 }
 
-private class ReplaceMethodClassVisitor(
-    private val config: ReplaceMethodConfig,
-    private val nextClassVisitor: ClassVisitor
-) : BaseTrackClassNode() {
+private class ReplaceInstructionClassVisitor(
+    private val nextClassVisitor: ClassVisitor,
+    override val trackConfig: ReplaceInstructionConfig
+) : BaseTrackClassNode(trackConfig = trackConfig) {
 
     override fun visitEnd() {
         super.visitEnd()
@@ -56,22 +55,42 @@ private class ReplaceMethodClassVisitor(
         exceptions: Array<out String>?
     ): MethodVisitor {
         val methodVisitor = super.visitMethod(access, name, descriptor, signature, exceptions)
-        return ReplaceMethodMethodVisitor(
+        return ReplaceInstructionMethodVisitor(
             api = api,
             methodVisitor = methodVisitor,
             classNode = this,
-            config = config
+            config = trackConfig
         )
     }
 
 }
 
-private class ReplaceMethodMethodVisitor(
+private class ReplaceInstructionMethodVisitor(
     api: Int,
     methodVisitor: MethodVisitor,
     private val classNode: ClassNode,
-    private val config: ReplaceMethodConfig
+    private val config: ReplaceInstructionConfig
 ) : MethodVisitor(api, methodVisitor) {
+
+    override fun visitFieldInsn(
+        opcode: Int,
+        owner: String?,
+        name: String?,
+        descriptor: String?
+    ) {
+        val find = config.instructions.find {
+            it.owner == owner && it.name == name && (it.descriptor.isEmpty() || it.descriptor == descriptor)
+        }
+        if (find != null && opcode == Opcodes.GETSTATIC) {
+            val proxyOwner = replaceDotBySlash(className = find.proxyOwner)
+            super.visitFieldInsn(opcode, proxyOwner, name, descriptor)
+            LogPrint.normal(tag = config.extensionName) {
+                "${classNode.name} 发现符合规则的指令：$owner $name $descriptor , 替换为 $proxyOwner $name $descriptor ，完成处理..."
+            }
+        } else {
+            super.visitFieldInsn(opcode, owner, name, descriptor)
+        }
+    }
 
     override fun visitMethodInsn(
         opcode: Int,
@@ -80,8 +99,8 @@ private class ReplaceMethodMethodVisitor(
         descriptor: String,
         isInterface: Boolean
     ) {
-        val find = config.methods.find {
-            it.owner == owner && it.name == name && it.descriptor == descriptor
+        val find = config.instructions.find {
+            it.owner == owner && it.name == name && (it.descriptor.isEmpty() || it.descriptor == descriptor)
         }
         val mOpcode: Int
         val mOwner: String
@@ -95,7 +114,7 @@ private class ReplaceMethodMethodVisitor(
                 mOpcode = opcode
                 mDescriptor = descriptor
             }
-            LogPrint.normal(tag = "ReplaceMethodTrack") {
+            LogPrint.normal(tag = config.extensionName) {
                 "${classNode.name} 发现符合规则的指令：$owner $name $descriptor , 替换为 $mOwner $name $mDescriptor ，完成处理..."
             }
         } else {

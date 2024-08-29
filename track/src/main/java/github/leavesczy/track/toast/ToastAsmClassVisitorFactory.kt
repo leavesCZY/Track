@@ -5,7 +5,6 @@ import com.android.build.api.instrumentation.ClassData
 import github.leavesczy.track.BaseTrackAsmClassVisitorFactory
 import github.leavesczy.track.BaseTrackClassNode
 import github.leavesczy.track.BaseTrackConfigParameters
-import github.leavesczy.track.utils.LogPrint
 import github.leavesczy.track.utils.replaceDotBySlash
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.Opcodes
@@ -25,8 +24,8 @@ internal abstract class ToastAsmClassVisitorFactory :
         nextClassVisitor: ClassVisitor
     ): BaseTrackClassNode {
         return ToastClassVisitor(
-            config = trackConfig,
-            nextClassVisitor = nextClassVisitor
+            nextClassVisitor = nextClassVisitor,
+            trackConfig = trackConfig
         )
     }
 
@@ -37,9 +36,9 @@ internal abstract class ToastAsmClassVisitorFactory :
 }
 
 private class ToastClassVisitor(
-    private val config: ToastConfig,
-    private val nextClassVisitor: ClassVisitor
-) : BaseTrackClassNode() {
+    private val nextClassVisitor: ClassVisitor,
+    override val trackConfig: ToastConfig
+) : BaseTrackClassNode(trackConfig = trackConfig) {
 
     private val toastClassDesc = "android/widget/Toast"
 
@@ -65,15 +64,15 @@ private class ToastClassVisitor(
         if (toastMethodInsnNodeList.isNotEmpty()) {
             toastMethodInsnNodeList.forEach {
                 it.opcode = Opcodes.INVOKESTATIC
-                it.owner = replaceDotBySlash(className = config.toasterClass)
-                it.name = config.showToastMethodName
+                it.owner = replaceDotBySlash(className = trackConfig.toasterClass)
+                it.name = trackConfig.showToastMethodName
                 it.desc = Type.getMethodDescriptor(
                     Type.VOID_TYPE,
                     Type.getObjectType(toastClassDesc)
                 )
                 it.itf = false
             }
-            LogPrint.normal(tag = "ToastTrack") {
+            nLog {
                 name + " 发现 ${toastMethodInsnNodeList.size} 个 Toast.show 指令，完成处理..."
             }
         }

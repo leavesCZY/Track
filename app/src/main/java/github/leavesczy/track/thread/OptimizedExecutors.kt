@@ -22,35 +22,27 @@ internal object OptimizedExecutors {
 
     @JvmStatic
     @JvmOverloads
-    fun newSingleThreadExecutor(
-        threadFactory: ThreadFactory? = null,
-        className: String
-    ): ExecutorService {
+    fun newSingleThreadExecutor(threadFactory: ThreadFactory? = null): ExecutorService {
         return getOptimizedExecutorService(
             corePoolSize = 1,
             maximumPoolSize = 1,
             keepAliveTime = 0L,
             unit = TimeUnit.MILLISECONDS,
             workQueue = LinkedBlockingQueue(),
-            threadFactory = threadFactory,
-            className = className
+            threadFactory = threadFactory
         )
     }
 
     @JvmStatic
     @JvmOverloads
-    fun newCachedThreadPool(
-        threadFactory: ThreadFactory? = null,
-        className: String
-    ): ExecutorService {
+    fun newCachedThreadPool(threadFactory: ThreadFactory? = null): ExecutorService {
         return getOptimizedExecutorService(
             corePoolSize = 0,
             maximumPoolSize = Integer.MAX_VALUE,
             keepAliveTime = 60L,
             unit = TimeUnit.SECONDS,
             workQueue = SynchronousQueue(),
-            threadFactory = threadFactory,
-            className = className
+            threadFactory = threadFactory
         )
     }
 
@@ -58,8 +50,7 @@ internal object OptimizedExecutors {
     @JvmOverloads
     fun newFixedThreadPool(
         corePoolSize: Int,
-        threadFactory: ThreadFactory? = null,
-        className: String
+        threadFactory: ThreadFactory? = null
     ): ExecutorService {
         return getOptimizedExecutorService(
             corePoolSize = corePoolSize,
@@ -67,8 +58,7 @@ internal object OptimizedExecutors {
             keepAliveTime = 0L,
             unit = TimeUnit.MILLISECONDS,
             workQueue = LinkedBlockingQueue(),
-            threadFactory = threadFactory,
-            className = className
+            threadFactory = threadFactory
         )
     }
 
@@ -76,26 +66,20 @@ internal object OptimizedExecutors {
     @JvmOverloads
     fun newScheduledThreadPool(
         corePoolSize: Int,
-        threadFactory: ThreadFactory? = null,
-        className: String
+        threadFactory: ThreadFactory? = null
     ): ScheduledExecutorService {
         return getOptimizedScheduledExecutorService(
             corePoolSize = corePoolSize,
-            threadFactory = threadFactory,
-            className = className
+            threadFactory = threadFactory
         )
     }
 
     @JvmStatic
     @JvmOverloads
-    fun newSingleThreadScheduledExecutor(
-        threadFactory: ThreadFactory? = null,
-        className: String
-    ): ScheduledExecutorService {
+    fun newSingleThreadScheduledExecutor(threadFactory: ThreadFactory? = null): ScheduledExecutorService {
         return newScheduledThreadPool(
             corePoolSize = 1,
-            threadFactory = threadFactory,
-            className = className
+            threadFactory = threadFactory
         )
     }
 
@@ -105,14 +89,13 @@ internal object OptimizedExecutors {
         keepAliveTime: Long,
         unit: TimeUnit,
         workQueue: BlockingQueue<Runnable>,
-        threadFactory: ThreadFactory?,
-        className: String
+        threadFactory: ThreadFactory?
     ): ExecutorService {
         val executor = ThreadPoolExecutor(
             corePoolSize, maximumPoolSize,
             keepAliveTime, unit,
             workQueue,
-            NamedThreadFactory(threadFactory, className)
+            NamedThreadFactory(threadFactory)
         )
         executor.setKeepAliveTime(DEFAULT_THREAD_KEEP_ALIVE_TIME, TimeUnit.MILLISECONDS)
         executor.allowCoreThreadTimeOut(true)
@@ -121,12 +104,11 @@ internal object OptimizedExecutors {
 
     private fun getOptimizedScheduledExecutorService(
         corePoolSize: Int,
-        threadFactory: ThreadFactory?,
-        className: String
+        threadFactory: ThreadFactory?
     ): ScheduledExecutorService {
         val executor = ScheduledThreadPoolExecutor(
             corePoolSize,
-            NamedThreadFactory(threadFactory, className)
+            NamedThreadFactory(threadFactory)
         )
         executor.setKeepAliveTime(DEFAULT_THREAD_KEEP_ALIVE_TIME, TimeUnit.MILLISECONDS)
         executor.allowCoreThreadTimeOut(true)
@@ -134,8 +116,7 @@ internal object OptimizedExecutors {
     }
 
     private class NamedThreadFactory(
-        private val threadFactory: ThreadFactory?,
-        private val className: String
+        private val threadFactory: ThreadFactory?
     ) : ThreadFactory {
 
         private val threadId = AtomicInteger(0)
@@ -143,8 +124,6 @@ internal object OptimizedExecutors {
         override fun newThread(runnable: Runnable): Thread {
             val thread = threadFactory?.newThread(runnable) ?: Thread(runnable)
             val threadName = buildString {
-                append("[className : $className]")
-                append(" - ")
                 append("[threadId : ${threadId.getAndIncrement()}]")
                 append(" - ")
                 append("[threadName : ${thread.name}]")

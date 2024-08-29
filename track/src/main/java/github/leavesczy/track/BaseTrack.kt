@@ -4,6 +4,7 @@ import com.android.build.api.instrumentation.AsmClassVisitorFactory
 import com.android.build.api.instrumentation.ClassContext
 import com.android.build.api.instrumentation.ClassData
 import com.android.build.api.instrumentation.InstrumentationParameters
+import github.leavesczy.track.utils.LogPrint
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.objectweb.asm.ClassVisitor
@@ -16,7 +17,14 @@ import java.io.Serializable
  * @Date: 2024/8/25 1:56
  * @Desc:
  */
-internal open class BaseTrackClassNode : ClassNode(Opcodes.ASM7)
+internal abstract class BaseTrackClassNode(protected open val trackConfig: BaseTrackConfig) :
+    ClassNode(Opcodes.ASM7) {
+
+    fun nLog(msg: () -> Any) {
+        LogPrint.normal(tag = trackConfig.extensionName, msg = msg)
+    }
+
+}
 
 internal interface BaseTrackConfig : Serializable {
 
@@ -25,6 +33,8 @@ internal interface BaseTrackConfig : Serializable {
     val include: Set<String>
 
     val exclude: Set<String>
+
+    val extensionName: String
 
 }
 

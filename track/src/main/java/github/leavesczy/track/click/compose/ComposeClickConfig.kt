@@ -6,13 +6,17 @@ internal data class ComposeClickConfig(
     override val isEnabled: Boolean,
     override val include: Set<String>,
     override val exclude: Set<String>,
+    override val extensionName: String,
     val onClickClass: String,
     val onClickWhiteList: String
 ) : BaseTrackConfig {
 
     companion object {
 
-        operator fun invoke(pluginParameter: ComposeClickPluginParameter): ComposeClickConfig? {
+        operator fun invoke(
+            pluginParameter: ComposeClickPluginParameter,
+            extensionName: String
+        ): ComposeClickConfig? {
             val onClickClass = pluginParameter.onClickClass
             val onClickWhiteList = pluginParameter.onClickWhiteList
             return if (onClickClass.isBlank()) {
@@ -22,6 +26,7 @@ internal data class ComposeClickConfig(
                     isEnabled = pluginParameter.isEnabled,
                     include = emptySet(),
                     exclude = emptySet(),
+                    extensionName = extensionName,
                     onClickClass = onClickClass,
                     onClickWhiteList = onClickWhiteList
                 )
