@@ -31,8 +31,7 @@ internal abstract class ReplaceInstructionAsmClassVisitorFactory :
     }
 
     override fun isTrackEnabled(classData: ClassData): Boolean {
-        val className = classData.className
-        return trackConfig.instructions.find { it.proxyOwner == className } == null
+        return trackConfig.instructions.find { it.proxyOwner == classData.className } == null
     }
 
 }

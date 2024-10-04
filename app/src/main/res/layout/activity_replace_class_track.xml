@@ -14,7 +14,7 @@
         android:src="@drawable/icon_dog"
         tools:ignore="ContentDescription" />
 
-    <github.leavesczy.track.replace.clazz.CustomStyleImageView
+    <github.leavesczy.track.replace.clazz.CustomImageView
         android:layout_width="160dp"
         android:layout_height="160dp"
         android:layout_margin="10dp"

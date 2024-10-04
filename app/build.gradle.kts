@@ -137,16 +137,15 @@ toastTrack {
     isEnabled = true
     include = setOf()
     exclude = setOf()
-    toasterClass = "github.leavesczy.track.toast.Toaster"
-    showToastMethodName = "showToast"
+    proxyOwner = "github.leavesczy.track.toast.ToastProxy"
 }
 
 optimizedThreadTrack {
     isEnabled = true
     include = setOf()
     exclude = setOf()
-    optimizedExecutorsClass = "github.leavesczy.track.thread.OptimizedExecutors"
-    executorsMethods = setOf(
+    proxyOwner = "github.leavesczy.track.thread.OptimizedExecutors"
+    methods = setOf(
         "newSingleThreadExecutor",
         "newCachedThreadPool",
         "newFixedThreadPool",
@@ -172,7 +171,7 @@ replaceFieldTrack {
             owner = "android.os.Build",
             name = "BRAND",
             descriptor = "Ljava/lang/String;",
-            proxyOwner = "github.leavesczy.track.replace.instruction.FieldProxy"
+            proxyOwner = "github.leavesczy.track.replace.instruction.SystemFieldProxy"
         )
     )
 }
@@ -181,7 +180,7 @@ replaceMethodTrack {
     isEnabled = true
     include = setOf()
     exclude = setOf()
-    val systemMethodProxyOwner = "github.leavesczy.track.replace.instruction.MethodProxy"
+    val systemMethodProxyOwner = "github.leavesczy.track.replace.instruction.SystemMethodProxy"
     instructions = setOf(
         ReplaceInstruction(
             owner = "android.telephony.TelephonyManager",

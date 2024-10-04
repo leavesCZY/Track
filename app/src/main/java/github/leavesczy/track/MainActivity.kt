@@ -28,17 +28,17 @@ class MainActivity : AppCompatActivity() {
         findViewById<View>(R.id.btnComposeClickTrack).setOnClickListener {
             startActivity<ComposeClickTrackActivity>()
         }
-        findViewById<View>(R.id.btnReplaceClassTrack).setOnClickListener {
-            startActivity<ReplaceClassTrackActivity>()
-        }
-        findViewById<View>(R.id.btnReplaceInstructionTrack).setOnClickListener {
-            startActivity<ReplaceInstructionTrackActivity>()
-        }
         findViewById<View>(R.id.btnToastTrack).setOnClickListener {
             startActivity<ToastTrackActivity>()
         }
         findViewById<View>(R.id.btnOptimizedThreadTrack).setOnClickListener {
             startActivity<OptimizedThreadTrackActivity>()
+        }
+        findViewById<View>(R.id.btnReplaceClassTrack).setOnClickListener {
+            startActivity<ReplaceClassTrackActivity>()
+        }
+        findViewById<View>(R.id.btnReplaceInstructionTrack).setOnClickListener {
+            startActivity<ReplaceInstructionTrackActivity>()
         }
     }
 

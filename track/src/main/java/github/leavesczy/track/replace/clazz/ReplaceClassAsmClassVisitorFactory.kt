@@ -27,9 +27,11 @@ internal abstract class ReplaceClassAsmClassVisitorFactory :
     }
 
     override fun isTrackEnabled(classData: ClassData): Boolean {
-        val className = classData.className
         val superClasses = classData.superClasses
-        return !(className == trackConfig.targetClass || superClasses.first() != trackConfig.originClass)
+        if (classData.className == trackConfig.targetClass || superClasses.isEmpty()) {
+            return false
+        }
+        return superClasses.first() == trackConfig.originClass
     }
 
 }
@@ -55,8 +57,8 @@ private class ReplaceClassClassVisitor(
             replaceDotBySlash(className = trackConfig.targetClass),
             interfaces
         )
-        nLog {
-            "$name 的父类符合 ReplaceClass 规则，完成处理..."
+        log {
+            "$name 的父类符合规则，完成处理..."
         }
     }
 

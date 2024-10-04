@@ -18,7 +18,7 @@ class ComposeOnClick(private val onClick: () -> Unit) : Function0<Unit> {
 
     override fun invoke() {
         val currentTime = SystemClock.elapsedRealtime()
-        val isEnabled = currentTime - lastClickTime > 300
+        val isEnabled = currentTime - lastClickTime > 500
         log("onClick isEnabled : $isEnabled")
         if (isEnabled) {
             lastClickTime = currentTime

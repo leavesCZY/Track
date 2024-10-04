@@ -64,11 +64,11 @@ private class ViewClickClassVisitor(
 
     override fun visitEnd() {
         super.visitEnd()
-        hook()
+        handleViewClick()
         accept(nextClassVisitor)
     }
 
-    private fun hook() {
+    private fun handleViewClick() {
         val shouldHookMethodList = mutableSetOf<MethodNode>()
         methods.forEach { methodNode ->
             when {
@@ -100,7 +100,7 @@ private class ViewClickClassVisitor(
             shouldHookMethodList.forEach {
                 hookMethod(modeNode = it)
             }
-            nLog {
+            log {
                 "$name 发现 ${shouldHookMethodList.size} 个 View.OnClickListener 指令，完成处理..."
             }
         }

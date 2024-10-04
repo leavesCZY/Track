@@ -36,6 +36,15 @@
         tools:ignore="HardcodedText" />
 
     <Button
+        android:id="@+id/btnOptimizedThreadTrack"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginVertical="10dp"
+        android:text="OptimizedThreadTrack"
+        tools:ignore="HardcodedText" />
+
+    <Button
         android:id="@+id/btnReplaceClassTrack"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -51,15 +60,6 @@
         android:layout_marginHorizontal="20dp"
         android:layout_marginVertical="10dp"
         android:text="Replace Field &amp; Method Track"
-        tools:ignore="HardcodedText" />
-
-    <Button
-        android:id="@+id/btnOptimizedThreadTrack"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="20dp"
-        android:layout_marginVertical="10dp"
-        android:text="OptimizedThreadTrack"
         tools:ignore="HardcodedText" />
 
 </LinearLayout>

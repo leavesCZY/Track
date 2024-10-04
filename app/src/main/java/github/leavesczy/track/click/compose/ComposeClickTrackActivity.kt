@@ -9,11 +9,8 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
@@ -63,14 +60,9 @@ class ComposeClickTrackActivity : AppCompatActivity() {
                         ) {
                             Text(
                                 modifier = Modifier
-                                    .padding(all = 10.dp),
+                                    .padding(all = 15.dp),
                                 text = index.toString(),
                                 fontSize = 22.sp
-                            )
-                            Spacer(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(height = 60.dp)
                             )
                             Text(
                                 modifier = Modifier
@@ -90,11 +82,6 @@ class ComposeClickTrackActivity : AppCompatActivity() {
                                     )
                                     .padding(all = 15.dp),
                                 text = "Text combinedClickable 不防抖"
-                            )
-                            Spacer(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(height = 60.dp)
                             )
                             Text(
                                 modifier = Modifier

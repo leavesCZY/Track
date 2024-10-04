@@ -9,33 +9,7 @@ internal data class ComposeClickConfig(
     override val extensionName: String,
     val onClickClass: String,
     val onClickWhiteList: String
-) : BaseTrackConfig {
-
-    companion object {
-
-        operator fun invoke(
-            pluginParameter: ComposeClickPluginParameter,
-            extensionName: String
-        ): ComposeClickConfig? {
-            val onClickClass = pluginParameter.onClickClass
-            val onClickWhiteList = pluginParameter.onClickWhiteList
-            return if (onClickClass.isBlank()) {
-                null
-            } else {
-                ComposeClickConfig(
-                    isEnabled = pluginParameter.isEnabled,
-                    include = emptySet(),
-                    exclude = emptySet(),
-                    extensionName = extensionName,
-                    onClickClass = onClickClass,
-                    onClickWhiteList = onClickWhiteList
-                )
-            }
-        }
-
-    }
-
-}
+) : BaseTrackConfig
 
 open class ComposeClickPluginParameter(
     var isEnabled: Boolean = true,

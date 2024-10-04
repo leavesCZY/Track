@@ -11,7 +11,7 @@ import android.widget.ImageView
  * @Desc:
  */
 @SuppressLint("AppCompatCustomView")
-class CustomImageView @JvmOverloads constructor(
+class IgnoreImageView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0,

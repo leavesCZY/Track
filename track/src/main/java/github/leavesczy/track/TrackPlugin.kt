@@ -16,10 +16,10 @@ import github.leavesczy.track.replace.clazz.ReplaceClassPluginParameter
 import github.leavesczy.track.replace.instruction.OptimizedThreadPluginParameter
 import github.leavesczy.track.replace.instruction.ReplaceInstructionAsmClassVisitorFactory
 import github.leavesczy.track.replace.instruction.ReplaceInstructionConfig
+import github.leavesczy.track.replace.instruction.ReplaceInstructionConfig.ReplaceInstructionParameter
 import github.leavesczy.track.replace.instruction.ReplaceInstructionPluginParameter
-import github.leavesczy.track.toast.ToastAsmClassVisitorFactory
-import github.leavesczy.track.toast.ToastConfig
-import github.leavesczy.track.toast.ToastPluginParameter
+import github.leavesczy.track.replace.instruction.ToastPluginParameter
+import github.leavesczy.track.utils.replaceDotBySlash
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 
@@ -79,12 +79,12 @@ class TrackPlugin : Plugin<Project> {
         androidComponents.onVariants { variant ->
             handleViewClickTrack(project = project, variant = variant)
             handleComposeClickTrack(project = project, variant = variant)
-            handleToastTrack(project = project, variant = variant)
             handleReplaceClassTrack(project = project, variant = variant)
             handleOptimizedThreadTrack(
                 project = project,
                 variant = variant
             )
+            handleToastTrack(project = project, variant = variant)
             handleReplaceInstructionTrack(
                 project = project,
                 variant = variant,
@@ -101,67 +101,52 @@ class TrackPlugin : Plugin<Project> {
 
     private fun handleViewClickTrack(project: Project, variant: Variant) {
         val pluginParameter = project.extensions.findByType(ViewClickPluginParameter::class.java)
-        val config = if (pluginParameter == null) {
-            null
-        } else {
-            ViewClickConfig(
-                pluginParameter = pluginParameter,
-                extensionName = viewClickTrack
-            )
+        val onClickClass = pluginParameter?.onClickClass
+        val onClickMethodName = pluginParameter?.onClickMethodName
+        if (onClickClass.isNullOrBlank() || onClickMethodName.isNullOrBlank()) {
+            return
         }
-        if (config != null) {
-            variant.instrumentation.apply {
-                transformClassesWith(
-                    ViewClickAsmClassVisitorFactory::class.java,
-                    InstrumentationScope.ALL
-                ) { params ->
-                    params.trackConfig.set(config)
-                }
+        variant.instrumentation.apply {
+            transformClassesWith(
+                ViewClickAsmClassVisitorFactory::class.java,
+                InstrumentationScope.ALL
+            ) { params ->
+                params.trackConfig.set(
+                    ViewClickConfig(
+                        isEnabled = pluginParameter.isEnabled,
+                        include = pluginParameter.include,
+                        exclude = pluginParameter.exclude,
+                        extensionName = viewClickTrack,
+                        onClickClass = onClickClass,
+                        onClickMethodName = onClickMethodName,
+                        uncheckViewOnClickAnnotation = pluginParameter.uncheckViewOnClickAnnotation
+                    )
+                )
             }
         }
     }
 
     private fun handleComposeClickTrack(project: Project, variant: Variant) {
         val pluginParameter = project.extensions.findByType(ComposeClickPluginParameter::class.java)
-        val config = if (pluginParameter == null) {
-            null
-        } else {
-            ComposeClickConfig(
-                pluginParameter = pluginParameter,
-                extensionName = composeClickTrack
-            )
+        val onClickClass = pluginParameter?.onClickClass
+        if (onClickClass.isNullOrBlank()) {
+            return
         }
-        if (config != null) {
-            variant.instrumentation.apply {
-                transformClassesWith(
-                    ComposeClickAsmClassVisitorFactory::class.java,
-                    InstrumentationScope.ALL
-                ) { params ->
-                    params.trackConfig.set(config)
-                }
-            }
-        }
-    }
-
-    private fun handleToastTrack(project: Project, variant: Variant) {
-        val pluginParameter =
-            project.extensions.findByType(ToastPluginParameter::class.java)
-        val config = if (pluginParameter == null) {
-            null
-        } else {
-            ToastConfig(
-                pluginParameter = pluginParameter,
-                extensionName = toastTrack
-            )
-        }
-        if (config != null) {
-            variant.instrumentation.apply {
-                transformClassesWith(
-                    ToastAsmClassVisitorFactory::class.java,
-                    InstrumentationScope.ALL
-                ) { params ->
-                    params.trackConfig.set(config)
-                }
+        variant.instrumentation.apply {
+            transformClassesWith(
+                ComposeClickAsmClassVisitorFactory::class.java,
+                InstrumentationScope.ALL
+            ) { params ->
+                params.trackConfig.set(
+                    ComposeClickConfig(
+                        isEnabled = pluginParameter.isEnabled,
+                        include = emptySet(),
+                        exclude = emptySet(),
+                        extensionName = composeClickTrack,
+                        onClickClass = onClickClass,
+                        onClickWhiteList = pluginParameter.onClickWhiteList
+                    )
+                )
             }
         }
     }
@@ -169,24 +154,52 @@ class TrackPlugin : Plugin<Project> {
     private fun handleReplaceClassTrack(project: Project, variant: Variant) {
         val pluginParameter =
             project.extensions.findByType(ReplaceClassPluginParameter::class.java)
-        val config = if (pluginParameter == null) {
-            null
-        } else {
-            ReplaceClassConfig(
-                pluginParameter = pluginParameter,
-                extensionName = replaceClassTrack
-            )
+        val originClass = pluginParameter?.originClass
+        val targetClass = pluginParameter?.targetClass
+        if (originClass.isNullOrBlank() || targetClass.isNullOrBlank()) {
+            return
         }
-        if (config != null) {
-            variant.instrumentation.apply {
-                transformClassesWith(
-                    ReplaceClassAsmClassVisitorFactory::class.java,
-                    InstrumentationScope.ALL
-                ) { params ->
-                    params.trackConfig.set(config)
-                }
+        variant.instrumentation.apply {
+            transformClassesWith(
+                ReplaceClassAsmClassVisitorFactory::class.java,
+                InstrumentationScope.ALL
+            ) { params ->
+                params.trackConfig.set(
+                    ReplaceClassConfig(
+                        isEnabled = pluginParameter.isEnabled,
+                        include = pluginParameter.include,
+                        exclude = pluginParameter.exclude,
+                        extensionName = replaceClassTrack,
+                        originClass = originClass,
+                        targetClass = targetClass
+                    )
+                )
             }
         }
+    }
+
+    private fun handleToastTrack(project: Project, variant: Variant) {
+        val pluginParameter =
+            project.extensions.findByType(ToastPluginParameter::class.java)
+        val proxyOwner = pluginParameter?.proxyOwner
+        if (proxyOwner.isNullOrBlank()) {
+            return
+        }
+        handleReplaceInstructionTrack(
+            variant = variant,
+            extensionName = toastTrack,
+            isEnabled = pluginParameter.isEnabled,
+            include = pluginParameter.include,
+            exclude = pluginParameter.exclude,
+            instructions = setOf(
+                element = ReplaceInstructionParameter(
+                    owner = "android/widget/Toast",
+                    name = "show",
+                    descriptor = "()V",
+                    proxyOwner = proxyOwner
+                )
+            )
+        )
     }
 
     private fun handleOptimizedThreadTrack(
@@ -195,20 +208,26 @@ class TrackPlugin : Plugin<Project> {
     ) {
         val pluginParameter =
             project.extensions.findByType(OptimizedThreadPluginParameter::class.java)
-        val config = if (pluginParameter == null) {
-            null
-        } else {
-            ReplaceInstructionConfig(
-                pluginParameter = pluginParameter,
-                extensionName = optimizedThreadTrack
-            )
+        val proxyOwner = pluginParameter?.proxyOwner
+        val methods = pluginParameter?.methods
+        if (proxyOwner.isNullOrBlank() || methods.isNullOrEmpty()) {
+            return
         }
-        if (config != null) {
-            handleReplaceInstructionTrack(
-                variant = variant,
-                config = config
-            )
-        }
+        handleReplaceInstructionTrack(
+            variant = variant,
+            extensionName = optimizedThreadTrack,
+            isEnabled = pluginParameter.isEnabled,
+            include = pluginParameter.include,
+            exclude = pluginParameter.exclude,
+            instructions = methods.map {
+                ReplaceInstructionParameter(
+                    owner = "java/util/concurrent/Executors",
+                    name = it,
+                    descriptor = "",
+                    proxyOwner = proxyOwner
+                )
+            }.toSet()
+        )
     }
 
     private fun handleReplaceInstructionTrack(
@@ -218,32 +237,60 @@ class TrackPlugin : Plugin<Project> {
     ) {
         val pluginParameter =
             project.extensions.findByName(extensionName) as? ReplaceInstructionPluginParameter
-        val config = if (pluginParameter == null) {
-            null
-        } else {
-            ReplaceInstructionConfig(
-                pluginParameter = pluginParameter,
-                extensionName = extensionName
-            )
+        val instructions = pluginParameter?.instructions?.mapNotNull {
+            val owner = it.owner
+            val name = it.name
+            val descriptor = it.descriptor
+            val proxyOwner = it.proxyOwner
+            if (owner.isBlank() || name.isBlank() || proxyOwner.isBlank()) {
+                null
+            } else {
+                ReplaceInstructionParameter(
+                    owner = replaceDotBySlash(className = owner),
+                    name = name,
+                    descriptor = descriptor,
+                    proxyOwner = proxyOwner
+                )
+            }
+        }?.toSet()
+        if (instructions.isNullOrEmpty()) {
+            return
         }
-        if (config != null) {
-            handleReplaceInstructionTrack(
-                variant = variant,
-                config = config
-            )
-        }
+        handleReplaceInstructionTrack(
+            variant = variant,
+            extensionName = extensionName,
+            isEnabled = pluginParameter.isEnabled,
+            include = pluginParameter.include,
+            exclude = pluginParameter.exclude,
+            instructions = instructions
+        )
     }
 
     private fun handleReplaceInstructionTrack(
         variant: Variant,
-        config: ReplaceInstructionConfig
+        extensionName: String,
+        isEnabled: Boolean,
+        include: Set<String>,
+        exclude: Set<String>,
+        instructions: Set<ReplaceInstructionParameter>
     ) {
+        if (instructions.isEmpty()) {
+            return
+        }
         variant.instrumentation.apply {
             transformClassesWith(
                 ReplaceInstructionAsmClassVisitorFactory::class.java,
                 InstrumentationScope.ALL
             ) { params ->
-                params.trackConfig.set(config)
+                params.trackConfig.set(
+                    ReplaceInstructionConfig(
+                        isEnabled = isEnabled,
+                        include = include,
+                        exclude = exclude,
+                        extensionName = extensionName,
+                        instructions = instructions
+                    )
+                )
             }
         }
     }

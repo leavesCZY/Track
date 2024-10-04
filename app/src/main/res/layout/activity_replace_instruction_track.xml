@@ -6,12 +6,12 @@
     android:orientation="vertical">
 
     <Button
-        android:id="@+id/btnTest"
+        android:id="@+id/btnSystemInstructions"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="20dp"
         android:layout_marginVertical="5dp"
-        android:text="Test"
+        android:text="输出指定字段 &amp; 指定方法的返回值"
         android:textAllCaps="false"
         tools:ignore="HardcodedText" />
 
@@ -21,7 +21,7 @@
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="20dp"
         android:layout_marginVertical="5dp"
-        android:text="ProxyIsEnabled"
+        android:text="是否替换"
         android:textAllCaps="false"
         tools:ignore="HardcodedText" />
 

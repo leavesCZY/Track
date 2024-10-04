@@ -25,12 +25,12 @@ class ReplaceInstructionTrackActivity : AppCompatActivity() {
 
     }
 
-    private val btnProxyIsEnabled by lazy {
-        findViewById<Button>(R.id.btnProxyIsEnabled)
+    private val btnSystemInstructions by lazy {
+        findViewById<Button>(R.id.btnSystemInstructions)
     }
 
-    private val btnTest by lazy {
-        findViewById<Button>(R.id.btnTest)
+    private val btnProxyIsEnabled by lazy {
+        findViewById<Button>(R.id.btnProxyIsEnabled)
     }
 
     private val tvLog by lazy {
@@ -47,7 +47,7 @@ class ReplaceInstructionTrackActivity : AppCompatActivity() {
             isProxyEnabled = !isProxyEnabled
             onProxyEnabledChanged()
         }
-        btnTest.setOnClickListener {
+        btnSystemInstructions.setOnClickListener {
             val log = buildString {
                 append("DeviceId: " + getDeviceId(context = this@ReplaceInstructionTrackActivity))
                 append("\n")
@@ -62,14 +62,14 @@ class ReplaceInstructionTrackActivity : AppCompatActivity() {
     }
 
     private fun onProxyEnabledChanged() {
-        FieldProxy.onProxyEnabledChanged()
-        btnProxyIsEnabled.text = "ProxyIsEnabled : $isProxyEnabled"
+        SystemFieldProxy.onProxyEnabledChanged()
+        btnProxyIsEnabled.text = "是否替换 : $isProxyEnabled"
     }
 
     private fun getDeviceId(context: Context): String {
         return try {
             val telephonyManager =
-                context.getSystemService(android.app.Service.TELEPHONY_SERVICE) as? TelephonyManager
+                context.getSystemService(TELEPHONY_SERVICE) as? TelephonyManager
             telephonyManager?.deviceId ?: ""
         } catch (throwable: Throwable) {
             throwable.printStackTrace()
@@ -80,7 +80,7 @@ class ReplaceInstructionTrackActivity : AppCompatActivity() {
     private fun getImei(context: Context): String {
         return try {
             val telephonyManager =
-                context.getSystemService(android.app.Service.TELEPHONY_SERVICE) as? TelephonyManager
+                context.getSystemService(TELEPHONY_SERVICE) as? TelephonyManager
             telephonyManager?.getImei(1) ?: ""
         } catch (throwable: Throwable) {
             throwable.printStackTrace()

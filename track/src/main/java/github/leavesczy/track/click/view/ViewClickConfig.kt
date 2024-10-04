@@ -15,34 +15,7 @@ internal data class ViewClickConfig(
     val onClickClass: String,
     val onClickMethodName: String,
     val uncheckViewOnClickAnnotation: String
-) : BaseTrackConfig {
-
-    companion object {
-
-        operator fun invoke(
-            pluginParameter: ViewClickPluginParameter,
-            extensionName: String
-        ): ViewClickConfig? {
-            val onClickClass = pluginParameter.onClickClass
-            val onClickMethodName = pluginParameter.onClickMethodName
-            return if (onClickClass.isBlank() || onClickMethodName.isBlank()) {
-                null
-            } else {
-                ViewClickConfig(
-                    isEnabled = pluginParameter.isEnabled,
-                    include = pluginParameter.include,
-                    exclude = pluginParameter.exclude,
-                    extensionName = extensionName,
-                    onClickClass = onClickClass,
-                    onClickMethodName = onClickMethodName,
-                    uncheckViewOnClickAnnotation = pluginParameter.uncheckViewOnClickAnnotation
-                )
-            }
-        }
-
-    }
-
-}
+) : BaseTrackConfig
 
 open class ViewClickPluginParameter(
     var isEnabled: Boolean = true,

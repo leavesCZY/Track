@@ -14,32 +14,7 @@ internal data class ReplaceClassConfig(
     override val extensionName: String,
     val originClass: String,
     val targetClass: String
-) : BaseTrackConfig {
-
-    companion object {
-
-        operator fun invoke(
-            pluginParameter: ReplaceClassPluginParameter,
-            extensionName: String
-        ): ReplaceClassConfig? {
-            val originClass = pluginParameter.originClass
-            val targetClass = pluginParameter.targetClass
-            if (originClass.isBlank() || targetClass.isBlank()) {
-                return null
-            }
-            return ReplaceClassConfig(
-                isEnabled = pluginParameter.isEnabled,
-                include = pluginParameter.include,
-                exclude = pluginParameter.exclude,
-                extensionName = extensionName,
-                originClass = originClass,
-                targetClass = targetClass
-            )
-        }
-
-    }
-
-}
+) : BaseTrackConfig
 
 open class ReplaceClassPluginParameter(
     var isEnabled: Boolean = true,

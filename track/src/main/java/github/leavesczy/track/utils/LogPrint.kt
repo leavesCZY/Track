@@ -7,15 +7,15 @@ package github.leavesczy.track.utils
  */
 internal object LogPrint {
 
-    fun normal(tag: String, msg: () -> Any) {
+    fun normal(tag: String, msg: () -> String) {
         println(buildLog(tag = tag, msg = msg).normal)
     }
 
-    fun error(tag: String, msg: () -> Any) {
+    fun error(tag: String, msg: () -> String) {
         println(buildLog(tag = tag, msg = msg).error)
     }
 
-    private fun buildLog(tag: String, msg: () -> Any): LogUI {
+    private fun buildLog(tag: String, msg: () -> String): LogUI {
         return LogUI(text = "[${tag}]: " + msg())
     }
 

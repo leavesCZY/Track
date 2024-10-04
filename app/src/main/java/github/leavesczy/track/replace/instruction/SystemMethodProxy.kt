@@ -11,7 +11,7 @@ import android.telephony.TelephonyManager
  * @Desc:
  */
 @SuppressLint("MissingPermission", "HardwareIds", "NewApi")
-internal object MethodProxy {
+internal object SystemMethodProxy {
 
     private val isProxyEnabled: Boolean
         get() = ReplaceInstructionTrackActivity.isProxyEnabled

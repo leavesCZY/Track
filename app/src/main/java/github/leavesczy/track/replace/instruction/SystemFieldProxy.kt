@@ -7,7 +7,7 @@ import android.os.Build
  * @Github: https://github.com/leavesCZY
  * @Desc:
  */
-internal object FieldProxy {
+internal object SystemFieldProxy {
 
     @JvmField
     var BRAND = "这是一个假的 BRAND"

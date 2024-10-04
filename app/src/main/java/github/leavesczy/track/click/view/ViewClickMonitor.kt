@@ -19,7 +19,7 @@ internal object ViewClickMonitor {
     fun isEnabled(view: View): Boolean {
         clickIndex++
         val currentTime = SystemClock.elapsedRealtime()
-        val isEnabled = currentTime - lastClickTime > 400L
+        val isEnabled = currentTime - lastClickTime > 500L
         if (isEnabled) {
             lastClickTime = currentTime
         }

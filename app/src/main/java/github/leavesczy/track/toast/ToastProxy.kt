@@ -11,10 +11,10 @@ import android.widget.Toast
  * @Github: https://github.com/leavesCZY
  * @Desc:
  */
-object Toaster {
+object ToastProxy {
 
     @JvmStatic
-    fun showToast(toast: Toast) {
+    fun show(toast: Toast) {
         hookToastIfNeed(toast)
         toast.setText("Toast 内容被修改了 ~")
         toast.show()

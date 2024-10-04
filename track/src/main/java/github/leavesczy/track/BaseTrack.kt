@@ -20,7 +20,7 @@ import java.io.Serializable
 internal abstract class BaseTrackClassNode(protected open val trackConfig: BaseTrackConfig) :
     ClassNode(Opcodes.ASM7) {
 
-    fun nLog(msg: () -> Any) {
+    fun log(msg: () -> String) {
         LogPrint.normal(tag = trackConfig.extensionName, msg = msg)
     }
 
@@ -39,8 +39,10 @@ internal interface BaseTrackConfig : Serializable {
 }
 
 internal interface BaseTrackConfigParameters : InstrumentationParameters {
+
     @get:Input
     val trackConfig: Property<BaseTrackConfig>
+
 }
 
 internal interface BaseTrackAsmClassVisitorFactory<Parameters : BaseTrackConfigParameters, TrackConfig : BaseTrackConfig> :

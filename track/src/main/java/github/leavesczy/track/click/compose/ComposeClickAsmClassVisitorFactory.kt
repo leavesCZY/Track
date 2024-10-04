@@ -25,7 +25,7 @@ import org.objectweb.asm.tree.VarInsnNode
  * @Github: https://github.com/leavesCZY
  * @Desc:
  */
-private const val composeClickClassName = "androidx.compose.foundation.ClickableKt"
+private const val ComposeClickableClassName = "androidx.compose.foundation.ClickableKt"
 
 internal abstract class ComposeClickAsmClassVisitorFactory :
     BaseTrackAsmClassVisitorFactory<BaseTrackConfigParameters, ComposeClickConfig> {
@@ -41,7 +41,7 @@ internal abstract class ComposeClickAsmClassVisitorFactory :
     }
 
     override fun isTrackEnabled(classData: ClassData): Boolean {
-        return classData.className == composeClickClassName
+        return classData.className == ComposeClickableClassName
     }
 
 }
@@ -66,19 +66,19 @@ private class ComposeClickClassVisitor(
     ): MethodVisitor {
         val methodNode =
             super.visitMethod(access, name, descriptor, signature, exceptions) as MethodNode
-        hookComposeClick(methodNode = methodNode)
+        handleComposeClick(methodNode = methodNode)
         return methodNode
     }
 
     override fun visitEnd() {
         super.visitEnd()
-        nLog {
-            "找到 $composeClickClassName 类，完成处理..."
+        log {
+            "找到 $ComposeClickableClassName 类，完成处理..."
         }
         accept(nextClassVisitor)
     }
 
-    private fun hookComposeClick(methodNode: MethodNode) {
+    private fun handleComposeClick(methodNode: MethodNode) {
         val onClickArgumentIndex = when (methodNode.desc) {
             clickableMethodDesc -> {
                 6
