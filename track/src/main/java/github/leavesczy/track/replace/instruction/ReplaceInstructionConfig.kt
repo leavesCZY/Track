@@ -51,11 +51,5 @@ open class OptimizedThreadPluginParameter(
     var include: Set<String> = emptySet(),
     var exclude: Set<String> = emptySet(),
     var proxyOwner: String = "",
-    var methods: Set<String> = setOf(
-        "newSingleThreadExecutor",
-        "newCachedThreadPool",
-        "newFixedThreadPool",
-        "newScheduledThreadPool",
-        "newSingleThreadScheduledExecutor"
-    )
+    var methods: Set<String> = setOf()
 )

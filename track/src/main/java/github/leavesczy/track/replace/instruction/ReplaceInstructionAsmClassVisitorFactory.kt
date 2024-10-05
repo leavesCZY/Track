@@ -6,7 +6,7 @@ import github.leavesczy.track.BaseTrackAsmClassVisitorFactory
 import github.leavesczy.track.BaseTrackClassNode
 import github.leavesczy.track.BaseTrackConfigParameters
 import github.leavesczy.track.utils.LogPrint
-import github.leavesczy.track.utils.replaceDotBySlash
+import github.leavesczy.track.utils.replacePeriodWithSlash
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes
@@ -81,7 +81,7 @@ private class ReplaceInstructionMethodVisitor(
             it.owner == owner && it.name == name && (it.descriptor.isEmpty() || it.descriptor == descriptor)
         }
         if (find != null && opcode == Opcodes.GETSTATIC) {
-            val proxyOwner = replaceDotBySlash(className = find.proxyOwner)
+            val proxyOwner = replacePeriodWithSlash(className = find.proxyOwner)
             super.visitFieldInsn(opcode, proxyOwner, name, descriptor)
             LogPrint.normal(tag = config.extensionName) {
                 "${classNode.name} 发现符合规则的指令：$owner $name $descriptor , 替换为 $proxyOwner $name $descriptor ，完成处理..."
@@ -105,7 +105,7 @@ private class ReplaceInstructionMethodVisitor(
         val mOwner: String
         val mDescriptor: String
         if (find != null) {
-            mOwner = replaceDotBySlash(className = find.proxyOwner)
+            mOwner = replacePeriodWithSlash(className = find.proxyOwner)
             if (opcode == Opcodes.INVOKEVIRTUAL) {
                 mOpcode = Opcodes.INVOKESTATIC
                 mDescriptor = insetAsFirstArgument(descriptor = descriptor, owner = owner)

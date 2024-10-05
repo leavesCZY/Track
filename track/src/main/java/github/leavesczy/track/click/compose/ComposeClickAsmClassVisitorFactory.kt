@@ -6,7 +6,7 @@ import github.leavesczy.track.BaseTrackAsmClassVisitorFactory
 import github.leavesczy.track.BaseTrackClassNode
 import github.leavesczy.track.BaseTrackConfigParameters
 import github.leavesczy.track.utils.InitMethodName
-import github.leavesczy.track.utils.replaceDotBySlash
+import github.leavesczy.track.utils.replacePeriodWithSlash
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes
@@ -106,7 +106,7 @@ private class ComposeClickClassVisitor(
                     false
                 )
             )
-            val onClickClassFormat = replaceDotBySlash(className = trackConfig.onClickClass)
+            val onClickClassFormat = replacePeriodWithSlash(className = trackConfig.onClickClass)
             val label = LabelNode()
             input.add(JumpInsnNode(Opcodes.IFNE, label))
             input.add(TypeInsnNode(Opcodes.NEW, onClickClassFormat))

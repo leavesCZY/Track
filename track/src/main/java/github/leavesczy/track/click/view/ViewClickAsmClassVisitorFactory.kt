@@ -8,7 +8,7 @@ import github.leavesczy.track.BaseTrackConfigParameters
 import github.leavesczy.track.utils.filterLambda
 import github.leavesczy.track.utils.hasAnnotation
 import github.leavesczy.track.utils.isStatic
-import github.leavesczy.track.utils.replaceDotBySlash
+import github.leavesczy.track.utils.replacePeriodWithSlash
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.Handle
 import org.objectweb.asm.Opcodes
@@ -128,7 +128,7 @@ private class ViewClickClassVisitor(
                 list.add(
                     MethodInsnNode(
                         Opcodes.INVOKESTATIC,
-                        replaceDotBySlash(className = trackConfig.onClickClass),
+                        replacePeriodWithSlash(className = trackConfig.onClickClass),
                         trackConfig.onClickMethodName,
                         proxyOnClickMethodDesc
                     )

@@ -5,7 +5,7 @@ import com.android.build.api.instrumentation.ClassData
 import github.leavesczy.track.BaseTrackAsmClassVisitorFactory
 import github.leavesczy.track.BaseTrackClassNode
 import github.leavesczy.track.BaseTrackConfigParameters
-import github.leavesczy.track.utils.replaceDotBySlash
+import github.leavesczy.track.utils.replacePeriodWithSlash
 import org.objectweb.asm.ClassVisitor
 
 /**
@@ -54,7 +54,7 @@ private class ReplaceClassClassVisitor(
             access,
             name,
             signature,
-            replaceDotBySlash(className = trackConfig.targetClass),
+            replacePeriodWithSlash(className = trackConfig.targetClass),
             interfaces
         )
         log {

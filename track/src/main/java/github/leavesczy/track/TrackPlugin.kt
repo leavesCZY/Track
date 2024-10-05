@@ -19,7 +19,7 @@ import github.leavesczy.track.replace.instruction.ReplaceInstructionConfig
 import github.leavesczy.track.replace.instruction.ReplaceInstructionConfig.ReplaceInstructionParameter
 import github.leavesczy.track.replace.instruction.ReplaceInstructionPluginParameter
 import github.leavesczy.track.replace.instruction.ToastPluginParameter
-import github.leavesczy.track.utils.replaceDotBySlash
+import github.leavesczy.track.utils.replacePeriodWithSlash
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 
@@ -80,11 +80,11 @@ class TrackPlugin : Plugin<Project> {
             handleViewClickTrack(project = project, variant = variant)
             handleComposeClickTrack(project = project, variant = variant)
             handleReplaceClassTrack(project = project, variant = variant)
+            handleToastTrack(project = project, variant = variant)
             handleOptimizedThreadTrack(
                 project = project,
                 variant = variant
             )
-            handleToastTrack(project = project, variant = variant)
             handleReplaceInstructionTrack(
                 project = project,
                 variant = variant,
@@ -246,7 +246,7 @@ class TrackPlugin : Plugin<Project> {
                 null
             } else {
                 ReplaceInstructionParameter(
-                    owner = replaceDotBySlash(className = owner),
+                    owner = replacePeriodWithSlash(className = owner),
                     name = name,
                     descriptor = descriptor,
                     proxyOwner = proxyOwner

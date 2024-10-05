@@ -16,13 +16,13 @@ internal const val InitMethodName = "<init>"
 internal val MethodNode.isStatic: Boolean
     get() = access and Opcodes.ACC_STATIC == Opcodes.ACC_STATIC
 
-internal fun replaceDotBySlash(className: String): String {
+internal fun replacePeriodWithSlash(className: String): String {
     return className.replace(".", "/")
 }
 
 internal fun MethodNode.hasAnnotation(annotationClassName: String): Boolean {
     val annotationDesc =
-        Type.getObjectType(replaceDotBySlash(className = annotationClassName)).descriptor
+        Type.getObjectType(replacePeriodWithSlash(className = annotationClassName)).descriptor
     return visibleAnnotations?.find { it.desc == annotationDesc } != null
 }
 
