@@ -70,9 +70,11 @@ private class ViewClickClassVisitor(
 
     private fun handleViewClick() {
         val shouldHookMethodList = mutableSetOf<MethodNode>()
+        val uncheckViewOnClickAnnotation = trackConfig.uncheckViewOnClickAnnotation
         methods.forEach { methodNode ->
             when {
-                methodNode.hasAnnotation(annotationClassName = trackConfig.uncheckViewOnClickAnnotation) -> {
+                uncheckViewOnClickAnnotation.isNotBlank() &&
+                        methodNode.hasAnnotation(annotationClassName = uncheckViewOnClickAnnotation) -> {
 
                 }
 
