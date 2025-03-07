@@ -8,6 +8,7 @@ import java.util.TimeZone
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
+    alias(libs.plugins.jetbrains.kotlin.compose)
     alias(libs.plugins.leavesczy.track)
 }
 
@@ -77,6 +78,9 @@ android {
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_11.toString()
     }
+    buildFeatures {
+        compose = true
+    }
     packaging {
         dex {
             useLegacyPackaging = true
@@ -93,16 +97,14 @@ android {
                 "**/**/*.properties",
                 "META-INF/{AL2.0,LGPL2.1}",
                 "META-INF/CHANGES",
+                "META-INF/kotlin-stdlib.kotlin_module",
+                "META-INF/mediationsdk_release.kotlin_module",
+                "META-INF/unity-ads_release.kotlin_module",
                 "DebugProbesKt.bin",
-                "kotlin-tooling-metadata.json"
+                "kotlin-tooling-metadata.json",
+                "androidsupportmultidexversion.txt"
             )
         }
-    }
-    buildFeatures {
-        compose = true
-    }
-    composeOptions {
-        kotlinCompilerExtensionVersion = libs.versions.androidx.compose.compiler.get()
     }
 }
 
