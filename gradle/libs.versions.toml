@@ -7,7 +7,7 @@ androidx-junit = "1.2.1"
 androidx-espresso = "3.6.1"
 androidx-appcompat = "1.7.0"
 androidx-activity-compose = "1.10.1"
-androidx-compose-bom = "2025.02.00"
+androidx-compose-bom = "2025.04.00"
 
 junit-junit = "4.13.2"
 
@@ -27,17 +27,20 @@ gradle-plugin-publish = { id = "com.gradle.plugin-publish", version.ref = "gradl
 leavesczy-track = { id = "io.github.leavesczy.track" }
 
 [libraries]
+junit-junit = { module = "junit:junit", version.ref = "junit-junit" }
+
 android-gradle = { module = "com.android.tools.build:gradle", version.ref = "android-plugin" }
 android-gradle-api = { module = "com.android.tools.build:gradle-api", version.ref = "android-plugin" }
 
 androidx-junit = { module = "androidx.test.ext:junit", version.ref = "androidx-junit" }
 androidx-espresso = { module = "androidx.test.espresso:espresso-core", version.ref = "androidx-espresso" }
+
 androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "androidx-appcompat" }
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activity-compose" }
-androidx-compose-bom = { module = "androidx.compose:compose-bom", version.ref = "androidx-compose-bom" }
-androidx-compose-material3 = { module = "androidx.compose.material3:material3" }
 
-junit-junit = { module = "junit:junit", version.ref = "junit-junit" }
+androidx-compose-bom = { module = "androidx.compose:compose-bom", version.ref = "androidx-compose-bom" }
+androidx-compose-ui = { module = "androidx.compose.ui:ui" }
+androidx-compose-material3 = { module = "androidx.compose.material3:material3" }
 
 google-material = { module = "com.google.android.material:material", version.ref = "google-material" }
 

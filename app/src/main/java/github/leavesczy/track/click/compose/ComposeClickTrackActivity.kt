@@ -40,9 +40,10 @@ class ComposeClickTrackActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         supportActionBar?.title = "ComposeClickTrack"
         setContent {
-            TransformTheme {
+            TrackTheme {
                 Scaffold(
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier
+                        .fillMaxSize(),
                     contentWindowInsets = WindowInsets.navigationBars
                 ) { innerPadding ->
                     var index by remember {
@@ -54,7 +55,8 @@ class ComposeClickTrackActivity : AppCompatActivity() {
                             .padding(paddingValues = innerPadding)
                     ) {
                         Column(
-                            modifier = Modifier.fillMaxSize(),
+                            modifier = Modifier
+                                .fillMaxSize(),
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.Center
                         ) {

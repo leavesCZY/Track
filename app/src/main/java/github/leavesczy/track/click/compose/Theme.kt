@@ -36,7 +36,7 @@ private val Typography = Typography(
 )
 
 @Composable
-internal fun TransformTheme(content: @Composable () -> Unit) {
+internal fun TrackTheme(content: @Composable () -> Unit) {
     MaterialTheme(
         colorScheme = LightColorScheme,
         typography = Typography,
