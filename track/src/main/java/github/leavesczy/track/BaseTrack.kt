@@ -14,7 +14,7 @@ import java.io.Serializable
 
 /**
  * @Author: leavesCZY
- * @Date: 2024/8/25 1:56
+ * @Date: 2025/5/16 11:43
  * @Desc:
  */
 internal abstract class BaseTrackClassNode(protected open val trackConfig: BaseTrackConfig) :

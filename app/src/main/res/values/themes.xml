@@ -1,20 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
 
-    <style name="Theme.Track" parent="Theme.Material3.Light.NoActionBar">
+    <style name="Theme.Track" parent="Theme.Material3.Light">
         <item name="colorPrimary">@color/color_top_bar</item>
         <item name="colorOnSurface">@android:color/white</item>
         <item name="toolbarStyle">@style/Theme.Track.Toolbar</item>
-        <item name="android:statusBarColor">@android:color/white</item>
+        <item name="android:windowAnimationStyle">@style/Animation.Track.Activity</item>
+        <item name="android:statusBarColor">@color/color_top_bar</item>
         <item name="android:navigationBarColor">@android:color/white</item>
-        <item name="android:windowLightStatusBar" tools:targetApi="m">true</item>
-        <item name="android:windowLightNavigationBar" tools:targetApi="o_mr1">true</item>
-        <item name="android:enforceStatusBarContrast" tools:ignore="NewApi">false</item>
-        <item name="android:enforceNavigationBarContrast" tools:ignore="NewApi">false</item>
+        <item name="android:windowLightStatusBar" tools:targetApi="23">false</item>
+        <item name="android:windowLightNavigationBar" tools:targetApi="27">false</item>
+        <item name="android:enforceStatusBarContrast" tools:targetApi="29">false</item>
+        <item name="android:enforceNavigationBarContrast" tools:targetApi="29">false</item>
+        <item name="android:windowOptOutEdgeToEdgeEnforcement" tools:targetApi="35">true</item>
     </style>
 
     <style name="Theme.Track.Toolbar" parent="Widget.Material3.Toolbar">
         <item name="android:background">@color/color_top_bar</item>
+    </style>
+
+    <style name="Animation.Track.Activity" parent="@android:style/Animation.Activity">
+        <item name="android:activityOpenExitAnimation">@anim/animation_activity_static
+        </item>
+        <item name="android:activityOpenEnterAnimation">
+            @anim/animation_activity_from_right_to_center
+        </item>
+        <item name="android:activityCloseExitAnimation">
+            @anim/animation_activity_from_center_to_right
+        </item>
+        <item name="android:activityCloseEnterAnimation">@anim/animation_activity_static
+        </item>
     </style>
 
 </resources>

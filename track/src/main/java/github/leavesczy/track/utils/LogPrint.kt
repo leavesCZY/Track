@@ -2,7 +2,7 @@ package github.leavesczy.track.utils
 
 /**
  * @Author: leavesCZY
- * @Github: https://github.com/leavesCZY
+ * @Date: 2025/5/16 11:43
  * @Desc:
  */
 internal object LogPrint {

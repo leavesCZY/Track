@@ -5,7 +5,7 @@ import android.util.Log
 
 /**
  * @Author: leavesCZY
- * @Github: https://github.com/leavesCZY
+ * @Date: 2025/5/16 11:43
  * @Desc:
  */
 class ComposeOnClick(private val onClick: () -> Unit) : Function0<Unit> {
