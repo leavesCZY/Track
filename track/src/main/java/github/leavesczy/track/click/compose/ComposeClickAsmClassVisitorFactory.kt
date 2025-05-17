@@ -54,8 +54,11 @@ private class ComposeClickClassVisitor(
     private val clickableMethodDesc =
         "(Landroidx/compose/ui/Modifier;Landroidx/compose/foundation/interaction/MutableInteractionSource;Landroidx/compose/foundation/Indication;ZLjava/lang/String;Landroidx/compose/ui/semantics/Role;Lkotlin/jvm/functions/Function0;)Landroidx/compose/ui/Modifier;"
 
-    private val combinedClickableMethodDesc =
+    private val combinedClickableMethodDesc1 =
         "(Landroidx/compose/ui/Modifier;Landroidx/compose/foundation/interaction/MutableInteractionSource;Landroidx/compose/foundation/Indication;ZLjava/lang/String;Landroidx/compose/ui/semantics/Role;Ljava/lang/String;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;)Landroidx/compose/ui/Modifier;"
+
+    private val combinedClickableMethodDesc2 =
+        "(Landroidx/compose/ui/Modifier;Landroidx/compose/foundation/interaction/MutableInteractionSource;Landroidx/compose/foundation/Indication;ZLjava/lang/String;Landroidx/compose/ui/semantics/Role;Ljava/lang/String;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;ZLkotlin/jvm/functions/Function0;)Landroidx/compose/ui/Modifier;"
 
     override fun visitMethod(
         access: Int,
@@ -84,47 +87,49 @@ private class ComposeClickClassVisitor(
                 6
             }
 
-            combinedClickableMethodDesc -> {
+            combinedClickableMethodDesc1 -> {
                 9
             }
 
+            combinedClickableMethodDesc2 -> {
+                10
+            }
+
             else -> {
-                -1
+                return
             }
         }
-        if (onClickArgumentIndex > 0) {
-            val onClickLabelArgumentIndex = 4
-            val input = InsnList()
-            input.add(LdcInsnNode(trackConfig.onClickWhiteList))
-            input.add(VarInsnNode(Opcodes.ALOAD, onClickLabelArgumentIndex))
-            input.add(
-                MethodInsnNode(
-                    Opcodes.INVOKEVIRTUAL,
-                    "java/lang/String",
-                    "equals",
-                    "(Ljava/lang/Object;)Z",
-                    false
-                )
+        val onClickLabelArgumentIndex = 4
+        val input = InsnList()
+        input.add(LdcInsnNode(trackConfig.onClickWhiteList))
+        input.add(VarInsnNode(Opcodes.ALOAD, onClickLabelArgumentIndex))
+        input.add(
+            MethodInsnNode(
+                Opcodes.INVOKEVIRTUAL,
+                "java/lang/String",
+                "equals",
+                "(Ljava/lang/Object;)Z",
+                false
             )
-            val onClickClassFormat = replacePeriodWithSlash(className = trackConfig.onClickClass)
-            val label = LabelNode()
-            input.add(JumpInsnNode(Opcodes.IFNE, label))
-            input.add(TypeInsnNode(Opcodes.NEW, onClickClassFormat))
-            input.add(InsnNode(Opcodes.DUP))
-            input.add(VarInsnNode(Opcodes.ALOAD, onClickArgumentIndex))
-            input.add(
-                MethodInsnNode(
-                    Opcodes.INVOKESPECIAL,
-                    onClickClassFormat,
-                    InitMethodName,
-                    "(Lkotlin/jvm/functions/Function0;)V",
-                    false
-                )
+        )
+        val onClickClassFormat = replacePeriodWithSlash(className = trackConfig.onClickClass)
+        val label = LabelNode()
+        input.add(JumpInsnNode(Opcodes.IFNE, label))
+        input.add(TypeInsnNode(Opcodes.NEW, onClickClassFormat))
+        input.add(InsnNode(Opcodes.DUP))
+        input.add(VarInsnNode(Opcodes.ALOAD, onClickArgumentIndex))
+        input.add(
+            MethodInsnNode(
+                Opcodes.INVOKESPECIAL,
+                onClickClassFormat,
+                InitMethodName,
+                "(Lkotlin/jvm/functions/Function0;)V",
+                false
             )
-            input.add(VarInsnNode(Opcodes.ASTORE, onClickArgumentIndex))
-            input.add(label)
-            methodNode.instructions.insert(input)
-        }
+        )
+        input.add(VarInsnNode(Opcodes.ASTORE, onClickArgumentIndex))
+        input.add(label)
+        methodNode.instructions.insert(input)
     }
 
 }

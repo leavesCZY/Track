@@ -7,13 +7,13 @@ androidx-junit = "1.2.1"
 androidx-espresso = "3.6.1"
 androidx-appcompat = "1.7.0"
 androidx-activity-compose = "1.10.1"
-androidx-compose-bom = "2025.04.00"
+androidx-compose-bom = "2025.05.00"
 
 junit-junit = "4.13.2"
 
 google-material = "1.12.0"
 
-ow2-asm-commons = "9.7.1"
+ow2-asm-commons = "9.7"
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "android-plugin" }
