@@ -44,7 +44,7 @@ class OptimizedThreadTrackActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_optimized_thread_track)
-        title = "OptimizedThreadTrack"
+        supportActionBar?.title = "OptimizedThreadTrack"
         btnSubmitTask.setOnClickListener {
             newSingleThreadExecutor.execute {
                 printThreadName("newSingleThreadExecutor")

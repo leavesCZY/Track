@@ -19,7 +19,7 @@ class ViewClickTrackActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_view_click_track)
-        title = "ViewClickTrack"
+        supportActionBar?.title = "ViewClickTrack"
         findViewById<TextView>(R.id.btnObjectUnCheck).setOnClickListener(object :
             View.OnClickListener {
             @UncheckViewOnClick

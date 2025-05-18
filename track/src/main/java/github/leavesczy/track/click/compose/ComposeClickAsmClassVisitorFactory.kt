@@ -10,6 +10,7 @@ import github.leavesczy.track.utils.replacePeriodWithSlash
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes
+import org.objectweb.asm.Type
 import org.objectweb.asm.tree.InsnList
 import org.objectweb.asm.tree.InsnNode
 import org.objectweb.asm.tree.JumpInsnNode
@@ -51,6 +52,8 @@ private class ComposeClickClassVisitor(
     override val trackConfig: ComposeClickConfig
 ) : BaseTrackClassNode(trackConfig = trackConfig) {
 
+    private val onClickFunctionType = Type.getType("Lkotlin/jvm/functions/Function0;")
+
     private val clickableMethodDesc =
         "(Landroidx/compose/ui/Modifier;Landroidx/compose/foundation/interaction/MutableInteractionSource;Landroidx/compose/foundation/Indication;ZLjava/lang/String;Landroidx/compose/ui/semantics/Role;Lkotlin/jvm/functions/Function0;)Landroidx/compose/ui/Modifier;"
 
@@ -83,16 +86,8 @@ private class ComposeClickClassVisitor(
 
     private fun handleComposeClick(methodNode: MethodNode) {
         val onClickArgumentIndex = when (methodNode.desc) {
-            clickableMethodDesc -> {
-                6
-            }
-
-            combinedClickableMethodDesc1 -> {
-                9
-            }
-
-            combinedClickableMethodDesc2 -> {
-                10
+            clickableMethodDesc, combinedClickableMethodDesc1, combinedClickableMethodDesc2 -> {
+                Type.getArgumentTypes(methodNode.desc).lastIndexOf(element = onClickFunctionType)
             }
 
             else -> {

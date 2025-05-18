@@ -40,7 +40,7 @@ class ReplaceInstructionTrackActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_replace_instruction_track)
-        title = "Replace Field & Method Track"
+        supportActionBar?.title = "Replace Field & Method Track"
         isProxyEnabled = true
         onProxyEnabledChanged()
         btnProxyIsEnabled.setOnClickListener {

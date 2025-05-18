@@ -14,7 +14,7 @@ class ReplaceClassTrackActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_replace_class_track)
-        title = "ReplaceClassTrack"
+        supportActionBar?.title = "ReplaceClassTrack"
     }
 
 }

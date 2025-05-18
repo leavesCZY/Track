@@ -3,7 +3,6 @@ package github.leavesczy.track.click.compose
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
@@ -31,7 +30,6 @@ import androidx.compose.ui.unit.sp
  * @Date: 2025/5/16 11:43
  * @Desc:
  */
-@OptIn(ExperimentalFoundationApi::class)
 class ComposeClickTrackActivity : AppCompatActivity() {
 
     private val ontClickWhiteList = "notCheck"
@@ -46,9 +44,6 @@ class ComposeClickTrackActivity : AppCompatActivity() {
                         .fillMaxSize(),
                     contentWindowInsets = WindowInsets.navigationBars
                 ) { innerPadding ->
-                    var index by remember {
-                        mutableIntStateOf(0)
-                    }
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
@@ -58,20 +53,24 @@ class ComposeClickTrackActivity : AppCompatActivity() {
                             modifier = Modifier
                                 .fillMaxSize(),
                             horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.Center
+                            verticalArrangement = Arrangement.spacedBy(
+                                space = 20.dp,
+                                alignment = Alignment.CenterVertically
+                            )
                         ) {
+                            var index by remember {
+                                mutableIntStateOf(0)
+                            }
                             Text(
-                                modifier = Modifier
-                                    .padding(all = 15.dp),
+                                modifier = Modifier,
                                 text = index.toString(),
-                                fontSize = 22.sp
+                                fontSize = 25.sp
                             )
                             Text(
                                 modifier = Modifier
                                     .clickable(onClickLabel = ontClickWhiteList) {
                                         index++
-                                    }
-                                    .padding(all = 15.dp),
+                                    },
                                 text = "Text clickable 不防抖"
                             )
                             Text(
@@ -81,16 +80,14 @@ class ComposeClickTrackActivity : AppCompatActivity() {
                                         onClick = {
                                             index++
                                         }
-                                    )
-                                    .padding(all = 15.dp),
+                                    ),
                                 text = "Text combinedClickable 不防抖"
                             )
                             Text(
                                 modifier = Modifier
                                     .clickable {
                                         index++
-                                    }
-                                    .padding(all = 15.dp),
+                                    },
                                 text = "Text clickable"
                             )
                             Text(
@@ -99,22 +96,22 @@ class ComposeClickTrackActivity : AppCompatActivity() {
                                         onClick = {
                                             index++
                                         }
-                                    )
-                                    .padding(all = 15.dp),
+                                    ),
                                 text = "Text combinedClickable"
                             )
                             TextButton(
+                                modifier = Modifier,
                                 onClick = {
                                     index++
                                 }
                             ) {
                                 Text(
-                                    modifier = Modifier
-                                        .padding(all = 15.dp),
+                                    modifier = Modifier,
                                     text = "TextButton"
                                 )
                             }
                             Button(
+                                modifier = Modifier,
                                 onClick = {
                                     index++
                                 }

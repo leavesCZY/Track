@@ -16,7 +16,7 @@ class ToastTrackActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_toast_track)
-        title = "ToastTrack"
+        supportActionBar?.title = "ToastTrack"
         findViewById<View>(R.id.btnToastTrack).setOnClickListener {
             Toast.makeText(this, "ToastTrack", Toast.LENGTH_SHORT).show()
         }
