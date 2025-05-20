@@ -52,6 +52,8 @@ private class ComposeClickClassVisitor(
     override val trackConfig: ComposeClickConfig
 ) : BaseTrackClassNode(trackConfig = trackConfig) {
 
+    private val onClickLabelType = Type.getType("Ljava/lang/String;")
+
     private val onClickFunctionType = Type.getType("Lkotlin/jvm/functions/Function0;")
 
     private val clickableMethodDesc =
@@ -62,6 +64,14 @@ private class ComposeClickClassVisitor(
 
     private val combinedClickableMethodDesc2 =
         "(Landroidx/compose/ui/Modifier;Landroidx/compose/foundation/interaction/MutableInteractionSource;Landroidx/compose/foundation/Indication;ZLjava/lang/String;Landroidx/compose/ui/semantics/Role;Ljava/lang/String;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;ZLkotlin/jvm/functions/Function0;)Landroidx/compose/ui/Modifier;"
+
+    override fun visitEnd() {
+        super.visitEnd()
+        log {
+            "找到 $ComposeClickableClassName 类，完成处理..."
+        }
+        accept(nextClassVisitor)
+    }
 
     override fun visitMethod(
         access: Int,
@@ -76,25 +86,21 @@ private class ComposeClickClassVisitor(
         return methodNode
     }
 
-    override fun visitEnd() {
-        super.visitEnd()
-        log {
-            "找到 $ComposeClickableClassName 类，完成处理..."
-        }
-        accept(nextClassVisitor)
-    }
-
     private fun handleComposeClick(methodNode: MethodNode) {
-        val onClickArgumentIndex = when (methodNode.desc) {
+        val onClickLabelArgumentIndex: Int
+        val onClickArgumentIndex: Int
+        when (val desc = methodNode.desc) {
             clickableMethodDesc, combinedClickableMethodDesc1, combinedClickableMethodDesc2 -> {
-                Type.getArgumentTypes(methodNode.desc).lastIndexOf(element = onClickFunctionType)
+                val methodArgumentTypes = Type.getArgumentTypes(desc)
+                onClickLabelArgumentIndex = methodArgumentTypes.indexOf(element = onClickLabelType)
+                onClickArgumentIndex =
+                    methodArgumentTypes.lastIndexOf(element = onClickFunctionType)
             }
 
             else -> {
                 return
             }
         }
-        val onClickLabelArgumentIndex = 4
         val input = InsnList()
         input.add(LdcInsnNode(trackConfig.onClickWhiteList))
         input.add(VarInsnNode(Opcodes.ALOAD, onClickLabelArgumentIndex))

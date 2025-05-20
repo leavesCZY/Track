@@ -18,7 +18,7 @@ import java.io.Serializable
  * @Desc:
  */
 internal abstract class BaseTrackClassNode(protected open val trackConfig: BaseTrackConfig) :
-    ClassNode(Opcodes.ASM7) {
+    ClassNode(Opcodes.ASM8) {
 
     fun log(msg: () -> String) {
         LogPrint.normal(tag = trackConfig.extensionName, msg = msg)
