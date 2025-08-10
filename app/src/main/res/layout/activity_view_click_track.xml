@@ -19,7 +19,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="20dp"
-        android:layout_marginVertical="10dp"
         android:text="setOnClickListener 匿名内部类\n不防抖"
         android:textAllCaps="false"
         tools:ignore="HardcodedText" />
@@ -29,7 +28,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="20dp"
-        android:layout_marginVertical="10dp"
         android:text="setOnClickListener 匿名内部类"
         android:textAllCaps="false"
         tools:ignore="ButtonStyle,HardcodedText" />
@@ -39,7 +37,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="20dp"
-        android:layout_marginVertical="10dp"
         android:text="setOnClickListener lambda"
         android:textAllCaps="false"
         tools:ignore="ButtonStyle,HardcodedText" />
@@ -49,7 +46,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="20dp"
-        android:layout_marginVertical="10dp"
         android:onClick="onClickByXml"
         android:text="xml onClick"
         android:textAllCaps="false"

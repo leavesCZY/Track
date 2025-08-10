@@ -1,6 +1,7 @@
-@file:Suppress("UnstableApiUsage")
-
+import com.android.build.gradle.internal.api.ApkVariantOutputImpl
 import github.leavesczy.track.replace.instruction.ReplaceInstruction
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.TimeZone
@@ -62,7 +63,7 @@ android {
     applicationVariants.all {
         val variant = this
         outputs.all {
-            if (this is com.android.build.gradle.internal.api.ApkVariantOutputImpl) {
+            if (this is ApkVariantOutputImpl) {
                 val simpleDateFormat = SimpleDateFormat("yyyy_MM_dd_HH_mm_ss")
                 simpleDateFormat.timeZone = TimeZone.getTimeZone("Asia/Shanghai")
                 val time = simpleDateFormat.format(Calendar.getInstance().time)
@@ -75,18 +76,16 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
-    kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_11.toString()
+    tasks.withType<KotlinCompile>().configureEach {
+        compilerOptions {
+            jvmTarget.value(JvmTarget.JVM_11)
+        }
     }
     buildFeatures {
         compose = true
     }
     packaging {
-        dex {
-            useLegacyPackaging = true
-        }
         jniLibs {
-            useLegacyPackaging = true
             excludes += setOf("META-INF/{AL2.0,LGPL2.1}")
         }
         resources {
@@ -109,7 +108,7 @@ android {
 }
 
 dependencies {
-    testImplementation(libs.junit.junit)
+    testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso)
     implementation(libs.androidx.appcompat)

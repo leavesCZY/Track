@@ -7,23 +7,23 @@
     android:orientation="vertical">
 
     <ImageView
-        android:layout_width="160dp"
-        android:layout_height="160dp"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
         android:layout_margin="10dp"
         android:scaleType="centerCrop"
         android:src="@drawable/icon_dog"
         tools:ignore="ContentDescription" />
 
     <github.leavesczy.track.replace.clazz.CustomImageView
-        android:layout_width="160dp"
-        android:layout_height="160dp"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
         android:layout_margin="10dp"
         android:scaleType="centerCrop"
         android:src="@drawable/icon_dog" />
 
     <github.leavesczy.track.replace.clazz.IgnoreImageView
-        android:layout_width="160dp"
-        android:layout_height="160dp"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
         android:layout_margin="10dp"
         android:scaleType="centerCrop"
         android:src="@drawable/icon_dog" />

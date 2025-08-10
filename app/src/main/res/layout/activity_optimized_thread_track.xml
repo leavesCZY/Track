@@ -10,7 +10,6 @@
         android:id="@+id/btnSubmitTask"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginVertical="10dp"
         android:text="向线程池提交任务"
         tools:ignore="HardcodedText" />
 
