@@ -92,6 +92,16 @@ class ComposeClickTrackActivity : AppCompatActivity() {
                             )
                             Text(
                                 modifier = Modifier
+                                    .clickable(
+                                        interactionSource = null,
+                                        indication = null
+                                    ) {
+                                        index++
+                                    },
+                                text = "Text clickable"
+                            )
+                            Text(
+                                modifier = Modifier
                                     .combinedClickable(
                                         onClick = {
                                             index++

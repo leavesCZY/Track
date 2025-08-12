@@ -26,9 +26,12 @@ import org.objectweb.asm.tree.VarInsnNode
  * @Date: 2025/5/16 11:41
  * @Desc:
  */
-private const val ComposeClickableClassName = "androidx.compose.foundation.ClickableKt"
+private const val ClickableElementClassName = "androidx.compose.foundation.ClickableElement"
 
-internal abstract class ComposeClickAsmClassVisitorFactory :
+private const val CombinedClickableElementClassName =
+    "androidx.compose.foundation.CombinedClickableElement"
+
+internal abstract class ComposeClickAsmClassVisitorFactory2 :
     BaseTrackAsmClassVisitorFactory<BaseTrackConfigParameters, ComposeClickConfig> {
 
     override fun createClassVisitor(
@@ -42,7 +45,7 @@ internal abstract class ComposeClickAsmClassVisitorFactory :
     }
 
     override fun isTrackEnabled(classData: ClassData): Boolean {
-        return classData.className == ComposeClickableClassName
+        return classData.className == ClickableElementClassName || classData.className == CombinedClickableElementClassName
     }
 
 }
@@ -52,23 +55,10 @@ private class ComposeClickClassVisitor(
     override val trackConfig: ComposeClickConfig
 ) : BaseTrackClassNode(trackConfig = trackConfig) {
 
-    private val onClickLabelType = Type.getType("Ljava/lang/String;")
-
-    private val onClickFunctionType = Type.getType("Lkotlin/jvm/functions/Function0;")
-
-    private val clickableMethodDesc =
-        "(Landroidx/compose/ui/Modifier;Landroidx/compose/foundation/interaction/MutableInteractionSource;Landroidx/compose/foundation/Indication;ZLjava/lang/String;Landroidx/compose/ui/semantics/Role;Lkotlin/jvm/functions/Function0;)Landroidx/compose/ui/Modifier;"
-
-    private val combinedClickableMethodDesc1 =
-        "(Landroidx/compose/ui/Modifier;Landroidx/compose/foundation/interaction/MutableInteractionSource;Landroidx/compose/foundation/Indication;ZLjava/lang/String;Landroidx/compose/ui/semantics/Role;Ljava/lang/String;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;)Landroidx/compose/ui/Modifier;"
-
-    private val combinedClickableMethodDesc2 =
-        "(Landroidx/compose/ui/Modifier;Landroidx/compose/foundation/interaction/MutableInteractionSource;Landroidx/compose/foundation/Indication;ZLjava/lang/String;Landroidx/compose/ui/semantics/Role;Ljava/lang/String;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;ZLkotlin/jvm/functions/Function0;)Landroidx/compose/ui/Modifier;"
-
     override fun visitEnd() {
         super.visitEnd()
         log {
-            "找到 $ComposeClickableClassName 类，完成处理..."
+            "找到 $ClickableElementClassName , $CombinedClickableElementClassName 类，完成处理..."
         }
         accept(nextClassVisitor)
     }
@@ -82,25 +72,34 @@ private class ComposeClickClassVisitor(
     ): MethodVisitor {
         val methodNode =
             super.visitMethod(access, name, descriptor, signature, exceptions) as MethodNode
-        handleComposeClick(methodNode = methodNode)
+        if (name == InitMethodName) {
+            handleComposeClick(methodNode = methodNode)
+        }
         return methodNode
     }
 
     private fun handleComposeClick(methodNode: MethodNode) {
-        val onClickLabelArgumentIndex: Int
-        val onClickArgumentIndex: Int
-        when (val desc = methodNode.desc) {
-            clickableMethodDesc, combinedClickableMethodDesc1, combinedClickableMethodDesc2 -> {
-                val methodArgumentTypes = Type.getArgumentTypes(desc)
-                onClickLabelArgumentIndex = methodArgumentTypes.indexOf(element = onClickLabelType)
-                onClickArgumentIndex =
-                    methodArgumentTypes.lastIndexOf(element = onClickFunctionType)
-            }
-
-            else -> {
-                return
-            }
+        if (methodNode.signature.isNullOrBlank()) {
+            return
         }
+        val onClickLabelType = Type.getType("Ljava/lang/String;")
+        val onClickFunctionType = Type.getType("Lkotlin/jvm/functions/Function0;")
+        val methodDesc = methodNode.desc
+        val methodArgumentTypes = Type.getArgumentTypes(methodDesc)
+        val onClickLabelArgumentIndex = methodArgumentTypes.indexOf(element = onClickLabelType) + 1
+        val onClickArgumentIndex = methodArgumentTypes.indexOf(element = onClickFunctionType) + 1
+        insertInstructions(
+            methodNode = methodNode,
+            onClickLabelArgumentIndex = onClickLabelArgumentIndex,
+            onClickArgumentIndex = onClickArgumentIndex
+        )
+    }
+
+    private fun insertInstructions(
+        methodNode: MethodNode,
+        onClickArgumentIndex: Int,
+        onClickLabelArgumentIndex: Int
+    ) {
         val input = InsnList()
         input.add(LdcInsnNode(trackConfig.onClickWhiteList))
         input.add(VarInsnNode(Opcodes.ALOAD, onClickLabelArgumentIndex))

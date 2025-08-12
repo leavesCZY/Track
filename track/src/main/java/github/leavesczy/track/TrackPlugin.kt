@@ -4,7 +4,7 @@ import com.android.build.api.instrumentation.FramesComputationMode
 import com.android.build.api.instrumentation.InstrumentationScope
 import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.api.variant.Variant
-import github.leavesczy.track.click.compose.ComposeClickAsmClassVisitorFactory
+import github.leavesczy.track.click.compose.ComposeClickAsmClassVisitorFactory2
 import github.leavesczy.track.click.compose.ComposeClickConfig
 import github.leavesczy.track.click.compose.ComposeClickPluginParameter
 import github.leavesczy.track.click.view.ViewClickAsmClassVisitorFactory
@@ -108,8 +108,8 @@ class TrackPlugin : Plugin<Project> {
         }
         variant.instrumentation.apply {
             transformClassesWith(
-                ViewClickAsmClassVisitorFactory::class.java,
-                InstrumentationScope.ALL
+                classVisitorFactoryImplClass = ViewClickAsmClassVisitorFactory::class.java,
+                scope = InstrumentationScope.ALL
             ) { params ->
                 params.trackConfig.set(
                     ViewClickConfig(
@@ -134,8 +134,8 @@ class TrackPlugin : Plugin<Project> {
         }
         variant.instrumentation.apply {
             transformClassesWith(
-                ComposeClickAsmClassVisitorFactory::class.java,
-                InstrumentationScope.ALL
+                classVisitorFactoryImplClass = ComposeClickAsmClassVisitorFactory2::class.java,
+                scope = InstrumentationScope.ALL
             ) { params ->
                 params.trackConfig.set(
                     ComposeClickConfig(
@@ -161,8 +161,8 @@ class TrackPlugin : Plugin<Project> {
         }
         variant.instrumentation.apply {
             transformClassesWith(
-                ReplaceClassAsmClassVisitorFactory::class.java,
-                InstrumentationScope.ALL
+                classVisitorFactoryImplClass = ReplaceClassAsmClassVisitorFactory::class.java,
+                scope = InstrumentationScope.ALL
             ) { params ->
                 params.trackConfig.set(
                     ReplaceClassConfig(
@@ -279,8 +279,8 @@ class TrackPlugin : Plugin<Project> {
         }
         variant.instrumentation.apply {
             transformClassesWith(
-                ReplaceInstructionAsmClassVisitorFactory::class.java,
-                InstrumentationScope.ALL
+                classVisitorFactoryImplClass = ReplaceInstructionAsmClassVisitorFactory::class.java,
+                scope = InstrumentationScope.ALL
             ) { params ->
                 params.trackConfig.set(
                     ReplaceInstructionConfig(
