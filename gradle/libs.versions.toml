@@ -1,13 +1,13 @@
 [versions]
-android-plugin = "8.12.0"
-kotlin-plugin = "2.2.0"
+android-plugin = "8.6.0"
+kotlin-plugin = "2.0.0"
 gradle-plugin-publish-plugin = "1.3.1"
 
 androidx-junit = "1.3.0"
 androidx-espresso = "3.7.0"
 androidx-appcompat = "1.7.1"
 androidx-activity-compose = "1.10.1"
-androidx-compose-bom = "2025.07.01"
+androidx-compose-bom = "2025.08.00"
 
 junit = "4.13.2"
 
@@ -24,7 +24,7 @@ jetbrains-kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin-
 
 gradle-plugin-publish = { id = "com.gradle.plugin-publish", version.ref = "gradle-plugin-publish-plugin" }
 
-leavesczy-track = { id = "io.github.leavesczy.track" }
+leavesczy-track = { id = "io.github.leavesczy.track", version = "unspecified" }
 
 [libraries]
 junit = { module = "junit:junit", version.ref = "junit" }
