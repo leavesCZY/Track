@@ -1,42 +1,59 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/rootView"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <Button
-        android:id="@+id/btnSystemInstructions"
+    <LinearLayout
+        android:id="@+id/viewStatusBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="20dp"
-        android:text="输出指定字段 &amp; 指定方法的返回值"
-        android:textAllCaps="false"
-        tools:ignore="HardcodedText" />
+        android:orientation="vertical" />
 
-    <Button
-        android:id="@+id/btnProxyIsEnabled"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="20dp"
-        android:text="是否替换"
-        android:textAllCaps="false"
-        tools:ignore="HardcodedText" />
-
-    <ScrollView
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_margin="5dp"
         android:layout_weight="1"
-        android:clipToPadding="false">
+        android:gravity="center"
+        android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/tvLog"
+        <Button
+            android:id="@+id/btnSystemInstructions"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center_horizontal"
-            android:textSize="14sp" />
+            android:layout_marginHorizontal="20dp"
+            android:text="输出指定字段 &amp; 指定方法的返回值"
+            android:textAllCaps="false"
+            tools:ignore="HardcodedText" />
 
-    </ScrollView>
+        <Button
+            android:id="@+id/btnProxyIsEnabled"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="20dp"
+            android:text="是否替换"
+            android:textAllCaps="false"
+            tools:ignore="HardcodedText" />
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_margin="5dp"
+            android:layout_weight="1"
+            android:clipToPadding="false">
+
+            <TextView
+                android:id="@+id/tvLog"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:textSize="14sp" />
+
+        </ScrollView>
+
+
+    </LinearLayout>
 
 </LinearLayout>

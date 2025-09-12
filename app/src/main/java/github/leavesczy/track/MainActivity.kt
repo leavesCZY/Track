@@ -4,7 +4,6 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
-import androidx.appcompat.app.AppCompatActivity
 import github.leavesczy.track.click.compose.ComposeClickTrackActivity
 import github.leavesczy.track.click.view.ViewClickTrackActivity
 import github.leavesczy.track.replace.clazz.ReplaceClassTrackActivity
@@ -17,11 +16,12 @@ import github.leavesczy.track.toast.ToastTrackActivity
  * @Date: 2025/5/16 11:43
  * @Desc:
  */
-class MainActivity : AppCompatActivity() {
+class MainActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        setOnApplyWindowInsetsListener()
         findViewById<View>(R.id.btnViewClickTrack).setOnClickListener {
             startActivity<ViewClickTrackActivity>()
         }

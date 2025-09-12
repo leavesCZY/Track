@@ -5,14 +5,20 @@
         <item name="colorPrimary">@color/color_top_bar</item>
         <item name="colorOnSurface">@android:color/white</item>
         <item name="toolbarStyle">@style/Theme.Track.Toolbar</item>
-        <item name="android:windowAnimationStyle">@style/Animation.Track.Activity</item>
-        <item name="android:statusBarColor">@color/color_top_bar</item>
-        <item name="android:navigationBarColor">@android:color/white</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
         <item name="android:windowLightStatusBar" tools:targetApi="23">false</item>
         <item name="android:windowLightNavigationBar" tools:targetApi="27">false</item>
         <item name="android:enforceStatusBarContrast" tools:targetApi="29">false</item>
         <item name="android:enforceNavigationBarContrast" tools:targetApi="29">false</item>
-        <item name="android:windowOptOutEdgeToEdgeEnforcement" tools:targetApi="35">true</item>
+        <item name="android:windowAnimationStyle">@style/Animation.Track.Activity</item>
+        <item name="android:windowLayoutInDisplayCutoutMode" tools:targetApi="o_mr1">shortEdges
+        </item>
+    </style>
+
+    <style name="Theme.Track.NoTitle" parent="Theme.Track">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
     </style>
 
     <style name="Theme.Track.Toolbar" parent="Widget.Material3.Toolbar">
@@ -20,8 +26,7 @@
     </style>
 
     <style name="Animation.Track.Activity" parent="@android:style/Animation.Activity">
-        <item name="android:activityOpenExitAnimation">@anim/animation_activity_static
-        </item>
+        <item name="android:activityOpenExitAnimation">@anim/animation_activity_static</item>
         <item name="android:activityOpenEnterAnimation">
             @anim/animation_activity_from_right_to_center
         </item>

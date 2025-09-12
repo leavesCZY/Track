@@ -3,7 +3,7 @@ package github.leavesczy.track.click.view
 import android.os.Bundle
 import android.view.View
 import android.widget.TextView
-import androidx.appcompat.app.AppCompatActivity
+import github.leavesczy.track.BaseActivity
 import github.leavesczy.track.R
 
 /**
@@ -11,7 +11,7 @@ import github.leavesczy.track.R
  * @Date: 2025/5/16 11:43
  * @Desc:
  */
-class ViewClickTrackActivity : AppCompatActivity() {
+class ViewClickTrackActivity : BaseActivity() {
 
     private var clickIndex = 1
 
@@ -19,6 +19,7 @@ class ViewClickTrackActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_view_click_track)
+        setOnApplyWindowInsetsListener()
         supportActionBar?.title = "ViewClickTrack"
         findViewById<TextView>(R.id.btnObjectUnCheck).setOnClickListener(object :
             View.OnClickListener {

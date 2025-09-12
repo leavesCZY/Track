@@ -3,7 +3,7 @@ package github.leavesczy.track.thread
 import android.os.Bundle
 import android.widget.Button
 import android.widget.TextView
-import androidx.appcompat.app.AppCompatActivity
+import github.leavesczy.track.BaseActivity
 import github.leavesczy.track.R
 import java.util.concurrent.Executors
 import kotlin.random.Random
@@ -13,7 +13,7 @@ import kotlin.random.Random
  * @Date: 2025/5/16 11:43
  * @Desc:
  */
-class OptimizedThreadTrackActivity : AppCompatActivity() {
+class OptimizedThreadTrackActivity : BaseActivity() {
 
     private val btnSubmitTask by lazy {
         findViewById<Button>(R.id.btnSubmitTask)
@@ -44,6 +44,7 @@ class OptimizedThreadTrackActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_optimized_thread_track)
+        setOnApplyWindowInsetsListener()
         supportActionBar?.title = "OptimizedThreadTrack"
         btnSubmitTask.setOnClickListener {
             newSingleThreadExecutor.execute {

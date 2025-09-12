@@ -8,7 +8,7 @@ import android.provider.Settings
 import android.telephony.TelephonyManager
 import android.widget.Button
 import android.widget.TextView
-import androidx.appcompat.app.AppCompatActivity
+import github.leavesczy.track.BaseActivity
 import github.leavesczy.track.R
 
 /**
@@ -17,7 +17,7 @@ import github.leavesczy.track.R
  * @Desc:
  */
 @SuppressLint("MissingPermission", "HardwareIds", "NewApi", "SetTextI18n")
-class ReplaceInstructionTrackActivity : AppCompatActivity() {
+class ReplaceInstructionTrackActivity : BaseActivity() {
 
     companion object {
 
@@ -40,6 +40,7 @@ class ReplaceInstructionTrackActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_replace_instruction_track)
+        setOnApplyWindowInsetsListener()
         supportActionBar?.title = "Replace Field & Method Track"
         isProxyEnabled = true
         onProxyEnabledChanged()

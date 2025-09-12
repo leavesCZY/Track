@@ -1,7 +1,7 @@
 package github.leavesczy.track.replace.clazz
 
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
+import github.leavesczy.track.BaseActivity
 import github.leavesczy.track.R
 
 /**
@@ -9,11 +9,12 @@ import github.leavesczy.track.R
  * @Date: 2025/5/16 11:43
  * @Desc:
  */
-class ReplaceClassTrackActivity : AppCompatActivity() {
+class ReplaceClassTrackActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_replace_class_track)
+        setOnApplyWindowInsetsListener()
         supportActionBar?.title = "ReplaceClassTrack"
     }
 

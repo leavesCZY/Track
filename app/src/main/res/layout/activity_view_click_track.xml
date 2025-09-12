@@ -1,54 +1,69 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/rootView"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="center"
     android:orientation="vertical">
 
-    <TextView
-        android:id="@+id/tvIndex"
+    <LinearLayout
+        android:id="@+id/viewStatusBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:orientation="vertical" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
         android:gravity="center"
-        android:padding="5dp"
-        android:textSize="24sp" />
+        android:orientation="vertical">
 
-    <Button
-        android:id="@+id/btnObjectUnCheck"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="20dp"
-        android:text="setOnClickListener 匿名内部类\n不防抖"
-        android:textAllCaps="false"
-        tools:ignore="HardcodedText" />
+        <TextView
+            android:id="@+id/tvIndex"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:padding="5dp"
+            android:textSize="24sp" />
 
-    <Button
-        android:id="@+id/btnObject"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="20dp"
-        android:text="setOnClickListener 匿名内部类"
-        android:textAllCaps="false"
-        tools:ignore="ButtonStyle,HardcodedText" />
+        <Button
+            android:id="@+id/btnObjectUnCheck"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="20dp"
+            android:text="setOnClickListener 匿名内部类\n不防抖"
+            android:textAllCaps="false"
+            tools:ignore="HardcodedText" />
 
-    <Button
-        android:id="@+id/btnLambda"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="20dp"
-        android:text="setOnClickListener lambda"
-        android:textAllCaps="false"
-        tools:ignore="ButtonStyle,HardcodedText" />
+        <Button
+            android:id="@+id/btnObject"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="20dp"
+            android:text="setOnClickListener 匿名内部类"
+            android:textAllCaps="false"
+            tools:ignore="ButtonStyle,HardcodedText" />
 
-    <Button
-        android:id="@+id/btnClickByXml"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="20dp"
-        android:onClick="onClickByXml"
-        android:text="xml onClick"
-        android:textAllCaps="false"
-        tools:ignore="HardcodedText,UsingOnClickInXml" />
+        <Button
+            android:id="@+id/btnLambda"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="20dp"
+            android:text="setOnClickListener lambda"
+            android:textAllCaps="false"
+            tools:ignore="ButtonStyle,HardcodedText" />
+
+        <Button
+            android:id="@+id/btnClickByXml"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="20dp"
+            android:onClick="onClickByXml"
+            android:text="xml onClick"
+            android:textAllCaps="false"
+            tools:ignore="HardcodedText,UsingOnClickInXml" />
+
+    </LinearLayout>
 
 </LinearLayout>

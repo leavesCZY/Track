@@ -1,55 +1,69 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/rootView"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_marginHorizontal="20dp"
-    android:gravity="center"
     android:orientation="vertical">
 
-    <Button
-        android:id="@+id/btnViewClickTrack"
+    <LinearLayout
+        android:id="@+id/viewStatusBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:orientation="vertical" />
 
-        android:text="ViewClickTrack"
-        android:textAllCaps="false"
-        tools:ignore="HardcodedText" />
-
-    <Button
-        android:id="@+id/btnComposeClickTrack"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="ComposeClickTrack"
-        android:textAllCaps="false"
-        tools:ignore="HardcodedText" />
+        android:layout_height="0dp"
+        android:layout_marginHorizontal="20dp"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:orientation="vertical">
 
-    <Button
-        android:id="@+id/btnToastTrack"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="ToastTrack"
-        tools:ignore="HardcodedText" />
+        <Button
+            android:id="@+id/btnViewClickTrack"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="ViewClickTrack"
+            android:textAllCaps="false"
+            tools:ignore="HardcodedText" />
 
-    <Button
-        android:id="@+id/btnOptimizedThreadTrack"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="OptimizedThreadTrack"
-        tools:ignore="HardcodedText" />
+        <Button
+            android:id="@+id/btnComposeClickTrack"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="ComposeClickTrack"
+            android:textAllCaps="false"
+            tools:ignore="HardcodedText" />
 
-    <Button
-        android:id="@+id/btnReplaceClassTrack"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="ReplaceClassTrack"
-        tools:ignore="HardcodedText" />
+        <Button
+            android:id="@+id/btnToastTrack"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="ToastTrack"
+            tools:ignore="HardcodedText" />
 
-    <Button
-        android:id="@+id/btnReplaceInstructionTrack"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Replace Field &amp; Method Track"
-        tools:ignore="HardcodedText" />
+        <Button
+            android:id="@+id/btnOptimizedThreadTrack"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="OptimizedThreadTrack"
+            tools:ignore="HardcodedText" />
+
+        <Button
+            android:id="@+id/btnReplaceClassTrack"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="ReplaceClassTrack"
+            tools:ignore="HardcodedText" />
+
+        <Button
+            android:id="@+id/btnReplaceInstructionTrack"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Replace Field &amp; Method Track"
+            tools:ignore="HardcodedText" />
+
+    </LinearLayout>
 
 </LinearLayout>

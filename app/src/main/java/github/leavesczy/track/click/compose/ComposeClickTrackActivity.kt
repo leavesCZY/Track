@@ -2,47 +2,68 @@ package github.leavesczy.track.click.compose
 
 import android.os.Bundle
 import androidx.activity.compose.setContent
-import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.view.WindowInsetsControllerCompat
+import github.leavesczy.track.BaseActivity
+import github.leavesczy.track.R
 
 /**
  * @Author: leavesCZY
  * @Date: 2025/5/16 11:43
  * @Desc:
  */
-class ComposeClickTrackActivity : AppCompatActivity() {
+class ComposeClickTrackActivity : BaseActivity() {
 
     private val ontClickWhiteList = "notCheck"
 
+    @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        supportActionBar?.title = "ComposeClickTrack"
+        setSystemBarUi()
         setContent {
             TrackTheme {
                 Scaffold(
                     modifier = Modifier
                         .fillMaxSize(),
-                    contentWindowInsets = WindowInsets.navigationBars
+                    topBar = {
+                        TopAppBar(
+                            modifier = Modifier,
+                            colors = TopAppBarDefaults.topAppBarColors(
+                                containerColor = colorResource(R.color.color_top_bar)
+                            ),
+                            title = {
+                                Text(
+                                    modifier = Modifier,
+                                    text = "ComposeClickTrack",
+                                    fontSize = 21.sp,
+                                    color = Color.White
+                                )
+                            }
+                        )
+                    }
                 ) { innerPadding ->
                     Box(
                         modifier = Modifier
@@ -135,6 +156,13 @@ class ComposeClickTrackActivity : AppCompatActivity() {
                     }
                 }
             }
+        }
+    }
+
+    private fun setSystemBarUi() {
+        WindowInsetsControllerCompat(window, window.decorView).apply {
+            isAppearanceLightStatusBars = false
+            isAppearanceLightNavigationBars = false
         }
     }
 
