@@ -1,4 +1,3 @@
-import com.android.build.gradle.internal.api.ApkVariantOutputImpl
 import github.leavesczy.track.replace.instruction.ReplaceInstruction
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
@@ -8,7 +7,6 @@ import java.util.TimeZone
 
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.jetbrains.kotlin.android)
     alias(libs.plugins.jetbrains.kotlin.compose)
     alias(libs.plugins.leavesczy.track)
 }
@@ -60,17 +58,12 @@ android {
             )
         }
     }
-    applicationVariants.all {
-        val variant = this
-        outputs.all {
-            if (this is ApkVariantOutputImpl) {
-                val simpleDateFormat = SimpleDateFormat("yyyy_MM_dd_HH_mm_ss")
-                simpleDateFormat.timeZone = TimeZone.getTimeZone("Asia/Shanghai")
-                val time = simpleDateFormat.format(Calendar.getInstance().time)
-                this.outputFileName =
-                    "track_${variant.name}_v${variant.versionName}_${variant.versionCode}_${time}.apk"
-            }
-        }
+    val basePluginExtension = project.extensions.getByType(BasePluginExtension::class.java)
+    basePluginExtension.apply {
+        val simpleDateFormat = SimpleDateFormat("yyyy_MM_dd_HH_mm_ss")
+        simpleDateFormat.timeZone = TimeZone.getTimeZone("Asia/Shanghai")
+        val time = simpleDateFormat.format(Calendar.getInstance().time)
+        archivesName.set("track_v${defaultConfig.versionName}_${defaultConfig.versionCode}_${time}")
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
