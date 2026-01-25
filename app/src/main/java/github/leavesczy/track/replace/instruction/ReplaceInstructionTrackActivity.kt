@@ -16,7 +16,6 @@ import github.leavesczy.track.R
  * @Date: 2025/5/16 11:43
  * @Desc:
  */
-@SuppressLint("MissingPermission", "HardwareIds", "NewApi", "SetTextI18n")
 class ReplaceInstructionTrackActivity : BaseActivity() {
 
     companion object {
@@ -67,6 +66,7 @@ class ReplaceInstructionTrackActivity : BaseActivity() {
         btnProxyIsEnabled.text = "是否替换 : $isProxyEnabled"
     }
 
+    @SuppressLint("MissingPermission")
     private fun getDeviceId(context: Context): String {
         return try {
             val telephonyManager =
@@ -78,6 +78,7 @@ class ReplaceInstructionTrackActivity : BaseActivity() {
         }
     }
 
+    @SuppressLint("MissingPermission")
     private fun getImei(context: Context): String {
         return try {
             val telephonyManager =

@@ -19,6 +19,7 @@ abstract class BaseActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
+        supportActionBar?.elevation = 0f
     }
 
     protected fun setOnApplyWindowInsetsListener() {

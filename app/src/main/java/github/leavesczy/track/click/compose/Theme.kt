@@ -20,9 +20,9 @@ import androidx.compose.ui.unit.sp
 internal fun TrackTheme(content: @Composable () -> Unit) {
     val lightColorScheme = remember {
         lightColorScheme(
-            primary = Color(0xFF0277BD),
-            secondary = Color(0xFF625b71),
-            tertiary = Color(0xFF7D5260)
+            primary = Color(color = 0xFF03A9F4),
+            secondary = Color(color = 0xFF03A9F4),
+            tertiary = Color(color = 0xFF7D5260)
         )
     }
     val typography = remember {
