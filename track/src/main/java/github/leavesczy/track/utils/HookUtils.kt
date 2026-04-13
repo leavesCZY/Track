@@ -13,6 +13,8 @@ import org.objectweb.asm.tree.MethodNode
  */
 internal const val InitMethodName = "<init>"
 
+internal const val ApiOpcodes = Opcodes.ASM8
+
 internal val MethodNode.isStatic: Boolean
     get() = access and Opcodes.ACC_STATIC == Opcodes.ACC_STATIC
 

@@ -4,11 +4,11 @@ import com.android.build.api.instrumentation.AsmClassVisitorFactory
 import com.android.build.api.instrumentation.ClassContext
 import com.android.build.api.instrumentation.ClassData
 import com.android.build.api.instrumentation.InstrumentationParameters
+import github.leavesczy.track.utils.ApiOpcodes
 import github.leavesczy.track.utils.LogPrint
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.objectweb.asm.ClassVisitor
-import org.objectweb.asm.Opcodes
 import org.objectweb.asm.tree.ClassNode
 import java.io.Serializable
 
@@ -18,7 +18,7 @@ import java.io.Serializable
  * @Desc:
  */
 internal abstract class BaseTrackClassNode(protected open val trackConfig: BaseTrackConfig) :
-    ClassNode(Opcodes.ASM8) {
+    ClassNode(ApiOpcodes) {
 
     fun log(msg: () -> String) {
         LogPrint.normal(tag = trackConfig.extensionName, msg = msg)
@@ -61,30 +61,29 @@ internal interface BaseTrackAsmClassVisitorFactory<Parameters : BaseTrackConfigP
         if (!trackConfig.isEnabled) {
             return false
         }
-        val include = trackConfig.include
-        val exclude = trackConfig.exclude
+        val include = trackConfig.include.map {
+            Regex(it)
+        }
+        val exclude = trackConfig.exclude.map {
+            Regex(it)
+        }
         if (include.isEmpty()) {
             if (classData.matches(rules = exclude)) {
                 return false
             }
-        } else {
-            if (exclude.isEmpty()) {
-                if (!classData.matches(rules = include)) {
-                    return false
-                }
-            } else {
-                if (!classData.matches(rules = include) || classData.matches(rules = exclude)) {
-                    return false
-                }
+        } else if (exclude.isEmpty()) {
+            if (!classData.matches(rules = include)) {
+                return false
             }
+        } else if (!classData.matches(rules = include) || classData.matches(rules = exclude)) {
+            return false
         }
         return isTrackEnabled(classData = classData)
     }
 
-    private fun ClassData.matches(rules: Collection<String>): Boolean {
-        for (item in rules) {
-            val regex = Regex(item)
-            if (className.matches(regex = regex)) {
+    private fun ClassData.matches(rules: List<Regex>): Boolean {
+        for (rule in rules) {
+            if (className.matches(regex = rule)) {
                 return true
             }
         }

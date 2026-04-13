@@ -31,7 +31,7 @@ private const val ClickableElementClassName = "androidx.compose.foundation.Click
 private const val CombinedClickableElementClassName =
     "androidx.compose.foundation.CombinedClickableElement"
 
-internal abstract class ComposeClickAsmClassVisitorFactory2 :
+internal abstract class ComposeClickAsmClassVisitorFactory :
     BaseTrackAsmClassVisitorFactory<BaseTrackConfigParameters, ComposeClickConfig> {
 
     override fun createClassVisitor(
@@ -54,14 +54,6 @@ private class ComposeClickClassVisitor(
     private val nextClassVisitor: ClassVisitor,
     override val trackConfig: ComposeClickConfig
 ) : BaseTrackClassNode(trackConfig = trackConfig) {
-
-    override fun visitEnd() {
-        super.visitEnd()
-        log {
-            "找到 $ClickableElementClassName , $CombinedClickableElementClassName 类，完成处理..."
-        }
-        accept(nextClassVisitor)
-    }
 
     override fun visitMethod(
         access: Int,
@@ -130,6 +122,14 @@ private class ComposeClickClassVisitor(
         input.add(VarInsnNode(Opcodes.ASTORE, onClickArgumentIndex))
         input.add(label)
         methodNode.instructions.insert(input)
+    }
+
+    override fun visitEnd() {
+        super.visitEnd()
+        log {
+            "找到 $ClickableElementClassName , $CombinedClickableElementClassName 类，完成处理..."
+        }
+        accept(nextClassVisitor)
     }
 
 }

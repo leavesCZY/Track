@@ -4,7 +4,7 @@ import com.android.build.api.instrumentation.FramesComputationMode
 import com.android.build.api.instrumentation.InstrumentationScope
 import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.api.variant.Variant
-import github.leavesczy.track.click.compose.ComposeClickAsmClassVisitorFactory2
+import github.leavesczy.track.click.compose.ComposeClickAsmClassVisitorFactory
 import github.leavesczy.track.click.compose.ComposeClickConfig
 import github.leavesczy.track.click.compose.ComposeClickPluginParameter
 import github.leavesczy.track.click.view.ViewClickAsmClassVisitorFactory
@@ -95,7 +95,7 @@ class TrackPlugin : Plugin<Project> {
                 variant = variant,
                 extensionName = replaceMethodTrack
             )
-            variant.instrumentation.setAsmFramesComputationMode(FramesComputationMode.COPY_FRAMES)
+            variant.instrumentation.setAsmFramesComputationMode(FramesComputationMode.COMPUTE_FRAMES_FOR_INSTRUMENTED_METHODS)
         }
     }
 
@@ -134,7 +134,7 @@ class TrackPlugin : Plugin<Project> {
         }
         variant.instrumentation.apply {
             transformClassesWith(
-                classVisitorFactoryImplClass = ComposeClickAsmClassVisitorFactory2::class.java,
+                classVisitorFactoryImplClass = ComposeClickAsmClassVisitorFactory::class.java,
                 scope = InstrumentationScope.ALL
             ) { params ->
                 params.trackConfig.set(

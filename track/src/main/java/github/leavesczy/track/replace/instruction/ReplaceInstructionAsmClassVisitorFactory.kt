@@ -41,11 +41,6 @@ private class ReplaceInstructionClassVisitor(
     override val trackConfig: ReplaceInstructionConfig
 ) : BaseTrackClassNode(trackConfig = trackConfig) {
 
-    override fun visitEnd() {
-        super.visitEnd()
-        accept(nextClassVisitor)
-    }
-
     override fun visitMethod(
         access: Int,
         name: String?,
@@ -60,6 +55,11 @@ private class ReplaceInstructionClassVisitor(
             classNode = this,
             config = trackConfig
         )
+    }
+
+    override fun visitEnd() {
+        super.visitEnd()
+        accept(nextClassVisitor)
     }
 
 }
