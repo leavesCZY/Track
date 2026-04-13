@@ -1,13 +1,13 @@
 [versions]
-android-plugin = "9.0.0"
-kotlin-plugin = "2.3.0"
-gradle-plugin-publish-plugin = "2.0.0"
+android-plugin = "8.13.2"
+kotlin-plugin = "2.0.0"
+gradle-plugin-publish-plugin = "2.1.1"
 
 androidx-junit = "1.3.0"
 androidx-espresso = "3.7.0"
 androidx-appcompat = "1.7.1"
-androidx-activity = "1.12.2"
-androidx-compose-bom = "2026.01.00"
+androidx-activity = "1.13.0"
+androidx-compose-bom = "2026.04.00"
 
 junit = "4.13.2"
 google-material = "1.13.0"
@@ -16,20 +16,18 @@ ow2-asm-commons = "9.9.1"
 [plugins]
 android-application = { id = "com.android.application", version.ref = "android-plugin" }
 
+jetbrains-kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin-plugin" }
 jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin-plugin" }
 jetbrains-kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin-plugin" }
-jetbrains-kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin-plugin" }
 
 gradle-plugin-publish = { id = "com.gradle.plugin-publish", version.ref = "gradle-plugin-publish-plugin" }
 
 leavesczy-track = { id = "io.github.leavesczy.track", version = "unspecified" }
 
 [libraries]
-junit = { module = "junit:junit", version.ref = "junit" }
-
-android-gradle = { module = "com.android.tools.build:gradle", version.ref = "android-plugin" }
 android-gradle-api = { module = "com.android.tools.build:gradle-api", version.ref = "android-plugin" }
 
+junit = { module = "junit:junit", version.ref = "junit" }
 androidx-junit = { module = "androidx.test.ext:junit", version.ref = "androidx-junit" }
 androidx-espresso = { module = "androidx.test.espresso:espresso-core", version.ref = "androidx-espresso" }
 
@@ -40,6 +38,5 @@ androidx-compose-bom = { module = "androidx.compose:compose-bom-beta", version.r
 androidx-compose-ui = { module = "androidx.compose.ui:ui" }
 androidx-compose-material3 = { module = "androidx.compose.material3:material3" }
 
-google-material = { module = "com.google.android.material:material", version.ref = "google-material" }
-
 ow2-asm-commons = { module = "org.ow2.asm:asm-commons", version.ref = "ow2-asm-commons" }
+google-material = { module = "com.google.android.material:material", version.ref = "google-material" }

@@ -15,22 +15,22 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginHorizontal="20dp"
         android:layout_weight="1"
-        android:gravity="center"
+        android:gravity="top"
         android:orientation="vertical">
 
         <Button
             android:id="@+id/btnSubmitTask"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginHorizontal="20dp"
             android:text="向线程池提交任务"
             tools:ignore="HardcodedText" />
 
         <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="10dp"
             android:clipToPadding="false">
 
             <TextView

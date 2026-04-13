@@ -7,6 +7,7 @@ import java.util.TimeZone
 
 plugins {
     alias(libs.plugins.android.application)
+    alias(libs.plugins.jetbrains.kotlin.android)
     alias(libs.plugins.jetbrains.kotlin.compose)
     alias(libs.plugins.leavesczy.track)
 }
@@ -86,15 +87,15 @@ android {
                 "**/*.md",
                 "**/*.version",
                 "**/*.properties",
-                "**/**/*.properties",
-                "META-INF/{AL2.0,LGPL2.1}",
-                "META-INF/CHANGES",
-                "META-INF/kotlin-stdlib.kotlin_module",
-                "META-INF/mediationsdk_release.kotlin_module",
-                "META-INF/unity-ads_release.kotlin_module",
-                "DebugProbesKt.bin",
-                "kotlin-tooling-metadata.json",
-                "androidsupportmultidexversion.txt"
+                "**/*.kotlin_module",
+                "**/CHANGES",
+                "**/LICENSE.txt",
+                "**/{AL2.0,LGPL2.1}",
+                "**/DebugProbesKt.bin",
+                "**/app-metadata.properties",
+                "**/kotlin-tooling-metadata.json",
+                "**/version-control-info.textproto",
+                "**/androidsupportmultidexversion.txt"
             )
         }
     }
@@ -151,7 +152,7 @@ optimizedThreadTrack {
 replaceClassTrack {
     isEnabled = true
     include = setOf()
-    exclude = setOf(".*\\.IgnoreImageView\$")
+    exclude = setOf(".*\\.IgnoreImageView$")
     originClass = "android.widget.ImageView"
     targetClass = "github.leavesczy.track.replace.clazz.MonitorImageView"
 }

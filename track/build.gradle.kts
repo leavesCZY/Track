@@ -39,7 +39,6 @@ gradlePlugin {
 }
 
 dependencies {
-    compileOnly(libs.android.gradle)
     compileOnly(libs.android.gradle.api)
     compileOnly(libs.ow2.asm.commons)
 }
