@@ -7,18 +7,23 @@ import java.util.TimeZone
 
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.jetbrains.kotlin.android)
     alias(libs.plugins.jetbrains.kotlin.compose)
     alias(libs.plugins.leavesczy.track)
 }
 
 android {
     namespace = "github.leavesczy.track"
-    compileSdk = 36
+    compileSdk {
+        version = release(version = 36)
+    }
     defaultConfig {
         applicationId = "github.leavesczy.track"
-        minSdk = 23
-        targetSdk = 36
+        minSdk {
+            version = release(version = 23)
+        }
+        targetSdk {
+            version = release(version = 36)
+        }
         versionCode = 1
         versionName = "1.0.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -28,13 +33,14 @@ android {
     }
     signingConfigs {
         create("release") {
-            storeFile =
-                File(rootDir.absolutePath + File.separator + "doc" + File.separator + "key.jks")
+            storeFile = File(File(rootDir, "doc"), "key.jks")
             keyAlias = "leavesCZY"
             keyPassword = "123456"
             storePassword = "123456"
             enableV1Signing = true
             enableV2Signing = true
+            enableV3Signing = true
+            enableV4Signing = true
         }
     }
     buildTypes {
