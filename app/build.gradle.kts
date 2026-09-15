@@ -14,7 +14,7 @@ plugins {
 android {
     namespace = "github.leavesczy.track"
     compileSdk {
-        version = release(version = 36)
+        version = release(version = 37)
     }
     defaultConfig {
         applicationId = "github.leavesczy.track"
@@ -22,7 +22,7 @@ android {
             version = release(version = 23)
         }
         targetSdk {
-            version = release(version = 36)
+            version = release(version = 37)
         }
         versionCode = 1
         versionName = "1.0.0"
@@ -73,12 +73,12 @@ android {
         archivesName.set("track_v${defaultConfig.versionName}_${defaultConfig.versionCode}_${time}")
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     tasks.withType<KotlinCompile>().configureEach {
         compilerOptions {
-            jvmTarget.value(JvmTarget.JVM_11)
+            jvmTarget.value(JvmTarget.JVM_17)
         }
     }
     buildFeatures {
@@ -196,7 +196,7 @@ replaceMethodTrack {
             proxyOwner = systemMethodProxyOwner
         ),
         ReplaceInstruction(
-            owner = "android.provider.Settings\$Secure",
+            owner = $$"android.provider.Settings$Secure",
             name = "getString",
             descriptor = "(Landroid/content/ContentResolver;Ljava/lang/String;)Ljava/lang/String;",
             proxyOwner = systemMethodProxyOwner

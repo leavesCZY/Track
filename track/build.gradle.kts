@@ -1,5 +1,3 @@
-@file:Suppress("UnstableApiUsage")
-
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
@@ -9,15 +7,15 @@ plugins {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_11
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
     withJavadocJar()
     withSourcesJar()
 }
 
 tasks.withType<KotlinCompile>().configureEach {
     compilerOptions {
-        jvmTarget.value(JvmTarget.JVM_11)
+        jvmTarget.value(JvmTarget.JVM_17)
     }
 }
 
@@ -40,5 +38,5 @@ gradlePlugin {
 
 dependencies {
     compileOnly(libs.android.gradle.api)
-    compileOnly(libs.ow2.asm.commons)
+    compileOnly(libs.ow2.asm.tree)
 }
