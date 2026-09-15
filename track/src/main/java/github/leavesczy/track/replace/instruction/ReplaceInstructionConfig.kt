@@ -4,7 +4,6 @@ import github.leavesczy.track.BaseTrackConfig
 import java.io.Serializable
 
 internal data class ReplaceInstructionConfig(
-    override val isEnabled: Boolean,
     override val include: Set<String>,
     override val exclude: Set<String>,
     override val extensionName: String,
@@ -21,7 +20,6 @@ internal data class ReplaceInstructionConfig(
 }
 
 open class ReplaceInstructionPluginParameter(
-    var isEnabled: Boolean = true,
     var include: Set<String> = emptySet(),
     var exclude: Set<String> = emptySet(),
     var instructions: Set<ReplaceInstruction> = emptySet()
@@ -35,14 +33,12 @@ open class ReplaceInstruction(
 )
 
 open class ToastPluginParameter(
-    var isEnabled: Boolean = true,
     var include: Set<String> = emptySet(),
     var exclude: Set<String> = emptySet(),
     var proxyOwner: String = ""
 )
 
 open class OptimizedThreadPluginParameter(
-    var isEnabled: Boolean = true,
     var include: Set<String> = emptySet(),
     var exclude: Set<String> = emptySet(),
     var proxyOwner: String = "",

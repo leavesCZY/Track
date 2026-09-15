@@ -120,7 +120,6 @@ dependencies {
 }
 
 viewClickTrack {
-    isEnabled = true
     include = setOf()
     exclude = setOf()
     onClickClass = "github.leavesczy.track.click.view.ViewClickMonitor"
@@ -129,20 +128,17 @@ viewClickTrack {
 }
 
 composeClickTrack {
-    isEnabled = true
     onClickClass = "github.leavesczy.track.click.compose.ComposeOnClick"
     uncheckOnClickLabel = "notCheck"
 }
 
 toastTrack {
-    isEnabled = true
     include = setOf()
     exclude = setOf()
     proxyOwner = "github.leavesczy.track.toast.ToastProxy"
 }
 
 optimizedThreadTrack {
-    isEnabled = true
     include = setOf()
     exclude = setOf()
     proxyOwner = "github.leavesczy.track.thread.OptimizedExecutors"
@@ -156,7 +152,6 @@ optimizedThreadTrack {
 }
 
 replaceClassTrack {
-    isEnabled = true
     include = setOf()
     exclude = setOf(".*\\.IgnoreImageView$")
     originClass = "android.widget.ImageView"
@@ -164,7 +159,6 @@ replaceClassTrack {
 }
 
 replaceFieldTrack {
-    isEnabled = true
     include = setOf()
     exclude = setOf()
     instructions = setOf(
@@ -178,7 +172,6 @@ replaceFieldTrack {
 }
 
 replaceMethodTrack {
-    isEnabled = true
     include = setOf()
     exclude = setOf()
     val systemMethodProxyOwner = "github.leavesczy.track.replace.instruction.SystemMethodProxy"

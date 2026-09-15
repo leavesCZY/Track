@@ -23,8 +23,6 @@ internal abstract class BaseTrackClassNode(protected open val trackConfig: BaseT
 
 internal interface BaseTrackConfig : Serializable {
 
-    val isEnabled: Boolean
-
     val include: Set<String>
 
     val exclude: Set<String>
@@ -53,9 +51,6 @@ internal interface BaseTrackAsmClassVisitorFactory<Parameters : BaseTrackConfigP
     ): BaseTrackClassNode
 
     override fun isInstrumentable(classData: ClassData): Boolean {
-        if (!trackConfig.isEnabled) {
-            return false
-        }
         val include = trackConfig.include.map {
             Regex(it)
         }

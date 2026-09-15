@@ -3,7 +3,6 @@ package github.leavesczy.track.replace.clazz
 import github.leavesczy.track.BaseTrackConfig
 
 internal data class ReplaceClassConfig(
-    override val isEnabled: Boolean,
     override val include: Set<String>,
     override val exclude: Set<String>,
     override val extensionName: String,
@@ -12,7 +11,6 @@ internal data class ReplaceClassConfig(
 ) : BaseTrackConfig
 
 open class ReplaceClassPluginParameter(
-    var isEnabled: Boolean = true,
     var include: Set<String> = emptySet(),
     var exclude: Set<String> = emptySet(),
     var originClass: String = "",

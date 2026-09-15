@@ -14,12 +14,14 @@ import github.leavesczy.track.replace.clazz.ReplaceClassAsmClassVisitorFactory
 import github.leavesczy.track.replace.clazz.ReplaceClassConfig
 import github.leavesczy.track.replace.clazz.ReplaceClassPluginParameter
 import github.leavesczy.track.replace.instruction.OptimizedThreadPluginParameter
+import github.leavesczy.track.replace.instruction.ReplaceInstruction
 import github.leavesczy.track.replace.instruction.ReplaceInstructionAsmClassVisitorFactory
 import github.leavesczy.track.replace.instruction.ReplaceInstructionConfig
 import github.leavesczy.track.replace.instruction.ReplaceInstructionConfig.ReplaceInstructionParameter
 import github.leavesczy.track.replace.instruction.ReplaceInstructionPluginParameter
 import github.leavesczy.track.replace.instruction.ToastPluginParameter
 import github.leavesczy.track.utils.replacePeriodWithSlash
+import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 
@@ -96,10 +98,22 @@ class TrackPlugin : Plugin<Project> {
 
     private fun handleViewClickTrack(project: Project, variant: Variant) {
         val pluginParameter = project.extensions.findByType(ViewClickPluginParameter::class.java)
-        val onClickClass = pluginParameter?.onClickClass
-        val onClickMethodName = pluginParameter?.onClickMethodName
-        if (onClickClass.isNullOrBlank() || onClickMethodName.isNullOrBlank()) {
+            ?: return
+        val hasConfigIntent = pluginParameter.onClickClass.isNotBlank() ||
+                pluginParameter.onClickMethodName.isNotBlank() ||
+                pluginParameter.uncheckViewOnClickAnnotation.isNotBlank() ||
+                pluginParameter.include.isNotEmpty() ||
+                pluginParameter.exclude.isNotEmpty()
+        if (!hasConfigIntent) {
             return
+        }
+        val onClickClass = pluginParameter.onClickClass
+        val onClickMethodName = pluginParameter.onClickMethodName
+        if (onClickClass.isBlank() || onClickMethodName.isBlank()) {
+            throw trackConfigError(
+                extensionName = viewClickTrack,
+                detail = "已配置但缺少必填参数 onClickClass / onClickMethodName"
+            )
         }
         variant.instrumentation.apply {
             transformClassesWith(
@@ -108,7 +122,6 @@ class TrackPlugin : Plugin<Project> {
             ) { params ->
                 params.trackConfig.set(
                     ViewClickConfig(
-                        isEnabled = pluginParameter.isEnabled,
                         include = pluginParameter.include,
                         exclude = pluginParameter.exclude,
                         extensionName = viewClickTrack,
@@ -123,9 +136,18 @@ class TrackPlugin : Plugin<Project> {
 
     private fun handleComposeClickTrack(project: Project, variant: Variant) {
         val pluginParameter = project.extensions.findByType(ComposeClickPluginParameter::class.java)
-        val onClickClass = pluginParameter?.onClickClass
-        if (onClickClass.isNullOrBlank()) {
+            ?: return
+        val hasConfigIntent = pluginParameter.onClickClass.isNotBlank() ||
+                pluginParameter.uncheckOnClickLabel.isNotBlank()
+        if (!hasConfigIntent) {
             return
+        }
+        val onClickClass = pluginParameter.onClickClass
+        if (onClickClass.isBlank()) {
+            throw trackConfigError(
+                extensionName = composeClickTrack,
+                detail = "已配置但缺少必填参数 onClickClass"
+            )
         }
         variant.instrumentation.apply {
             transformClassesWith(
@@ -134,7 +156,6 @@ class TrackPlugin : Plugin<Project> {
             ) { params ->
                 params.trackConfig.set(
                     ComposeClickConfig(
-                        isEnabled = pluginParameter.isEnabled,
                         include = emptySet(),
                         exclude = emptySet(),
                         extensionName = composeClickTrack,
@@ -149,10 +170,21 @@ class TrackPlugin : Plugin<Project> {
     private fun handleReplaceClassTrack(project: Project, variant: Variant) {
         val pluginParameter =
             project.extensions.findByType(ReplaceClassPluginParameter::class.java)
-        val originClass = pluginParameter?.originClass
-        val targetClass = pluginParameter?.targetClass
-        if (originClass.isNullOrBlank() || targetClass.isNullOrBlank()) {
+                ?: return
+        val hasConfigIntent = pluginParameter.originClass.isNotBlank() ||
+                pluginParameter.targetClass.isNotBlank() ||
+                pluginParameter.include.isNotEmpty() ||
+                pluginParameter.exclude.isNotEmpty()
+        if (!hasConfigIntent) {
             return
+        }
+        val originClass = pluginParameter.originClass
+        val targetClass = pluginParameter.targetClass
+        if (originClass.isBlank() || targetClass.isBlank()) {
+            throw trackConfigError(
+                extensionName = replaceClassTrack,
+                detail = "已配置但缺少必填参数 originClass / targetClass"
+            )
         }
         variant.instrumentation.apply {
             transformClassesWith(
@@ -161,7 +193,6 @@ class TrackPlugin : Plugin<Project> {
             ) { params ->
                 params.trackConfig.set(
                     ReplaceClassConfig(
-                        isEnabled = pluginParameter.isEnabled,
                         include = pluginParameter.include,
                         exclude = pluginParameter.exclude,
                         extensionName = replaceClassTrack,
@@ -176,14 +207,23 @@ class TrackPlugin : Plugin<Project> {
     private fun handleToastTrack(project: Project, variant: Variant) {
         val pluginParameter =
             project.extensions.findByType(ToastPluginParameter::class.java)
-        val proxyOwner = pluginParameter?.proxyOwner
-        if (proxyOwner.isNullOrBlank()) {
+                ?: return
+        val hasConfigIntent = pluginParameter.proxyOwner.isNotBlank() ||
+                pluginParameter.include.isNotEmpty() ||
+                pluginParameter.exclude.isNotEmpty()
+        if (!hasConfigIntent) {
             return
+        }
+        val proxyOwner = pluginParameter.proxyOwner
+        if (proxyOwner.isBlank()) {
+            throw trackConfigError(
+                extensionName = toastTrack,
+                detail = "已配置但缺少必填参数 proxyOwner"
+            )
         }
         handleReplaceInstructionTrack(
             variant = variant,
             extensionName = toastTrack,
-            isEnabled = pluginParameter.isEnabled,
             include = pluginParameter.include,
             exclude = pluginParameter.exclude,
             instructions = setOf(
@@ -203,15 +243,25 @@ class TrackPlugin : Plugin<Project> {
     ) {
         val pluginParameter =
             project.extensions.findByType(OptimizedThreadPluginParameter::class.java)
-        val proxyOwner = pluginParameter?.proxyOwner
-        val methods = pluginParameter?.methods
-        if (proxyOwner.isNullOrBlank() || methods.isNullOrEmpty()) {
+                ?: return
+        val hasConfigIntent = pluginParameter.proxyOwner.isNotBlank() ||
+                pluginParameter.methods.isNotEmpty() ||
+                pluginParameter.include.isNotEmpty() ||
+                pluginParameter.exclude.isNotEmpty()
+        if (!hasConfigIntent) {
             return
+        }
+        val proxyOwner = pluginParameter.proxyOwner
+        val methods = pluginParameter.methods
+        if (proxyOwner.isBlank() || methods.isEmpty()) {
+            throw trackConfigError(
+                extensionName = optimizedThreadTrack,
+                detail = "已配置但缺少必填参数 proxyOwner / methods"
+            )
         }
         handleReplaceInstructionTrack(
             variant = variant,
             extensionName = optimizedThreadTrack,
-            isEnabled = pluginParameter.isEnabled,
             include = pluginParameter.include,
             exclude = pluginParameter.exclude,
             instructions = methods.map {
@@ -232,39 +282,58 @@ class TrackPlugin : Plugin<Project> {
     ) {
         val pluginParameter =
             project.extensions.findByName(extensionName) as? ReplaceInstructionPluginParameter
-        val instructions = pluginParameter?.instructions?.mapNotNull {
-            val owner = it.owner
-            val name = it.name
-            val descriptor = it.descriptor
-            val proxyOwner = it.proxyOwner
-            if (owner.isBlank() || name.isBlank() || proxyOwner.isBlank()) {
-                null
-            } else {
-                ReplaceInstructionParameter(
-                    owner = replacePeriodWithSlash(className = owner),
-                    name = name,
-                    descriptor = descriptor,
-                    proxyOwner = proxyOwner
-                )
-            }
-        }?.toSet()
-        if (instructions.isNullOrEmpty()) {
+                ?: return
+        val hasConfigIntent = pluginParameter.instructions.isNotEmpty() ||
+                pluginParameter.include.isNotEmpty() ||
+                pluginParameter.exclude.isNotEmpty()
+        if (!hasConfigIntent) {
             return
         }
+        if (pluginParameter.instructions.isEmpty()) {
+            throw trackConfigError(
+                extensionName = extensionName,
+                detail = "已配置但缺少必填参数 instructions"
+            )
+        }
+        val instructions = pluginParameter.instructions.map { instruction ->
+            validateReplaceInstruction(
+                extensionName = extensionName,
+                instruction = instruction
+            )
+        }.toSet()
         handleReplaceInstructionTrack(
             variant = variant,
             extensionName = extensionName,
-            isEnabled = pluginParameter.isEnabled,
             include = pluginParameter.include,
             exclude = pluginParameter.exclude,
             instructions = instructions
         )
     }
 
+    private fun validateReplaceInstruction(
+        extensionName: String,
+        instruction: ReplaceInstruction
+    ): ReplaceInstructionParameter {
+        val owner = instruction.owner
+        val name = instruction.name
+        val proxyOwner = instruction.proxyOwner
+        if (owner.isBlank() || name.isBlank() || proxyOwner.isBlank()) {
+            throw trackConfigError(
+                extensionName = extensionName,
+                detail = "instructions 中存在不完整项，owner / name / proxyOwner 均不能为空"
+            )
+        }
+        return ReplaceInstructionParameter(
+            owner = replacePeriodWithSlash(className = owner),
+            name = name,
+            descriptor = instruction.descriptor,
+            proxyOwner = proxyOwner
+        )
+    }
+
     private fun handleReplaceInstructionTrack(
         variant: Variant,
         extensionName: String,
-        isEnabled: Boolean,
         include: Set<String>,
         exclude: Set<String>,
         instructions: Set<ReplaceInstructionParameter>
@@ -279,7 +348,6 @@ class TrackPlugin : Plugin<Project> {
             ) { params ->
                 params.trackConfig.set(
                     ReplaceInstructionConfig(
-                        isEnabled = isEnabled,
                         include = include,
                         exclude = exclude,
                         extensionName = extensionName,
@@ -288,6 +356,10 @@ class TrackPlugin : Plugin<Project> {
                 )
             }
         }
+    }
+
+    private fun trackConfigError(extensionName: String, detail: String): GradleException {
+        return GradleException("$extensionName 配置无效：$detail，已拒绝注册插桩。")
     }
 
 }

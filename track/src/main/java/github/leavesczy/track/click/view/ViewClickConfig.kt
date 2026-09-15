@@ -3,7 +3,6 @@ package github.leavesczy.track.click.view
 import github.leavesczy.track.BaseTrackConfig
 
 internal data class ViewClickConfig(
-    override val isEnabled: Boolean,
     override val include: Set<String>,
     override val exclude: Set<String>,
     override val extensionName: String,
@@ -13,7 +12,6 @@ internal data class ViewClickConfig(
 ) : BaseTrackConfig
 
 open class ViewClickPluginParameter(
-    var isEnabled: Boolean = true,
     var include: Set<String> = emptySet(),
     var exclude: Set<String> = emptySet(),
     var onClickClass: String = "",

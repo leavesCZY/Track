@@ -3,7 +3,6 @@ package github.leavesczy.track.click.compose
 import github.leavesczy.track.BaseTrackConfig
 
 internal data class ComposeClickConfig(
-    override val isEnabled: Boolean,
     override val include: Set<String>,
     override val exclude: Set<String>,
     override val extensionName: String,
@@ -12,7 +11,6 @@ internal data class ComposeClickConfig(
 ) : BaseTrackConfig
 
 open class ComposeClickPluginParameter(
-    var isEnabled: Boolean = true,
     var onClickClass: String = "",
     var uncheckOnClickLabel: String = ""
 )
