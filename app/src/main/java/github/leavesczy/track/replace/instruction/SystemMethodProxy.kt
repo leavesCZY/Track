@@ -1,16 +1,9 @@
 package github.leavesczy.track.replace.instruction
 
-import android.annotation.SuppressLint
 import android.content.ContentResolver
 import android.provider.Settings
 import android.telephony.TelephonyManager
 
-/**
- * @Author: leavesCZY
- * @Date: 2025/5/16 11:43
- * @Desc:
- */
-@SuppressLint("MissingPermission", "HardwareIds", "NewApi")
 internal object SystemMethodProxy {
 
     private val isProxyEnabled: Boolean
@@ -24,7 +17,7 @@ internal object SystemMethodProxy {
             try {
                 telephonyManager.deviceId ?: ""
             } catch (e: Throwable) {
-                "error"
+                e.message ?: ""
             }
         }
     }
@@ -37,7 +30,7 @@ internal object SystemMethodProxy {
             try {
                 telephonyManager.getImei(slotIndex) ?: ""
             } catch (e: Throwable) {
-                "error"
+                e.message ?: ""
             }
         }
     }
