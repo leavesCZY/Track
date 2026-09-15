@@ -131,7 +131,7 @@ viewClickTrack {
 composeClickTrack {
     isEnabled = true
     onClickClass = "github.leavesczy.track.click.compose.ComposeOnClick"
-    onClickWhiteList = "notCheck"
+    uncheckOnClickLabel = "notCheck"
 }
 
 toastTrack {

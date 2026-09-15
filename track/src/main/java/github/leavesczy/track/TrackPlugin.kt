@@ -139,7 +139,7 @@ class TrackPlugin : Plugin<Project> {
                         exclude = emptySet(),
                         extensionName = composeClickTrack,
                         onClickClass = onClickClass,
-                        onClickWhiteList = pluginParameter.onClickWhiteList
+                        uncheckOnClickLabel = pluginParameter.uncheckOnClickLabel
                     )
                 )
             }

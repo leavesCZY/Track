@@ -33,7 +33,7 @@ import github.leavesczy.track.R
 
 class ComposeClickTrackActivity : BaseActivity() {
 
-    private val ontClickWhiteList = "notCheck"
+    private val uncheckOnClickLabel = "notCheck"
 
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -80,23 +80,23 @@ class ComposeClickTrackActivity : BaseActivity() {
                         Text(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .clickable(onClickLabel = ontClickWhiteList) {
+                                .clickable(onClickLabel = uncheckOnClickLabel) {
                                     index++
                                 }
                                 .padding(vertical = 8.dp),
-                            text = "Text clickable（不防抖）"
+                            text = "clickable（不防抖）"
                         )
                         Text(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .combinedClickable(
-                                    onClickLabel = ontClickWhiteList,
+                                    onClickLabel = uncheckOnClickLabel,
                                     onClick = {
                                         index++
                                     }
                                 )
                                 .padding(vertical = 8.dp),
-                            text = "Text combinedClickable（不防抖）"
+                            text = "combinedClickable（不防抖）"
                         )
                         Text(
                             modifier = Modifier
@@ -105,7 +105,7 @@ class ComposeClickTrackActivity : BaseActivity() {
                                     index++
                                 }
                                 .padding(vertical = 8.dp),
-                            text = "Text clickable"
+                            text = "clickable"
                         )
                         Text(
                             modifier = Modifier
@@ -117,7 +117,7 @@ class ComposeClickTrackActivity : BaseActivity() {
                                     index++
                                 }
                                 .padding(vertical = 8.dp),
-                            text = "Text clickable（无 indication）"
+                            text = "clickable（无 indication）"
                         )
                         Text(
                             modifier = Modifier
@@ -126,7 +126,7 @@ class ComposeClickTrackActivity : BaseActivity() {
                                     index++
                                 })
                                 .padding(vertical = 8.dp),
-                            text = "Text combinedClickable"
+                            text = "combinedClickable"
                         )
                         TextButton(
                             modifier = Modifier

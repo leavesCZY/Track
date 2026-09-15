@@ -8,9 +8,9 @@ import github.leavesczy.track.BaseTrackConfigParameters
 import github.leavesczy.track.utils.InitMethodName
 import github.leavesczy.track.utils.replacePeriodWithSlash
 import org.objectweb.asm.ClassVisitor
-import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes
 import org.objectweb.asm.Type
+import org.objectweb.asm.tree.FieldInsnNode
 import org.objectweb.asm.tree.InsnList
 import org.objectweb.asm.tree.InsnNode
 import org.objectweb.asm.tree.JumpInsnNode
@@ -21,10 +21,21 @@ import org.objectweb.asm.tree.MethodNode
 import org.objectweb.asm.tree.TypeInsnNode
 import org.objectweb.asm.tree.VarInsnNode
 
-private const val ClickableElementClassName = "androidx.compose.foundation.ClickableElement"
+private const val CLICKABLE_ELEMENT_CLASS_NAME = "androidx.compose.foundation.ClickableElement"
 
-private const val CombinedClickableElementClassName =
+private const val COMBINED_CLICKABLE_ELEMENT_CLASS_NAME =
     "androidx.compose.foundation.CombinedClickableElement"
+
+private const val ON_CLICK_LABEL_PARAM_NAME = "onClickLabel"
+
+private const val ON_CLICK_PARAM_NAME = "onClick"
+
+private const val STRING_DESC = "Ljava/lang/String;"
+
+private const val FUNCTION0_DESC = "Lkotlin/jvm/functions/Function0;"
+
+private const val DEFAULT_CONSTRUCTOR_MARKER_CLASS_NAME =
+    "kotlin.jvm.internal.DefaultConstructorMarker"
 
 internal abstract class ComposeClickAsmClassVisitorFactory :
     BaseTrackAsmClassVisitorFactory<BaseTrackConfigParameters, ComposeClickConfig> {
@@ -40,7 +51,8 @@ internal abstract class ComposeClickAsmClassVisitorFactory :
     }
 
     override fun isTrackEnabled(classData: ClassData): Boolean {
-        return classData.className == ClickableElementClassName || classData.className == CombinedClickableElementClassName
+        return classData.className == CLICKABLE_ELEMENT_CLASS_NAME ||
+                classData.className == COMBINED_CLICKABLE_ELEMENT_CLASS_NAME
     }
 
 }
@@ -50,46 +62,103 @@ private class ComposeClickClassVisitor(
     override val trackConfig: ComposeClickConfig
 ) : BaseTrackClassNode(trackConfig = trackConfig) {
 
-    override fun visitMethod(
-        access: Int,
-        name: String?,
-        descriptor: String?,
-        signature: String?,
-        exceptions: Array<out String>?
-    ): MethodVisitor {
-        val methodNode =
-            super.visitMethod(access, name, descriptor, signature, exceptions) as MethodNode
-        if (name == InitMethodName) {
-            handleComposeClick(methodNode = methodNode)
+    override fun visitEnd() {
+        super.visitEnd()
+        val primaryConstructors = methods.filter { methodNode ->
+            methodNode.name == InitMethodName && methodNode.isPrimaryClickableConstructor()
         }
-        return methodNode
+        if (primaryConstructors.isEmpty()) {
+            throw composeClickTrackError(
+                detail = "未找到会 putfield onClick 的主构造方法，拒绝继续编译"
+            )
+        }
+        if (primaryConstructors.size > 1) {
+            throw composeClickTrackError(
+                detail = "找到多个主构造方法，拒绝重复插桩：${primaryConstructors.map { it.desc }}"
+            )
+        }
+        handleComposeClick(methodNode = primaryConstructors[0])
+        log {
+            "找到 $name 类，完成处理..."
+        }
+        accept(nextClassVisitor)
+    }
+
+    /**
+     * ClickableKt 有多组 clickable / combinedClickable 重载，最终都会走到
+     * ClickableElement / CombinedClickableElement 的主构造。
+     * 只改「真正 putfield onClick」的主构造，跳过带 DefaultConstructorMarker 的 synthetic 转发构造，
+     * 避免同一点击被重复包装。
+     */
+    private fun MethodNode.isPrimaryClickableConstructor(): Boolean {
+        val argumentTypes = Type.getArgumentTypes(desc)
+        if (argumentTypes.isNotEmpty() &&
+            argumentTypes.last().className == DEFAULT_CONSTRUCTOR_MARKER_CLASS_NAME
+        ) {
+            return false
+        }
+        val classInternalName = this@ComposeClickClassVisitor.name
+        return instructions.any { insn ->
+            insn is FieldInsnNode &&
+                    insn.opcode == Opcodes.PUTFIELD &&
+                    insn.owner == classInternalName &&
+                    insn.name == ON_CLICK_PARAM_NAME &&
+                    insn.desc == FUNCTION0_DESC
+        }
     }
 
     private fun handleComposeClick(methodNode: MethodNode) {
-        if (methodNode.signature.isNullOrBlank()) {
-            return
-        }
-        val onClickLabelType = Type.getType("Ljava/lang/String;")
-        val onClickFunctionType = Type.getType("Lkotlin/jvm/functions/Function0;")
-        val methodDesc = methodNode.desc
-        val methodArgumentTypes = Type.getArgumentTypes(methodDesc)
-        val onClickLabelArgumentIndex = methodArgumentTypes.indexOf(element = onClickLabelType) + 1
-        val onClickArgumentIndex = methodArgumentTypes.indexOf(element = onClickFunctionType) + 1
+        val onClickLabelSlot = methodNode.findRequiredParamSlot(
+            paramName = ON_CLICK_LABEL_PARAM_NAME,
+            expectedDesc = STRING_DESC
+        )
+        val onClickSlot = methodNode.findRequiredParamSlot(
+            paramName = ON_CLICK_PARAM_NAME,
+            expectedDesc = FUNCTION0_DESC
+        )
         insertInstructions(
             methodNode = methodNode,
-            onClickLabelArgumentIndex = onClickLabelArgumentIndex,
-            onClickArgumentIndex = onClickArgumentIndex
+            onClickLabelSlot = onClickLabelSlot,
+            onClickSlot = onClickSlot
+        )
+    }
+
+    private fun MethodNode.findRequiredParamSlot(paramName: String, expectedDesc: String): Int {
+        val localVariables = localVariables
+            ?: throw composeClickTrackError(
+                detail = "method <${this.name} $desc> 缺少 LocalVariableTable，无法按参数名定位 $paramName"
+            )
+        val matched = localVariables.filter { local ->
+            local.name == paramName && local.desc == expectedDesc
+        }
+        if (matched.isEmpty()) {
+            throw composeClickTrackError(
+                detail = "method <${this.name} $desc> 未找到参数 $paramName:$expectedDesc"
+            )
+        }
+        if (matched.size > 1) {
+            throw composeClickTrackError(
+                detail = "method <${this.name} $desc> 发现多个参数 $paramName:$expectedDesc，拒绝猜测"
+            )
+        }
+        return matched[0].index
+    }
+
+    private fun composeClickTrackError(detail: String): IllegalStateException {
+        return IllegalStateException(
+            "composeClickTrack 插桩失败：$name 。$detail 。" +
+                    "请确认 Compose Foundation 中 ClickableElement / CombinedClickableElement 构造参数仍包含 onClick / onClickLabel。"
         )
     }
 
     private fun insertInstructions(
         methodNode: MethodNode,
-        onClickArgumentIndex: Int,
-        onClickLabelArgumentIndex: Int
+        onClickSlot: Int,
+        onClickLabelSlot: Int
     ) {
         val input = InsnList()
-        input.add(LdcInsnNode(trackConfig.onClickWhiteList))
-        input.add(VarInsnNode(Opcodes.ALOAD, onClickLabelArgumentIndex))
+        input.add(LdcInsnNode(trackConfig.uncheckOnClickLabel))
+        input.add(VarInsnNode(Opcodes.ALOAD, onClickLabelSlot))
         input.add(
             MethodInsnNode(
                 Opcodes.INVOKEVIRTUAL,
@@ -104,7 +173,7 @@ private class ComposeClickClassVisitor(
         input.add(JumpInsnNode(Opcodes.IFNE, label))
         input.add(TypeInsnNode(Opcodes.NEW, onClickClassFormat))
         input.add(InsnNode(Opcodes.DUP))
-        input.add(VarInsnNode(Opcodes.ALOAD, onClickArgumentIndex))
+        input.add(VarInsnNode(Opcodes.ALOAD, onClickSlot))
         input.add(
             MethodInsnNode(
                 Opcodes.INVOKESPECIAL,
@@ -114,17 +183,9 @@ private class ComposeClickClassVisitor(
                 false
             )
         )
-        input.add(VarInsnNode(Opcodes.ASTORE, onClickArgumentIndex))
+        input.add(VarInsnNode(Opcodes.ASTORE, onClickSlot))
         input.add(label)
         methodNode.instructions.insert(input)
-    }
-
-    override fun visitEnd() {
-        super.visitEnd()
-        log {
-            "找到 $ClickableElementClassName , $CombinedClickableElementClassName 类，完成处理..."
-        }
-        accept(nextClassVisitor)
     }
 
 }
