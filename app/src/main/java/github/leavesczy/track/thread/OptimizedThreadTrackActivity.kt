@@ -8,11 +8,6 @@ import github.leavesczy.track.R
 import java.util.concurrent.Executors
 import kotlin.random.Random
 
-/**
- * @Author: leavesCZY
- * @Date: 2025/5/16 11:43
- * @Desc:
- */
 class OptimizedThreadTrackActivity : BaseActivity() {
 
     private val btnSubmitTask by lazy {
@@ -44,7 +39,6 @@ class OptimizedThreadTrackActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_optimized_thread_track)
-        setOnApplyWindowInsetsListener()
         supportActionBar?.title = "OptimizedThreadTrack"
         btnSubmitTask.setOnClickListener {
             newSingleThreadExecutor.execute {

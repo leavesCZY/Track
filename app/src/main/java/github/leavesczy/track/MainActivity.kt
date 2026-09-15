@@ -11,17 +11,12 @@ import github.leavesczy.track.replace.instruction.ReplaceInstructionTrackActivit
 import github.leavesczy.track.thread.OptimizedThreadTrackActivity
 import github.leavesczy.track.toast.ToastTrackActivity
 
-/**
- * @Author: leavesCZY
- * @Date: 2025/5/16 11:43
- * @Desc:
- */
 class MainActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        setOnApplyWindowInsetsListener()
+        supportActionBar?.title = getString(R.string.app_name)
         findViewById<View>(R.id.btnViewClickTrack).setOnClickListener {
             startActivity<ViewClickTrackActivity>()
         }
