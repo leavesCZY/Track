@@ -11,18 +11,18 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 
-/**
- * @Author: leavesCZY
- * @Date: 2025/5/16 11:43
- * @Desc:
- */
 @Composable
 internal fun TrackTheme(content: @Composable () -> Unit) {
     val lightColorScheme = remember {
         lightColorScheme(
-            primary = Color(color = 0xFF03A9F4),
-            secondary = Color(color = 0xFF03A9F4),
-            tertiary = Color(color = 0xFF7D5260)
+            primary = Color(color = 0xFF1E88E5),
+            onPrimary = Color.White,
+            primaryContainer = Color(color = 0xFFE3F2FD),
+            onPrimaryContainer = Color(color = 0xFF1565C0),
+            secondary = Color(color = 0xFF1E88E5),
+            surface = Color(color = 0xFFF5F7FA),
+            onSurface = Color(color = 0xFF1A2332),
+            onSurfaceVariant = Color(color = 0xFF5C6B7A)
         )
     }
     val typography = remember {

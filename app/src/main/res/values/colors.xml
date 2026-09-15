@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="color_top_bar">#FF0691F6</color>
-    <color name="ic_launcher_background">#FF0691F6</color>
+    <color name="color_primary">#FF1E88E5</color>
+    <color name="color_primary_dark">#FF1565C0</color>
+    <color name="color_primary_container">#FFE3F2FD</color>
+    <color name="color_on_primary">#FFFFFFFF</color>
+    <color name="color_surface">#FFF5F7FA</color>
+    <color name="color_on_surface">#FF1A2332</color>
+    <color name="color_on_surface_variant">#FF5C6B7A</color>
+    <color name="ic_launcher_background">@color/color_primary</color>
 </resources>

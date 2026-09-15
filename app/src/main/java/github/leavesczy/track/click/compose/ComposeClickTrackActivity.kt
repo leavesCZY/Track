@@ -5,12 +5,15 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -22,19 +25,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.view.WindowInsetsControllerCompat
 import github.leavesczy.track.BaseActivity
 import github.leavesczy.track.R
 
-/**
- * @Author: leavesCZY
- * @Date: 2025/5/16 11:43
- * @Desc:
- */
 class ComposeClickTrackActivity : BaseActivity() {
 
     private val ontClickWhiteList = "notCheck"
@@ -42,127 +38,117 @@ class ComposeClickTrackActivity : BaseActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setSystemBarUi()
         setContent {
             TrackTheme {
+                val primary = colorResource(id = R.color.color_primary)
                 Scaffold(
                     modifier = Modifier
                         .fillMaxSize(),
+                    containerColor = MaterialTheme.colorScheme.surface,
                     topBar = {
                         TopAppBar(
-                            modifier = Modifier,
                             colors = TopAppBarDefaults.topAppBarColors(
-                                containerColor = colorResource(R.color.color_top_bar)
+                                containerColor = primary,
+                                titleContentColor = colorResource(id = R.color.color_on_primary)
                             ),
                             title = {
                                 Text(
-                                    modifier = Modifier,
                                     text = "ComposeClickTrack",
-                                    fontSize = 21.sp,
-                                    color = Color.White
+                                    fontSize = 20.sp
                                 )
                             }
                         )
                     }
                 ) { innerPadding ->
-                    Box(
+                    var index by remember {
+                        mutableIntStateOf(value = 0)
+                    }
+                    Column(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(paddingValues = innerPadding)
+                            .verticalScroll(state = rememberScrollState())
+                            .padding(horizontal = 20.dp, vertical = 24.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(14.dp)
                     ) {
-                        Column(
+                        Text(
+                            text = index.toString(),
+                            fontSize = 36.sp,
+                            color = primary
+                        )
+                        Text(
                             modifier = Modifier
-                                .fillMaxSize(),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.spacedBy(
-                                space = 20.dp,
-                                alignment = Alignment.CenterVertically
-                            )
+                                .fillMaxWidth()
+                                .clickable(onClickLabel = ontClickWhiteList) {
+                                    index++
+                                }
+                                .padding(vertical = 8.dp),
+                            text = "Text clickable（不防抖）"
+                        )
+                        Text(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .combinedClickable(
+                                    onClickLabel = ontClickWhiteList,
+                                    onClick = {
+                                        index++
+                                    }
+                                )
+                                .padding(vertical = 8.dp),
+                            text = "Text combinedClickable（不防抖）"
+                        )
+                        Text(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    index++
+                                }
+                                .padding(vertical = 8.dp),
+                            text = "Text clickable"
+                        )
+                        Text(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable(
+                                    interactionSource = null,
+                                    indication = null
+                                ) {
+                                    index++
+                                }
+                                .padding(vertical = 8.dp),
+                            text = "Text clickable（无 indication）"
+                        )
+                        Text(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .combinedClickable(onClick = {
+                                    index++
+                                })
+                                .padding(vertical = 8.dp),
+                            text = "Text combinedClickable"
+                        )
+                        TextButton(
+                            modifier = Modifier
+                                .fillMaxWidth(),
+                            onClick = {
+                                index++
+                            }
                         ) {
-                            var index by remember {
-                                mutableIntStateOf(0)
+                            Text(text = "TextButton")
+                        }
+                        Button(
+                            modifier = Modifier
+                                .fillMaxWidth(),
+                            onClick = {
+                                index++
                             }
-                            Text(
-                                modifier = Modifier,
-                                text = index.toString(),
-                                fontSize = 25.sp
-                            )
-                            Text(
-                                modifier = Modifier
-                                    .clickable(onClickLabel = ontClickWhiteList) {
-                                        index++
-                                    },
-                                text = "Text clickable 不防抖"
-                            )
-                            Text(
-                                modifier = Modifier
-                                    .combinedClickable(
-                                        onClickLabel = ontClickWhiteList,
-                                        onClick = {
-                                            index++
-                                        }
-                                    ),
-                                text = "Text combinedClickable 不防抖"
-                            )
-                            Text(
-                                modifier = Modifier
-                                    .clickable {
-                                        index++
-                                    },
-                                text = "Text clickable"
-                            )
-                            Text(
-                                modifier = Modifier
-                                    .clickable(
-                                        interactionSource = null,
-                                        indication = null
-                                    ) {
-                                        index++
-                                    },
-                                text = "Text clickable"
-                            )
-                            Text(
-                                modifier = Modifier
-                                    .combinedClickable(
-                                        onClick = {
-                                            index++
-                                        }
-                                    ),
-                                text = "Text combinedClickable"
-                            )
-                            TextButton(
-                                modifier = Modifier,
-                                onClick = {
-                                    index++
-                                }
-                            ) {
-                                Text(
-                                    modifier = Modifier,
-                                    text = "TextButton"
-                                )
-                            }
-                            Button(
-                                modifier = Modifier,
-                                onClick = {
-                                    index++
-                                }
-                            ) {
-                                Text(
-                                    modifier = Modifier,
-                                    text = "Button"
-                                )
-                            }
+                        ) {
+                            Text(text = "Button")
                         }
                     }
                 }
             }
-        }
-    }
-
-    private fun setSystemBarUi() {
-        WindowInsetsControllerCompat(window, window.decorView).apply {
-            isAppearanceLightStatusBars = false
-            isAppearanceLightNavigationBars = false
         }
     }
 
