@@ -5,11 +5,6 @@ import android.content.Context
 import android.util.AttributeSet
 import android.widget.ImageView
 
-/**
- * @Author: leavesCZY
- * @Date: 2025/5/16 11:43
- * @Desc:
- */
 @SuppressLint("AppCompatCustomView")
 class IgnoreImageView @JvmOverloads constructor(
     context: Context,

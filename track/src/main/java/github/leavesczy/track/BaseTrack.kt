@@ -12,11 +12,6 @@ import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.tree.ClassNode
 import java.io.Serializable
 
-/**
- * @Author: leavesCZY
- * @Date: 2025/5/16 11:43
- * @Desc:
- */
 internal abstract class BaseTrackClassNode(protected open val trackConfig: BaseTrackConfig) :
     ClassNode(ApiOpcodes) {
 

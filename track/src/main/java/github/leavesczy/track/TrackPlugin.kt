@@ -23,11 +23,6 @@ import github.leavesczy.track.utils.replacePeriodWithSlash
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 
-/**
- * @Author: leavesCZY
- * @Date: 2025/5/16 11:43
- * @Desc:
- */
 class TrackPlugin : Plugin<Project> {
 
     private val viewClickTrack = "viewClickTrack"

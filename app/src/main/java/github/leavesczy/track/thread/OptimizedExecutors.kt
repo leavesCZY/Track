@@ -11,11 +11,6 @@ import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
 
-/**
- * @Author: leavesCZY
- * @Date: 2025/5/16 11:43
- * @Desc:
- */
 internal object OptimizedExecutors {
 
     private const val DEFAULT_THREAD_KEEP_ALIVE_TIME = 3000L

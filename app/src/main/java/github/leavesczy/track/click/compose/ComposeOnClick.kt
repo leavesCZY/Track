@@ -3,11 +3,6 @@ package github.leavesczy.track.click.compose
 import android.os.SystemClock
 import android.util.Log
 
-/**
- * @Author: leavesCZY
- * @Date: 2025/5/16 11:43
- * @Desc:
- */
 class ComposeOnClick(private val onClick: () -> Unit) : Function0<Unit> {
 
     companion object {

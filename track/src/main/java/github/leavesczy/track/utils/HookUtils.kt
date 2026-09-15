@@ -6,11 +6,6 @@ import org.objectweb.asm.tree.InvokeDynamicInsnNode
 import org.objectweb.asm.tree.MethodInsnNode
 import org.objectweb.asm.tree.MethodNode
 
-/**
- * @Author: leavesCZY
- * @Date: 2025/5/16 11:42
- * @Desc:
- */
 internal const val InitMethodName = "<init>"
 
 internal const val ApiOpcodes = Opcodes.ASM8

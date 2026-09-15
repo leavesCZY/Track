@@ -1,10 +1,5 @@
 package github.leavesczy.track.utils
 
-/**
- * @Author: leavesCZY
- * @Date: 2025/5/16 11:43
- * @Desc:
- */
 internal object LogPrint {
 
     fun normal(tag: String, msg: () -> String) {

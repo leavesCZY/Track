@@ -11,11 +11,6 @@ import android.util.AttributeSet
 import android.util.Log
 import android.widget.ImageView
 
-/**
- * @Author: leavesCZY
- * @Date: 2025/5/16 11:43
- * @Desc:
- */
 @SuppressLint("AppCompatCustomView")
 open class MonitorImageView @JvmOverloads constructor(
     context: Context,

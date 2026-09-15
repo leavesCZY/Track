@@ -21,11 +21,6 @@ import org.objectweb.asm.tree.MethodNode
 import org.objectweb.asm.tree.TypeInsnNode
 import org.objectweb.asm.tree.VarInsnNode
 
-/**
- * @Author: leavesCZY
- * @Date: 2025/5/16 11:41
- * @Desc:
- */
 private const val ClickableElementClassName = "androidx.compose.foundation.ClickableElement"
 
 private const val CombinedClickableElementClassName =

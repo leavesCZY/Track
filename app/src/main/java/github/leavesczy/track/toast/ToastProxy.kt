@@ -6,11 +6,6 @@ import android.os.Handler
 import android.os.Message
 import android.widget.Toast
 
-/**
- * @Author: leavesCZY
- * @Date: 2025/5/16 11:43
- * @Desc:
- */
 object ToastProxy {
 
     @JvmStatic

@@ -3,11 +3,6 @@ package github.leavesczy.track.replace.instruction
 import github.leavesczy.track.BaseTrackConfig
 import java.io.Serializable
 
-/**
- * @Author: leavesCZY
- * @Date: 2025/5/16 11:42
- * @Desc:
- */
 internal data class ReplaceInstructionConfig(
     override val isEnabled: Boolean,
     override val include: Set<String>,

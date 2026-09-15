@@ -2,11 +2,6 @@ package github.leavesczy.track.replace.instruction
 
 import android.os.Build
 
-/**
- * @Author: leavesCZY
- * @Date: 2025/5/16 11:43
- * @Desc:
- */
 internal object SystemFieldProxy {
 
     @JvmField

@@ -12,11 +12,6 @@ import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes
 import org.objectweb.asm.tree.ClassNode
 
-/**
- * @Author: leavesCZY
- * @Date: 2025/5/16 11:42
- * @Desc:
- */
 internal abstract class ReplaceInstructionAsmClassVisitorFactory :
     BaseTrackAsmClassVisitorFactory<BaseTrackConfigParameters, ReplaceInstructionConfig> {
 
