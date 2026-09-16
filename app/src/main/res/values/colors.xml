@@ -7,5 +7,5 @@
     <color name="color_surface">#FFF5F7FA</color>
     <color name="color_on_surface">#FF1A2332</color>
     <color name="color_on_surface_variant">#FF5C6B7A</color>
-    <color name="ic_launcher_background">@color/color_primary</color>
+    <color name="ic_launcher_background">#FFFFFFFF</color>
 </resources>

@@ -1,22 +1,34 @@
 package github.leavesczy.track.thread
 
 import android.os.Bundle
-import android.widget.Button
-import android.widget.TextView
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import github.leavesczy.track.BaseActivity
-import github.leavesczy.track.R
+import github.leavesczy.track.click.compose.TrackTheme
+import github.leavesczy.track.click.compose.TrackTopAppBar
 import java.util.concurrent.Executors
 import kotlin.random.Random
 
 class OptimizedThreadTrackActivity : BaseActivity() {
 
-    private val btnSubmitTask by lazy {
-        findViewById<Button>(R.id.btnSubmitTask)
-    }
-
-    private val tvLog by lazy {
-        findViewById<TextView>(R.id.tvLog)
-    }
+    private var log by mutableStateOf(value = "")
 
     private val newSingleThreadExecutor = Executors.newSingleThreadExecutor()
 
@@ -38,24 +50,31 @@ class OptimizedThreadTrackActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_optimized_thread_track)
-        supportActionBar?.title = "OptimizedThreadTrack"
-        btnSubmitTask.setOnClickListener {
-            newSingleThreadExecutor.execute {
-                printThreadName("newSingleThreadExecutor")
+        setContent {
+            TrackTheme {
+                OptimizedThreadTrackScreen(
+                    log = log,
+                    onSubmitTask = ::submitTasks
+                )
             }
-            newCachedThreadPool.execute {
-                printThreadName("newCachedThreadPool")
-            }
-            newFixedThreadPool.execute {
-                printThreadName("newFixedThreadPool")
-            }
-            newScheduledThreadPool.execute {
-                printThreadName("newScheduledThreadPool")
-            }
-            newSingleThreadScheduledExecutor.execute {
-                printThreadName("newSingleThreadScheduledExecutor")
-            }
+        }
+    }
+
+    private fun submitTasks() {
+        newSingleThreadExecutor.execute {
+            printThreadName(threadType = "newSingleThreadExecutor")
+        }
+        newCachedThreadPool.execute {
+            printThreadName(threadType = "newCachedThreadPool")
+        }
+        newFixedThreadPool.execute {
+            printThreadName(threadType = "newFixedThreadPool")
+        }
+        newScheduledThreadPool.execute {
+            printThreadName(threadType = "newScheduledThreadPool")
+        }
+        newSingleThreadScheduledExecutor.execute {
+            printThreadName(threadType = "newSingleThreadScheduledExecutor")
         }
     }
 
@@ -63,9 +82,47 @@ class OptimizedThreadTrackActivity : BaseActivity() {
         Thread.sleep(Random.nextLong(100, 400))
         val threadName = Thread.currentThread().name
         runOnUiThread {
-            tvLog.append("${threadType}: \n${threadName}")
-            tvLog.append("\n\n")
+            log += "${threadType}: \n${threadName}\n"
         }
     }
 
+}
+
+@Composable
+private fun OptimizedThreadTrackScreen(
+    log: String,
+    onSubmitTask: () -> Unit
+) {
+    Scaffold(
+        modifier = Modifier
+            .fillMaxSize(),
+        containerColor = MaterialTheme.colorScheme.surface,
+        topBar = {
+            TrackTopAppBar(title = "OptimizedThreadTrack")
+        }
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues = innerPadding)
+                .padding(horizontal = 20.dp)
+        ) {
+            Button(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                onClick = onSubmitTask
+            ) {
+                Text(text = "向线程池提交任务")
+            }
+            Text(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(weight = 1f)
+                    .verticalScroll(state = rememberScrollState()),
+                text = log,
+                fontSize = 14.sp,
+                textAlign = TextAlign.Center
+            )
+        }
+    }
 }

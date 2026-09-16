@@ -7,7 +7,7 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
-        android:theme="@style/Theme.Track">
+        android:theme="@style/Theme.Track.NoTitle">
         <activity
             android:name=".MainActivity"
             android:exported="true">
@@ -22,19 +22,20 @@
             android:configChanges="keyboard|keyboardHidden|screenLayout|screenSize|orientation|uiMode"
             android:exported="false"
             android:screenOrientation="portrait"
+            android:theme="@style/Theme.Track"
             tools:ignore="DiscouragedApi,LockedOrientationActivity" />
         <activity
             android:name=".click.compose.ComposeClickTrackActivity"
             android:configChanges="keyboard|keyboardHidden|screenLayout|screenSize|orientation|uiMode"
             android:exported="false"
             android:screenOrientation="portrait"
-            android:theme="@style/Theme.Track.NoTitle"
             tools:ignore="DiscouragedApi,LockedOrientationActivity" />
         <activity
             android:name=".replace.clazz.ReplaceClassTrackActivity"
             android:configChanges="keyboard|keyboardHidden|screenLayout|screenSize|orientation|uiMode"
             android:exported="false"
             android:screenOrientation="portrait"
+            android:theme="@style/Theme.Track"
             tools:ignore="DiscouragedApi,LockedOrientationActivity" />
         <activity
             android:name=".replace.instruction.ReplaceInstructionTrackActivity"

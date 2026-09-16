@@ -6,10 +6,28 @@ import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.telephony.TelephonyManager
-import android.widget.Button
-import android.widget.TextView
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import github.leavesczy.track.BaseActivity
-import github.leavesczy.track.R
+import github.leavesczy.track.click.compose.TrackTheme
+import github.leavesczy.track.click.compose.TrackTopAppBar
 
 class ReplaceInstructionTrackActivity : BaseActivity() {
 
@@ -19,45 +37,44 @@ class ReplaceInstructionTrackActivity : BaseActivity() {
 
     }
 
-    private val btnSystemInstructions by lazy {
-        findViewById<Button>(R.id.btnSystemInstructions)
-    }
+    private var proxyEnabled by mutableStateOf(value = true)
 
-    private val btnProxyIsEnabled by lazy {
-        findViewById<Button>(R.id.btnProxyIsEnabled)
-    }
-
-    private val tvLog by lazy {
-        findViewById<TextView>(R.id.tvLog)
-    }
+    private var log by mutableStateOf(value = "")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_replace_instruction_track)
-        supportActionBar?.title = "Replace Field & Method Track"
         isProxyEnabled = true
-        onProxyEnabledChanged()
-        btnProxyIsEnabled.setOnClickListener {
-            isProxyEnabled = !isProxyEnabled
-            onProxyEnabledChanged()
-        }
-        btnSystemInstructions.setOnClickListener {
-            val log = buildString {
-                append("DeviceId: " + getDeviceId(context = this@ReplaceInstructionTrackActivity))
-                append("\n")
-                append("Imei: " + getImei(context = this@ReplaceInstructionTrackActivity))
-                append("\n")
-                append("AndroidId: " + getAndroidId(context = this@ReplaceInstructionTrackActivity))
-                append("\n")
-                append("Brand: " + getBrand())
+        proxyEnabled = true
+        SystemFieldProxy.onProxyEnabledChanged()
+        setContent {
+            TrackTheme {
+                ReplaceInstructionTrackScreen(
+                    log = log,
+                    proxyEnabled = proxyEnabled,
+                    onOutputSystemInstructions = ::appendSystemInstructions,
+                    onToggleProxyEnabled = ::toggleProxyEnabled
+                )
             }
-            tvLog.append(log + "\n\n")
         }
     }
 
-    private fun onProxyEnabledChanged() {
+    private fun appendSystemInstructions() {
+        val result = buildString {
+            append("DeviceId: " + getDeviceId(context = this@ReplaceInstructionTrackActivity))
+            append("\n")
+            append("imei: " + getImei(context = this@ReplaceInstructionTrackActivity))
+            append("\n")
+            append("AndroidId: " + getAndroidId(context = this@ReplaceInstructionTrackActivity))
+            append("\n")
+            append("Brand: " + getBrand())
+        }
+        log += result + "\n\n"
+    }
+
+    private fun toggleProxyEnabled() {
+        isProxyEnabled = !isProxyEnabled
+        proxyEnabled = isProxyEnabled
         SystemFieldProxy.onProxyEnabledChanged()
-        btnProxyIsEnabled.text = "是否替换 : $isProxyEnabled"
     }
 
     @SuppressLint("MissingPermission")
@@ -66,9 +83,8 @@ class ReplaceInstructionTrackActivity : BaseActivity() {
             val telephonyManager =
                 context.getSystemService(TELEPHONY_SERVICE) as? TelephonyManager
             telephonyManager?.deviceId ?: ""
-        } catch (throwable: Throwable) {
-            throwable.printStackTrace()
-            ""
+        } catch (_: Throwable) {
+            "ERROR"
         }
     }
 
@@ -78,18 +94,16 @@ class ReplaceInstructionTrackActivity : BaseActivity() {
             val telephonyManager =
                 context.getSystemService(TELEPHONY_SERVICE) as? TelephonyManager
             telephonyManager?.getImei(1) ?: ""
-        } catch (throwable: Throwable) {
-            throwable.printStackTrace()
-            ""
+        } catch (_: Throwable) {
+            "ERROR"
         }
     }
 
     private fun getAndroidId(context: Context): String {
         return try {
             Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID) ?: ""
-        } catch (throwable: Throwable) {
-            throwable.printStackTrace()
-            ""
+        } catch (_: Throwable) {
+            "ERROR"
         }
     }
 
@@ -97,4 +111,53 @@ class ReplaceInstructionTrackActivity : BaseActivity() {
         return Build.BRAND
     }
 
+}
+
+@Composable
+private fun ReplaceInstructionTrackScreen(
+    log: String,
+    proxyEnabled: Boolean,
+    onOutputSystemInstructions: () -> Unit,
+    onToggleProxyEnabled: () -> Unit
+) {
+    Scaffold(
+        modifier = Modifier
+            .fillMaxSize(),
+        containerColor = MaterialTheme.colorScheme.surface,
+        topBar = {
+            TrackTopAppBar(title = "Replace Field & Method Track")
+        }
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues = innerPadding)
+                .padding(horizontal = 20.dp)
+        ) {
+            Button(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                onClick = onOutputSystemInstructions
+            ) {
+                Text(text = "输出指定字段 & 指定方法的返回值")
+            }
+            Button(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                onClick = onToggleProxyEnabled
+            ) {
+                Text(text = "是否替换 : $proxyEnabled")
+            }
+            Text(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(all = 5.dp)
+                    .weight(weight = 1f)
+                    .verticalScroll(state = rememberScrollState()),
+                text = log,
+                fontSize = 14.sp,
+                textAlign = TextAlign.Center
+            )
+        }
+    }
 }

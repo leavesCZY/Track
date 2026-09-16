@@ -16,8 +16,8 @@ internal object SystemMethodProxy {
         } else {
             try {
                 telephonyManager.deviceId ?: ""
-            } catch (e: Throwable) {
-                e.message ?: ""
+            } catch (_: Throwable) {
+                "ERROR"
             }
         }
     }
@@ -25,12 +25,12 @@ internal object SystemMethodProxy {
     @JvmStatic
     fun getImei(telephonyManager: TelephonyManager, slotIndex: Int): String {
         return if (isProxyEnabled) {
-            "这是一个假的 imei $slotIndex"
+            "这是一个假的 imei"
         } else {
             try {
                 telephonyManager.getImei(slotIndex) ?: ""
-            } catch (e: Throwable) {
-                e.message ?: ""
+            } catch (_: Throwable) {
+                "ERROR"
             }
         }
     }

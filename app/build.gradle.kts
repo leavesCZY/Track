@@ -79,6 +79,7 @@ android {
     tasks.withType<KotlinCompile>().configureEach {
         compilerOptions {
             jvmTarget.value(JvmTarget.JVM_17)
+            optIn.add("androidx.compose.material3.ExperimentalMaterial3Api")
         }
     }
     buildFeatures {
