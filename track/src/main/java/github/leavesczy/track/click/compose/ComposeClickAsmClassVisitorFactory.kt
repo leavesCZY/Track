@@ -156,7 +156,7 @@ private class ComposeClickClassVisitor(
         onClickLabelSlot: Int
     ) {
         val input = InsnList()
-        input.add(LdcInsnNode(trackConfig.uncheckOnClickLabel))
+        input.add(LdcInsnNode(trackConfig.skipOnClickLabel))
         input.add(VarInsnNode(Opcodes.ALOAD, onClickLabelSlot))
         input.add(
             MethodInsnNode(
@@ -167,16 +167,16 @@ private class ComposeClickClassVisitor(
                 false
             )
         )
-        val onClickClassFormat = replacePeriodWithSlash(className = trackConfig.onClickClass)
+        val clickWrapperClassFormat = replacePeriodWithSlash(className = trackConfig.clickWrapperClass)
         val label = LabelNode()
         input.add(JumpInsnNode(Opcodes.IFNE, label))
-        input.add(TypeInsnNode(Opcodes.NEW, onClickClassFormat))
+        input.add(TypeInsnNode(Opcodes.NEW, clickWrapperClassFormat))
         input.add(InsnNode(Opcodes.DUP))
         input.add(VarInsnNode(Opcodes.ALOAD, onClickSlot))
         input.add(
             MethodInsnNode(
                 Opcodes.INVOKESPECIAL,
-                onClickClassFormat,
+                clickWrapperClassFormat,
                 InitMethodName,
                 "(Lkotlin/jvm/functions/Function0;)V",
                 false

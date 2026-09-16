@@ -6,20 +6,22 @@ import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.api.variant.Variant
 import github.leavesczy.track.click.compose.ComposeClickAsmClassVisitorFactory
 import github.leavesczy.track.click.compose.ComposeClickConfig
-import github.leavesczy.track.click.compose.ComposeClickPluginParameter
+import github.leavesczy.track.click.compose.ComposeClickTrackPluginParameter
 import github.leavesczy.track.click.view.ViewClickAsmClassVisitorFactory
 import github.leavesczy.track.click.view.ViewClickConfig
-import github.leavesczy.track.click.view.ViewClickPluginParameter
-import github.leavesczy.track.replace.clazz.ReplaceClassAsmClassVisitorFactory
-import github.leavesczy.track.replace.clazz.ReplaceClassConfig
-import github.leavesczy.track.replace.clazz.ReplaceClassPluginParameter
-import github.leavesczy.track.replace.instruction.OptimizedThreadPluginParameter
-import github.leavesczy.track.replace.instruction.ReplaceInstruction
-import github.leavesczy.track.replace.instruction.ReplaceInstructionAsmClassVisitorFactory
-import github.leavesczy.track.replace.instruction.ReplaceInstructionConfig
-import github.leavesczy.track.replace.instruction.ReplaceInstructionConfig.ReplaceInstructionParameter
-import github.leavesczy.track.replace.instruction.ReplaceInstructionPluginParameter
-import github.leavesczy.track.replace.instruction.ToastPluginParameter
+import github.leavesczy.track.click.view.ViewClickTrackPluginParameter
+import github.leavesczy.track.replace.inheritance.ReplaceClassAsmClassVisitorFactory
+import github.leavesczy.track.replace.inheritance.ReplaceClassConfig
+import github.leavesczy.track.replace.inheritance.ReplaceClassTrackPluginParameter
+import github.leavesczy.track.replace.rule.OptimizedThreadTrackPluginParameter
+import github.leavesczy.track.replace.rule.ReplaceFieldRule
+import github.leavesczy.track.replace.rule.ReplaceFieldTrackPluginParameter
+import github.leavesczy.track.replace.rule.ReplaceMethodRule
+import github.leavesczy.track.replace.rule.ReplaceMethodTrackPluginParameter
+import github.leavesczy.track.replace.rule.ReplaceRuleAsmClassVisitorFactory
+import github.leavesczy.track.replace.rule.ReplaceRuleConfig
+import github.leavesczy.track.replace.rule.ReplaceRuleConfig.ReplaceRuleParameter
+import github.leavesczy.track.replace.rule.ToastTrackPluginParameter
 import github.leavesczy.track.utils.replacePeriodWithSlash
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
@@ -45,31 +47,31 @@ class TrackPlugin : Plugin<Project> {
         project.run {
             extensions.create(
                 viewClickTrack,
-                ViewClickPluginParameter::class.java
+                ViewClickTrackPluginParameter::class.java
             )
             extensions.create(
                 composeClickTrack,
-                ComposeClickPluginParameter::class.java
+                ComposeClickTrackPluginParameter::class.java
             )
             extensions.create(
                 toastTrack,
-                ToastPluginParameter::class.java
+                ToastTrackPluginParameter::class.java
             )
             extensions.create(
                 replaceClassTrack,
-                ReplaceClassPluginParameter::class.java
+                ReplaceClassTrackPluginParameter::class.java
             )
             extensions.create(
                 optimizedThreadTrack,
-                OptimizedThreadPluginParameter::class.java
+                OptimizedThreadTrackPluginParameter::class.java
             )
             extensions.create(
                 replaceFieldTrack,
-                ReplaceInstructionPluginParameter::class.java
+                ReplaceFieldTrackPluginParameter::class.java
             )
             extensions.create(
                 replaceMethodTrack,
-                ReplaceInstructionPluginParameter::class.java
+                ReplaceMethodTrackPluginParameter::class.java
             )
         }
         val androidComponents = project.extensions.getByType(AndroidComponentsExtension::class.java)
@@ -82,39 +84,31 @@ class TrackPlugin : Plugin<Project> {
                 project = project,
                 variant = variant
             )
-            handleReplaceInstructionTrack(
-                project = project,
-                variant = variant,
-                extensionName = replaceFieldTrack
-            )
-            handleReplaceInstructionTrack(
-                project = project,
-                variant = variant,
-                extensionName = replaceMethodTrack
-            )
+            handleReplaceFieldTrack(project = project, variant = variant)
+            handleReplaceMethodTrack(project = project, variant = variant)
             variant.instrumentation.setAsmFramesComputationMode(FramesComputationMode.COMPUTE_FRAMES_FOR_INSTRUMENTED_METHODS)
         }
     }
 
     private fun handleViewClickTrack(project: Project, variant: Variant) {
-        val pluginParameter = project.extensions.findByType(ViewClickPluginParameter::class.java)
+        val pluginParameter = project.extensions.findByType(ViewClickTrackPluginParameter::class.java)
             ?: return
-        val onClickClass = pluginParameter.onClickClass
-        val onClickMethodName = pluginParameter.onClickMethodName
-        val uncheckViewOnClickAnnotation = pluginParameter.uncheckViewOnClickAnnotation
+        val clickHandlerClass = pluginParameter.clickHandlerClass
+        val clickMethodName = pluginParameter.clickMethodName
+        val skipOnClickAnnotation = pluginParameter.skipOnClickAnnotation
         val include = pluginParameter.include
         val exclude = pluginParameter.exclude
-        val hasAnyConfig = onClickClass.isNotBlank() ||
-                onClickMethodName.isNotBlank() ||
-                uncheckViewOnClickAnnotation.isNotBlank() ||
+        val hasAnyConfig = clickHandlerClass.isNotBlank() ||
+                clickMethodName.isNotBlank() ||
+                skipOnClickAnnotation.isNotBlank() ||
                 include.isNotEmpty() ||
                 exclude.isNotEmpty()
-        val isComplete = onClickClass.isNotBlank() && onClickMethodName.isNotBlank()
+        val isComplete = clickHandlerClass.isNotBlank() && clickMethodName.isNotBlank()
         guardTrackConfig(
             extensionName = viewClickTrack,
             hasAnyConfig = hasAnyConfig,
             isComplete = isComplete,
-            missingDetail = "缺少必填参数 onClickClass / onClickMethodName"
+            missingDetail = "缺少必填参数 clickHandlerClass / clickMethodName"
         ) {
             variant.instrumentation.apply {
                 transformClassesWith(
@@ -126,9 +120,9 @@ class TrackPlugin : Plugin<Project> {
                             include = include,
                             exclude = exclude,
                             extensionName = viewClickTrack,
-                            onClickClass = onClickClass,
-                            onClickMethodName = onClickMethodName,
-                            uncheckViewOnClickAnnotation = uncheckViewOnClickAnnotation
+                            clickHandlerClass = clickHandlerClass,
+                            clickMethodName = clickMethodName,
+                            skipOnClickAnnotation = skipOnClickAnnotation
                         )
                     )
                 }
@@ -137,17 +131,17 @@ class TrackPlugin : Plugin<Project> {
     }
 
     private fun handleComposeClickTrack(project: Project, variant: Variant) {
-        val pluginParameter = project.extensions.findByType(ComposeClickPluginParameter::class.java)
+        val pluginParameter = project.extensions.findByType(ComposeClickTrackPluginParameter::class.java)
             ?: return
-        val onClickClass = pluginParameter.onClickClass
-        val uncheckOnClickLabel = pluginParameter.uncheckOnClickLabel
-        val hasAnyConfig = onClickClass.isNotBlank() || uncheckOnClickLabel.isNotBlank()
-        val isComplete = onClickClass.isNotBlank()
+        val clickWrapperClass = pluginParameter.clickWrapperClass
+        val skipOnClickLabel = pluginParameter.skipOnClickLabel
+        val hasAnyConfig = clickWrapperClass.isNotBlank() || skipOnClickLabel.isNotBlank()
+        val isComplete = clickWrapperClass.isNotBlank()
         guardTrackConfig(
             extensionName = composeClickTrack,
             hasAnyConfig = hasAnyConfig,
             isComplete = isComplete,
-            missingDetail = "缺少必填参数 onClickClass"
+            missingDetail = "缺少必填参数 clickWrapperClass"
         ) {
             variant.instrumentation.apply {
                 transformClassesWith(
@@ -159,8 +153,8 @@ class TrackPlugin : Plugin<Project> {
                             include = emptySet(),
                             exclude = emptySet(),
                             extensionName = composeClickTrack,
-                            onClickClass = onClickClass,
-                            uncheckOnClickLabel = uncheckOnClickLabel
+                            clickWrapperClass = clickWrapperClass,
+                            skipOnClickLabel = skipOnClickLabel
                         )
                     )
                 }
@@ -170,7 +164,7 @@ class TrackPlugin : Plugin<Project> {
 
     private fun handleReplaceClassTrack(project: Project, variant: Variant) {
         val pluginParameter =
-            project.extensions.findByType(ReplaceClassPluginParameter::class.java)
+            project.extensions.findByType(ReplaceClassTrackPluginParameter::class.java)
                 ?: return
         val originClass = pluginParameter.originClass
         val targetClass = pluginParameter.targetClass
@@ -208,32 +202,32 @@ class TrackPlugin : Plugin<Project> {
 
     private fun handleToastTrack(project: Project, variant: Variant) {
         val pluginParameter =
-            project.extensions.findByType(ToastPluginParameter::class.java)
+            project.extensions.findByType(ToastTrackPluginParameter::class.java)
                 ?: return
-        val proxyOwner = pluginParameter.proxyOwner
+        val proxyClass = pluginParameter.proxyClass
         val include = pluginParameter.include
         val exclude = pluginParameter.exclude
-        val hasAnyConfig = proxyOwner.isNotBlank() ||
+        val hasAnyConfig = proxyClass.isNotBlank() ||
                 include.isNotEmpty() ||
                 exclude.isNotEmpty()
-        val isComplete = proxyOwner.isNotBlank()
+        val isComplete = proxyClass.isNotBlank()
         guardTrackConfig(
             extensionName = toastTrack,
             hasAnyConfig = hasAnyConfig,
             isComplete = isComplete,
-            missingDetail = "缺少必填参数 proxyOwner"
+            missingDetail = "缺少必填参数 proxyClass"
         ) {
-            handleReplaceInstructionTrack(
+            handleReplaceRuleTrack(
                 variant = variant,
                 extensionName = toastTrack,
                 include = include,
                 exclude = exclude,
-                instructions = setOf(
-                    element = ReplaceInstructionParameter(
-                        owner = "android/widget/Toast",
-                        name = "show",
+                replacements = setOf(
+                    element = ReplaceRuleParameter(
+                        ownerClass = "android/widget/Toast",
+                        memberName = "show",
                         descriptor = "()V",
-                        proxyOwner = proxyOwner
+                        proxyClass = proxyClass
                     )
                 )
             )
@@ -245,119 +239,170 @@ class TrackPlugin : Plugin<Project> {
         variant: Variant
     ) {
         val pluginParameter =
-            project.extensions.findByType(OptimizedThreadPluginParameter::class.java)
+            project.extensions.findByType(OptimizedThreadTrackPluginParameter::class.java)
                 ?: return
-        val proxyOwner = pluginParameter.proxyOwner
-        val methods = pluginParameter.methods
+        val proxyClass = pluginParameter.proxyClass
+        val methodNames = pluginParameter.methodNames
         val include = pluginParameter.include
         val exclude = pluginParameter.exclude
-        val hasAnyConfig = proxyOwner.isNotBlank() ||
-                methods.isNotEmpty() ||
+        val hasAnyConfig = proxyClass.isNotBlank() ||
+                methodNames.isNotEmpty() ||
                 include.isNotEmpty() ||
                 exclude.isNotEmpty()
-        val isComplete = proxyOwner.isNotBlank() &&
-                methods.isNotEmpty() &&
-                methods.all { it.isNotBlank() }
+        val isComplete = proxyClass.isNotBlank() &&
+                methodNames.isNotEmpty() &&
+                methodNames.all { it.isNotBlank() }
         guardTrackConfig(
             extensionName = optimizedThreadTrack,
             hasAnyConfig = hasAnyConfig,
             isComplete = isComplete,
-            missingDetail = "缺少必填参数 proxyOwner / methods"
+            missingDetail = "缺少必填参数 proxyClass / methodNames"
         ) {
-            handleReplaceInstructionTrack(
+            handleReplaceRuleTrack(
                 variant = variant,
                 extensionName = optimizedThreadTrack,
                 include = include,
                 exclude = exclude,
-                instructions = methods.map {
-                    ReplaceInstructionParameter(
-                        owner = "java/util/concurrent/Executors",
-                        name = it,
-                        descriptor = "",
-                        proxyOwner = proxyOwner
+                replacements = methodNames.map {
+                    ReplaceRuleParameter(
+                        ownerClass = "java/util/concurrent/Executors",
+                        memberName = it,
+                        descriptor = ReplaceMethodRule.MATCH_ALL_METHOD_DESCRIPTORS,
+                        proxyClass = proxyClass
                     )
                 }.toSet()
             )
         }
     }
 
-    private fun handleReplaceInstructionTrack(
-        project: Project,
-        variant: Variant,
-        extensionName: String
-    ) {
+    private fun handleReplaceFieldTrack(project: Project, variant: Variant) {
         val pluginParameter =
-            project.extensions.findByName(extensionName) as? ReplaceInstructionPluginParameter
+            project.extensions.findByType(ReplaceFieldTrackPluginParameter::class.java)
                 ?: return
-        val instructions = pluginParameter.instructions
+        val replacements = pluginParameter.replacements
         val include = pluginParameter.include
         val exclude = pluginParameter.exclude
-        val hasAnyConfig = instructions.isNotEmpty() ||
+        val hasAnyConfig = replacements.isNotEmpty() ||
                 include.isNotEmpty() ||
                 exclude.isNotEmpty()
-        val isComplete = instructions.isNotEmpty()
+        val isComplete = replacements.isNotEmpty()
         guardTrackConfig(
-            extensionName = extensionName,
+            extensionName = replaceFieldTrack,
             hasAnyConfig = hasAnyConfig,
             isComplete = isComplete,
-            missingDetail = "缺少必填参数 instructions"
+            missingDetail = "缺少必填参数 replacements"
         ) {
-            val validatedInstructions = instructions.map { instruction ->
-                validateReplaceInstruction(
-                    extensionName = extensionName,
-                    instruction = instruction
+            val validatedReplacements = replacements.map { rule ->
+                validateReplaceFieldRule(
+                    extensionName = replaceFieldTrack,
+                    rule = rule
                 )
             }.toSet()
-            handleReplaceInstructionTrack(
+            handleReplaceRuleTrack(
                 variant = variant,
-                extensionName = extensionName,
+                extensionName = replaceFieldTrack,
                 include = include,
                 exclude = exclude,
-                instructions = validatedInstructions
+                replacements = validatedReplacements
             )
         }
     }
 
-    private fun validateReplaceInstruction(
-        extensionName: String,
-        instruction: ReplaceInstruction
-    ): ReplaceInstructionParameter {
-        val owner = instruction.owner
-        val name = instruction.name
-        val descriptor = instruction.descriptor
-        val proxyOwner = instruction.proxyOwner
-        if (owner.isBlank() || name.isBlank() || proxyOwner.isBlank()) {
-            throw trackConfigError(
-                extensionName = extensionName,
-                detail = "instructions 中存在不完整项，owner / name / proxyOwner 均不能为空"
+    private fun handleReplaceMethodTrack(project: Project, variant: Variant) {
+        val pluginParameter =
+            project.extensions.findByType(ReplaceMethodTrackPluginParameter::class.java)
+                ?: return
+        val replacements = pluginParameter.replacements
+        val include = pluginParameter.include
+        val exclude = pluginParameter.exclude
+        val hasAnyConfig = replacements.isNotEmpty() ||
+                include.isNotEmpty() ||
+                exclude.isNotEmpty()
+        val isComplete = replacements.isNotEmpty()
+        guardTrackConfig(
+            extensionName = replaceMethodTrack,
+            hasAnyConfig = hasAnyConfig,
+            isComplete = isComplete,
+            missingDetail = "缺少必填参数 replacements"
+        ) {
+            val validatedReplacements = replacements.map { rule ->
+                validateReplaceMethodRule(
+                    extensionName = replaceMethodTrack,
+                    rule = rule
+                )
+            }.toSet()
+            handleReplaceRuleTrack(
+                variant = variant,
+                extensionName = replaceMethodTrack,
+                include = include,
+                exclude = exclude,
+                replacements = validatedReplacements
             )
         }
-        return ReplaceInstructionParameter(
-            owner = replacePeriodWithSlash(className = owner),
-            name = name,
-            descriptor = descriptor,
-            proxyOwner = proxyOwner
+    }
+
+    private fun validateReplaceFieldRule(
+        extensionName: String,
+        rule: ReplaceFieldRule
+    ): ReplaceRuleParameter {
+        val ownerClass = rule.ownerClass
+        val fieldName = rule.fieldName
+        val typeDescriptor = rule.typeDescriptor
+        val proxyClass = rule.proxyClass
+        if (ownerClass.isBlank() || fieldName.isBlank() || typeDescriptor.isBlank() || proxyClass.isBlank()) {
+            throw trackConfigError(
+                extensionName = extensionName,
+                detail = "replacements 中存在不完整项，ownerClass / fieldName / typeDescriptor / proxyClass 均不能为空；匹配全部类型请使用 typeDescriptor = \"${ReplaceFieldRule.MATCH_ALL_TYPE_DESCRIPTORS}\""
+            )
+        }
+        return ReplaceRuleParameter(
+            ownerClass = replacePeriodWithSlash(className = ownerClass),
+            memberName = fieldName,
+            descriptor = typeDescriptor,
+            proxyClass = proxyClass
         )
     }
 
-    private fun handleReplaceInstructionTrack(
+    private fun validateReplaceMethodRule(
+        extensionName: String,
+        rule: ReplaceMethodRule
+    ): ReplaceRuleParameter {
+        val ownerClass = rule.ownerClass
+        val methodName = rule.methodName
+        val methodDescriptor = rule.methodDescriptor
+        val proxyClass = rule.proxyClass
+        if (ownerClass.isBlank() || methodName.isBlank() || methodDescriptor.isBlank() || proxyClass.isBlank()) {
+            throw trackConfigError(
+                extensionName = extensionName,
+                detail = "replacements 中存在不完整项，ownerClass / methodName / methodDescriptor / proxyClass 均不能为空；匹配全部重载请使用 methodDescriptor = \"${ReplaceMethodRule.MATCH_ALL_METHOD_DESCRIPTORS}\""
+            )
+        }
+        return ReplaceRuleParameter(
+            ownerClass = replacePeriodWithSlash(className = ownerClass),
+            memberName = methodName,
+            descriptor = methodDescriptor,
+            proxyClass = proxyClass
+        )
+    }
+
+    private fun handleReplaceRuleTrack(
         variant: Variant,
         extensionName: String,
         include: Set<String>,
         exclude: Set<String>,
-        instructions: Set<ReplaceInstructionParameter>
+        replacements: Set<ReplaceRuleParameter>
     ) {
         variant.instrumentation.apply {
             transformClassesWith(
-                classVisitorFactoryImplClass = ReplaceInstructionAsmClassVisitorFactory::class.java,
+                classVisitorFactoryImplClass = ReplaceRuleAsmClassVisitorFactory::class.java,
                 scope = InstrumentationScope.ALL
             ) { params ->
                 params.trackConfig.set(
-                    ReplaceInstructionConfig(
+                    ReplaceRuleConfig(
                         include = include,
                         exclude = exclude,
                         extensionName = extensionName,
-                        instructions = instructions
+                        replacements = replacements
                     )
                 )
             }

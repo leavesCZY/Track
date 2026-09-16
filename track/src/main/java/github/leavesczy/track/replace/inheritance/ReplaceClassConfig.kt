@@ -1,4 +1,4 @@
-package github.leavesczy.track.replace.clazz
+package github.leavesczy.track.replace.inheritance
 
 import github.leavesczy.track.BaseTrackConfig
 import github.leavesczy.track.BaseTrackConfigParameters
@@ -11,7 +11,7 @@ internal data class ReplaceClassConfig(
     val targetClass: String
 ) : BaseTrackConfig
 
-open class ReplaceClassPluginParameter(
+open class ReplaceClassTrackPluginParameter(
     var originClass: String = "",
     var targetClass: String = "",
     var include: Set<String> = emptySet(),

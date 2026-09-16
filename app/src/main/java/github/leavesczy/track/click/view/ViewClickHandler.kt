@@ -4,22 +4,22 @@ import android.os.SystemClock
 import android.util.Log
 import android.view.View
 
-internal object ViewClickMonitor {
+internal object ViewClickHandler {
 
     private var lastClickTime = 0L
 
     private var clickIndex = 0
 
     @JvmStatic
-    fun isEnabled(view: View): Boolean {
+    fun shouldHandleClick(view: View): Boolean {
         clickIndex++
         val currentTime = SystemClock.elapsedRealtime()
-        val isEnabled = currentTime - lastClickTime > 500L
-        if (isEnabled) {
+        val shouldHandle = currentTime - lastClickTime > 500L
+        if (shouldHandle) {
             lastClickTime = currentTime
         }
-        log("onClick $clickIndex , isEnabled : $isEnabled")
-        return isEnabled
+        log("onClick $clickIndex , shouldHandleClick : $shouldHandle")
+        return shouldHandle
     }
 
     private fun log(log: String) {

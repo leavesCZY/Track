@@ -44,7 +44,7 @@ class ComposeClickTrackActivity : BaseActivity() {
 
 @Composable
 private fun ComposeClickTrackScreen() {
-    val uncheckOnClickLabel = "notCheck"
+    val skipOnClickLabel = "skip"
     var index by remember {
         mutableIntStateOf(value = 0)
     }
@@ -74,7 +74,7 @@ private fun ComposeClickTrackScreen() {
             Text(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable(onClickLabel = uncheckOnClickLabel) {
+                    .clickable(onClickLabel = skipOnClickLabel) {
                         index++
                     }
                     .padding(vertical = 8.dp),
@@ -84,7 +84,7 @@ private fun ComposeClickTrackScreen() {
                 modifier = Modifier
                     .fillMaxWidth()
                     .combinedClickable(
-                        onClickLabel = uncheckOnClickLabel,
+                        onClickLabel = skipOnClickLabel,
                         onClick = {
                             index++
                         }

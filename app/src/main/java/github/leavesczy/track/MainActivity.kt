@@ -22,8 +22,8 @@ import github.leavesczy.track.click.compose.ComposeClickTrackActivity
 import github.leavesczy.track.click.compose.TrackTheme
 import github.leavesczy.track.click.compose.TrackTopAppBar
 import github.leavesczy.track.click.view.ViewClickTrackActivity
-import github.leavesczy.track.replace.clazz.ReplaceClassTrackActivity
-import github.leavesczy.track.replace.instruction.ReplaceInstructionTrackActivity
+import github.leavesczy.track.replace.inheritance.ReplaceClassTrackActivity
+import github.leavesczy.track.replace.rule.ReplaceRuleTrackActivity
 import github.leavesczy.track.thread.OptimizedThreadTrackActivity
 import github.leavesczy.track.toast.ToastTrackActivity
 
@@ -39,7 +39,7 @@ class MainActivity : BaseActivity() {
                     onToastTrack = { startActivity<ToastTrackActivity>() },
                     onOptimizedThreadTrack = { startActivity<OptimizedThreadTrackActivity>() },
                     onReplaceClassTrack = { startActivity<ReplaceClassTrackActivity>() },
-                    onReplaceInstructionTrack = { startActivity<ReplaceInstructionTrackActivity>() }
+                    onReplaceRuleTrack = { startActivity<ReplaceRuleTrackActivity>() }
                 )
             }
         }
@@ -59,11 +59,10 @@ private fun MainScreen(
     onToastTrack: () -> Unit,
     onOptimizedThreadTrack: () -> Unit,
     onReplaceClassTrack: () -> Unit,
-    onReplaceInstructionTrack: () -> Unit
+    onReplaceRuleTrack: () -> Unit
 ) {
     Scaffold(
-        modifier = Modifier
-            .fillMaxSize(),
+        modifier = Modifier.fillMaxSize(),
         containerColor = MaterialTheme.colorScheme.surface,
         topBar = {
             TrackTopAppBar(title = stringResource(id = R.string.app_name))
@@ -78,46 +77,40 @@ private fun MainScreen(
             verticalArrangement = Arrangement.Center
         ) {
             Button(
-                modifier = Modifier
-                    .fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth(),
                 onClick = onViewClickTrack
             ) {
                 Text(text = "ViewClickTrack")
             }
             Button(
-                modifier = Modifier
-                    .fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth(),
                 onClick = onComposeClickTrack
             ) {
                 Text(text = "ComposeClickTrack")
             }
             Button(
-                modifier = Modifier
-                    .fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth(),
                 onClick = onToastTrack
             ) {
                 Text(text = "ToastTrack")
             }
             Button(
-                modifier = Modifier
-                    .fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth(),
                 onClick = onOptimizedThreadTrack
             ) {
                 Text(text = "OptimizedThreadTrack")
             }
             Button(
-                modifier = Modifier
-                    .fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth(),
                 onClick = onReplaceClassTrack
             ) {
                 Text(text = "ReplaceClassTrack")
             }
             Button(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                onClick = onReplaceInstructionTrack
+                modifier = Modifier.fillMaxWidth(),
+                onClick = onReplaceRuleTrack
             ) {
-                Text(text = "Replace Field & Method Track")
+                Text(text = "ReplaceRuleTrack")
             }
         }
     }

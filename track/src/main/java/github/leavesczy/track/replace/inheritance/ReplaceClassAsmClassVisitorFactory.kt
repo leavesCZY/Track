@@ -1,11 +1,10 @@
-package github.leavesczy.track.replace.clazz
+package github.leavesczy.track.replace.inheritance
 
 import com.android.build.api.instrumentation.ClassContext
 import com.android.build.api.instrumentation.ClassData
 import github.leavesczy.track.BaseTrackAsmClassVisitorFactory
 import github.leavesczy.track.BaseTrackClassNode
-import github.leavesczy.track.utils.ApiOpcodes
-import github.leavesczy.track.utils.InitMethodName
+import github.leavesczy.track.utils.AsmApi
 import github.leavesczy.track.utils.replacePeriodWithSlash
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.MethodVisitor
@@ -18,7 +17,7 @@ internal abstract class ReplaceClassAsmClassVisitorFactory :
         classContext: ClassContext,
         nextClassVisitor: ClassVisitor
     ): BaseTrackClassNode {
-        return ReplaceClassClassVisitor(
+        return ReplaceClassVisitor(
             nextClassVisitor = nextClassVisitor,
             trackConfig = trackConfig
         )
@@ -34,7 +33,7 @@ internal abstract class ReplaceClassAsmClassVisitorFactory :
 
 }
 
-private class ReplaceClassClassVisitor(
+private class ReplaceClassVisitor(
     private val nextClassVisitor: ClassVisitor,
     override val trackConfig: ReplaceClassConfig
 ) : BaseTrackClassNode(trackConfig = trackConfig) {
@@ -55,7 +54,7 @@ private class ReplaceClassClassVisitor(
             version,
             access,
             name,
-            signature,
+            replaceSuperTypeInSignature(signature = signature),
             newSuperName,
             interfaces
         )
@@ -72,7 +71,7 @@ private class ReplaceClassClassVisitor(
         exceptions: Array<out String>?
     ): MethodVisitor {
         val methodVisitor = super.visitMethod(access, name, descriptor, signature, exceptions)
-        return object : MethodVisitor(ApiOpcodes, methodVisitor) {
+        return object : MethodVisitor(AsmApi, methodVisitor) {
             override fun visitMethodInsn(
                 opcode: Int,
                 owner: String?,
@@ -80,10 +79,9 @@ private class ReplaceClassClassVisitor(
                 methodDescriptor: String?,
                 isInterface: Boolean
             ) {
-                val currentOwner = if (opcode == Opcodes.INVOKESPECIAL &&
-                    methodName == InitMethodName &&
-                    owner == oldSuperName
-                ) {
+                // 编译器生成的 super.xxx() / super(...) 都是 INVOKESPECIAL，且 owner 为直接父类。
+                // 仅改写 <init> 会漏掉业务方法上的 super 调用，从而绕过新父类覆写。
+                val currentOwner = if (opcode == Opcodes.INVOKESPECIAL && owner == oldSuperName) {
                     newSuperName
                 } else {
                     owner
@@ -102,6 +100,18 @@ private class ReplaceClassClassVisitor(
     override fun visitEnd() {
         super.visitEnd()
         accept(nextClassVisitor)
+    }
+
+    private fun replaceSuperTypeInSignature(signature: String?): String? {
+        if (signature.isNullOrEmpty()) {
+            return signature
+        }
+        val oldType = "L$oldSuperName;"
+        val newType = "L$newSuperName;"
+        if (!signature.contains(oldType)) {
+            return signature
+        }
+        return signature.replace(oldType, newType)
     }
 
 }

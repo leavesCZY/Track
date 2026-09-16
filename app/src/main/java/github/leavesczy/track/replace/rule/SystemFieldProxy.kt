@@ -1,4 +1,4 @@
-package github.leavesczy.track.replace.instruction
+package github.leavesczy.track.replace.rule
 
 import android.os.Build
 
@@ -8,7 +8,7 @@ internal object SystemFieldProxy {
     var BRAND = "这是一个假的 BRAND"
 
     fun onProxyEnabledChanged() {
-        BRAND = if (ReplaceInstructionTrackActivity.isProxyEnabled) {
+        BRAND = if (ReplaceRuleTrackActivity.isProxyEnabled) {
             "这是一个假的 BRAND"
         } else {
             Build.BRAND

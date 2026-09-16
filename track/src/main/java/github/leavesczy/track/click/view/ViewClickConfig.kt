@@ -7,15 +7,15 @@ internal data class ViewClickConfig(
     override val include: Set<String>,
     override val exclude: Set<String>,
     override val extensionName: String,
-    val onClickClass: String,
-    val onClickMethodName: String,
-    val uncheckViewOnClickAnnotation: String
+    val clickHandlerClass: String,
+    val clickMethodName: String,
+    val skipOnClickAnnotation: String
 ) : BaseTrackConfig
 
-open class ViewClickPluginParameter(
-    var onClickClass: String = "",
-    var onClickMethodName: String = "",
-    var uncheckViewOnClickAnnotation: String = "",
+open class ViewClickTrackPluginParameter(
+    var clickHandlerClass: String = "",
+    var clickMethodName: String = "",
+    var skipOnClickAnnotation: String = "",
     var include: Set<String> = emptySet(),
     var exclude: Set<String> = emptySet()
 )

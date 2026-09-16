@@ -3,7 +3,7 @@ package github.leavesczy.track.click.compose
 import android.os.SystemClock
 import android.util.Log
 
-class ComposeOnClick(private val onClick: () -> Unit) : Function0<Unit> {
+class ComposeClickWrapper(private val onClick: () -> Unit) : Function0<Unit> {
 
     companion object {
 
@@ -13,9 +13,9 @@ class ComposeOnClick(private val onClick: () -> Unit) : Function0<Unit> {
 
     override fun invoke() {
         val currentTime = SystemClock.elapsedRealtime()
-        val isEnabled = currentTime - lastClickTime > 500
-        log("onClick isEnabled : $isEnabled")
-        if (isEnabled) {
+        val shouldHandle = currentTime - lastClickTime > 500
+        log("onClick shouldHandleClick : $shouldHandle")
+        if (shouldHandle) {
             lastClickTime = currentTime
             onClick()
         }
@@ -23,7 +23,7 @@ class ComposeOnClick(private val onClick: () -> Unit) : Function0<Unit> {
 
     private fun log(log: String) {
         Log.e(
-            "ComposeOnClick",
+            "ComposeClickWrapper",
             "${System.identityHashCode(this)} ${System.identityHashCode(onClick)} $log"
         )
     }

@@ -15,9 +15,9 @@ class ViewClickTrackActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_view_click_track)
         supportActionBar?.title = "ViewClickTrack"
-        findViewById<TextView>(R.id.btnObjectUnCheck).setOnClickListener(object :
+        findViewById<TextView>(R.id.btnObjectSkip).setOnClickListener(object :
             View.OnClickListener {
-            @UncheckViewOnClick
+            @SkipViewOnClick
             override fun onClick(view: View) {
                 onClickView()
             }

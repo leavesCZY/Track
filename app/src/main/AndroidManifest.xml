@@ -31,14 +31,13 @@
             android:screenOrientation="portrait"
             tools:ignore="DiscouragedApi,LockedOrientationActivity" />
         <activity
-            android:name=".replace.clazz.ReplaceClassTrackActivity"
+            android:name=".replace.inheritance.ReplaceClassTrackActivity"
             android:configChanges="keyboard|keyboardHidden|screenLayout|screenSize|orientation|uiMode"
             android:exported="false"
             android:screenOrientation="portrait"
-            android:theme="@style/Theme.Track"
             tools:ignore="DiscouragedApi,LockedOrientationActivity" />
         <activity
-            android:name=".replace.instruction.ReplaceInstructionTrackActivity"
+            android:name=".replace.rule.ReplaceRuleTrackActivity"
             android:configChanges="keyboard|keyboardHidden|screenLayout|screenSize|orientation|uiMode"
             android:exported="false"
             android:screenOrientation="portrait"

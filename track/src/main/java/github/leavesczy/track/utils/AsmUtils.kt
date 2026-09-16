@@ -3,12 +3,11 @@ package github.leavesczy.track.utils
 import org.objectweb.asm.Opcodes
 import org.objectweb.asm.Type
 import org.objectweb.asm.tree.InvokeDynamicInsnNode
-import org.objectweb.asm.tree.MethodInsnNode
 import org.objectweb.asm.tree.MethodNode
 
 internal const val InitMethodName = "<init>"
 
-internal const val ApiOpcodes = Opcodes.ASM9
+internal const val AsmApi = Opcodes.ASM9
 
 internal val MethodNode.isStatic: Boolean
     get() = access and Opcodes.ACC_STATIC == Opcodes.ACC_STATIC
@@ -20,16 +19,20 @@ internal fun replacePeriodWithSlash(className: String): String {
 internal fun MethodNode.hasAnnotation(annotationClassName: String): Boolean {
     val annotationDesc =
         Type.getObjectType(replacePeriodWithSlash(className = annotationClassName)).descriptor
-    return visibleAnnotations?.find { it.desc == annotationDesc } != null
+    val visible = visibleAnnotations?.any { it.desc == annotationDesc } == true
+    if (visible) {
+        return true
+    }
+    return invisibleAnnotations?.any { it.desc == annotationDesc } == true
 }
 
 internal fun MethodNode.filterLambda(filter: (InvokeDynamicInsnNode) -> Boolean): List<InvokeDynamicInsnNode> {
-    val mInstructions = instructions
-    if (mInstructions == null || mInstructions.size() == 0) {
+    val methodInstructions = instructions
+    if (methodInstructions == null || methodInstructions.size() == 0) {
         return emptyList()
     }
     val dynamicList = mutableListOf<InvokeDynamicInsnNode>()
-    mInstructions.forEach { instruction ->
+    methodInstructions.forEach { instruction ->
         if (instruction is InvokeDynamicInsnNode) {
             if (filter(instruction)) {
                 dynamicList.add(element = instruction)
@@ -37,14 +40,4 @@ internal fun MethodNode.filterLambda(filter: (InvokeDynamicInsnNode) -> Boolean)
         }
     }
     return dynamicList
-}
-
-internal fun MethodInsnNode.insertArgument(argumentType: Class<*>) {
-    val type = Type.getMethodType(desc)
-    val argumentTypes = type.argumentTypes
-    val returnType = type.returnType
-    val newArgumentTypes = arrayOfNulls<Type>(argumentTypes.size + 1)
-    System.arraycopy(argumentTypes, 0, newArgumentTypes, 0, argumentTypes.size - 1 + 1)
-    newArgumentTypes[newArgumentTypes.size - 1] = Type.getType(argumentType)
-    desc = Type.getMethodDescriptor(returnType, *newArgumentTypes)
 }

@@ -16,7 +16,7 @@
         android:textSize="24sp" />
 
     <Button
-        android:id="@+id/btnObjectUnCheck"
+        android:id="@+id/btnObjectSkip"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="setOnClickListener 匿名内部类\n不防抖"

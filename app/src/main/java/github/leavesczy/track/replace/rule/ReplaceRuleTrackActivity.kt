@@ -1,4 +1,4 @@
-package github.leavesczy.track.replace.instruction
+package github.leavesczy.track.replace.rule
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -29,7 +29,7 @@ import github.leavesczy.track.BaseActivity
 import github.leavesczy.track.click.compose.TrackTheme
 import github.leavesczy.track.click.compose.TrackTopAppBar
 
-class ReplaceInstructionTrackActivity : BaseActivity() {
+class ReplaceRuleTrackActivity : BaseActivity() {
 
     companion object {
 
@@ -48,23 +48,23 @@ class ReplaceInstructionTrackActivity : BaseActivity() {
         SystemFieldProxy.onProxyEnabledChanged()
         setContent {
             TrackTheme {
-                ReplaceInstructionTrackScreen(
+                ReplaceRuleTrackScreen(
                     log = log,
                     proxyEnabled = proxyEnabled,
-                    onOutputSystemInstructions = ::appendSystemInstructions,
+                    onOutputSystemValues = ::appendSystemValues,
                     onToggleProxyEnabled = ::toggleProxyEnabled
                 )
             }
         }
     }
 
-    private fun appendSystemInstructions() {
+    private fun appendSystemValues() {
         val result = buildString {
-            append("DeviceId: " + getDeviceId(context = this@ReplaceInstructionTrackActivity))
+            append("DeviceId: " + getDeviceId(context = this@ReplaceRuleTrackActivity))
             append("\n")
-            append("imei: " + getImei(context = this@ReplaceInstructionTrackActivity))
+            append("imei: " + getImei(context = this@ReplaceRuleTrackActivity))
             append("\n")
-            append("AndroidId: " + getAndroidId(context = this@ReplaceInstructionTrackActivity))
+            append("AndroidId: " + getAndroidId(context = this@ReplaceRuleTrackActivity))
             append("\n")
             append("Brand: " + getBrand())
         }
@@ -114,10 +114,10 @@ class ReplaceInstructionTrackActivity : BaseActivity() {
 }
 
 @Composable
-private fun ReplaceInstructionTrackScreen(
+private fun ReplaceRuleTrackScreen(
     log: String,
     proxyEnabled: Boolean,
-    onOutputSystemInstructions: () -> Unit,
+    onOutputSystemValues: () -> Unit,
     onToggleProxyEnabled: () -> Unit
 ) {
     Scaffold(
@@ -125,7 +125,7 @@ private fun ReplaceInstructionTrackScreen(
             .fillMaxSize(),
         containerColor = MaterialTheme.colorScheme.surface,
         topBar = {
-            TrackTopAppBar(title = "Replace Field & Method Track")
+            TrackTopAppBar(title = "ReplaceRuleTrack")
         }
     ) { innerPadding ->
         Column(
@@ -135,15 +135,13 @@ private fun ReplaceInstructionTrackScreen(
                 .padding(horizontal = 20.dp)
         ) {
             Button(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                onClick = onOutputSystemInstructions
+                modifier = Modifier.fillMaxWidth(),
+                onClick = onOutputSystemValues
             ) {
                 Text(text = "输出指定字段 & 指定方法的返回值")
             }
             Button(
-                modifier = Modifier
-                    .fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth(),
                 onClick = onToggleProxyEnabled
             ) {
                 Text(text = "是否替换 : $proxyEnabled")

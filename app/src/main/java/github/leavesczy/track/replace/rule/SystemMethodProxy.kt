@@ -1,4 +1,4 @@
-package github.leavesczy.track.replace.instruction
+package github.leavesczy.track.replace.rule
 
 import android.content.ContentResolver
 import android.provider.Settings
@@ -7,7 +7,7 @@ import android.telephony.TelephonyManager
 internal object SystemMethodProxy {
 
     private val isProxyEnabled: Boolean
-        get() = ReplaceInstructionTrackActivity.isProxyEnabled
+        get() = ReplaceRuleTrackActivity.isProxyEnabled
 
     @JvmStatic
     fun getDeviceId(telephonyManager: TelephonyManager): String {

@@ -1,4 +1,5 @@
-import github.leavesczy.track.replace.instruction.ReplaceInstruction
+import github.leavesczy.track.replace.rule.ReplaceFieldRule
+import github.leavesczy.track.replace.rule.ReplaceMethodRule
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.text.SimpleDateFormat
@@ -121,27 +122,27 @@ dependencies {
 }
 
 viewClickTrack {
-    onClickClass = "github.leavesczy.track.click.view.ViewClickMonitor"
-    onClickMethodName = "isEnabled"
-    uncheckViewOnClickAnnotation = "github.leavesczy.track.click.view.UncheckViewOnClick"
+    clickHandlerClass = "github.leavesczy.track.click.view.ViewClickHandler"
+    clickMethodName = "shouldHandleClick"
+    skipOnClickAnnotation = "github.leavesczy.track.click.view.SkipViewOnClick"
     include = setOf()
     exclude = setOf()
 }
 
 composeClickTrack {
-    onClickClass = "github.leavesczy.track.click.compose.ComposeOnClick"
-    uncheckOnClickLabel = "notCheck"
+    clickWrapperClass = "github.leavesczy.track.click.compose.ComposeClickWrapper"
+    skipOnClickLabel = "skip"
 }
 
 toastTrack {
-    proxyOwner = "github.leavesczy.track.toast.ToastProxy"
+    proxyClass = "github.leavesczy.track.toast.ToastProxy"
     include = setOf()
     exclude = setOf()
 }
 
 optimizedThreadTrack {
-    proxyOwner = "github.leavesczy.track.thread.OptimizedExecutors"
-    methods = setOf(
+    proxyClass = "github.leavesczy.track.thread.ExecutorsProxy"
+    methodNames = setOf(
         "newSingleThreadExecutor",
         "newCachedThreadPool",
         "newFixedThreadPool",
@@ -153,19 +154,19 @@ optimizedThreadTrack {
 }
 
 replaceClassTrack {
-    originClass = "android.widget.ImageView"
-    targetClass = "github.leavesczy.track.replace.clazz.MonitorImageView"
+    originClass = "github.leavesczy.track.replace.inheritance.OriginGreeter"
+    targetClass = "github.leavesczy.track.replace.inheritance.ProxyGreeter"
     include = setOf()
-    exclude = setOf(".*\\.IgnoreImageView$")
+    exclude = setOf(".*\\.ExcludedGreeter$")
 }
 
 replaceFieldTrack {
-    instructions = setOf(
-        ReplaceInstruction(
-            owner = "android.os.Build",
-            name = "BRAND",
-            descriptor = "Ljava/lang/String;",
-            proxyOwner = "github.leavesczy.track.replace.instruction.SystemFieldProxy"
+    replacements = setOf(
+        ReplaceFieldRule(
+            ownerClass = "android.os.Build",
+            fieldName = "BRAND",
+            typeDescriptor = "Ljava/lang/String;",
+            proxyClass = "github.leavesczy.track.replace.rule.SystemFieldProxy"
         )
     )
     include = setOf()
@@ -173,25 +174,25 @@ replaceFieldTrack {
 }
 
 replaceMethodTrack {
-    val systemMethodProxyOwner = "github.leavesczy.track.replace.instruction.SystemMethodProxy"
-    instructions = setOf(
-        ReplaceInstruction(
-            owner = "android.telephony.TelephonyManager",
-            name = "getDeviceId",
-            descriptor = "()Ljava/lang/String;",
-            proxyOwner = systemMethodProxyOwner
+    val systemMethodProxyClass = "github.leavesczy.track.replace.rule.SystemMethodProxy"
+    replacements = setOf(
+        ReplaceMethodRule(
+            ownerClass = "android.telephony.TelephonyManager",
+            methodName = "getDeviceId",
+            methodDescriptor = "()Ljava/lang/String;",
+            proxyClass = systemMethodProxyClass
         ),
-        ReplaceInstruction(
-            owner = "android.telephony.TelephonyManager",
-            name = "getImei",
-            descriptor = "(I)Ljava/lang/String;",
-            proxyOwner = systemMethodProxyOwner
+        ReplaceMethodRule(
+            ownerClass = "android.telephony.TelephonyManager",
+            methodName = "getImei",
+            methodDescriptor = "(I)Ljava/lang/String;",
+            proxyClass = systemMethodProxyClass
         ),
-        ReplaceInstruction(
-            owner = $$"android.provider.Settings$Secure",
-            name = "getString",
-            descriptor = "(Landroid/content/ContentResolver;Ljava/lang/String;)Ljava/lang/String;",
-            proxyOwner = systemMethodProxyOwner
+        ReplaceMethodRule(
+            ownerClass = $$"android.provider.Settings$Secure",
+            methodName = "getString",
+            methodDescriptor = "(Landroid/content/ContentResolver;Ljava/lang/String;)Ljava/lang/String;",
+            proxyClass = systemMethodProxyClass
         )
     )
     include = setOf()

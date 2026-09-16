@@ -4,7 +4,7 @@ import com.android.build.api.instrumentation.AsmClassVisitorFactory
 import com.android.build.api.instrumentation.ClassContext
 import com.android.build.api.instrumentation.ClassData
 import com.android.build.api.instrumentation.InstrumentationParameters
-import github.leavesczy.track.utils.ApiOpcodes
+import github.leavesczy.track.utils.AsmApi
 import github.leavesczy.track.utils.LogPrint
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
@@ -13,7 +13,7 @@ import org.objectweb.asm.tree.ClassNode
 import java.io.Serializable
 
 internal abstract class BaseTrackClassNode(protected open val trackConfig: BaseTrackConfig) :
-    ClassNode(ApiOpcodes) {
+    ClassNode(AsmApi) {
 
     fun log(msg: () -> String) {
         LogPrint.normal(tag = trackConfig.extensionName, msg = msg)

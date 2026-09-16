@@ -54,7 +54,7 @@ private class ViewClickClassVisitor(
 
     private val onClickMethodDesc = "(Landroid/view/View;)V"
 
-    private val proxyOnClickMethodDesc = "(Landroid/view/View;)Z"
+    private val clickHandlerMethodDesc = "(Landroid/view/View;)Z"
 
     override fun visitEnd() {
         super.visitEnd()
@@ -64,14 +64,14 @@ private class ViewClickClassVisitor(
 
     private fun handleViewClick() {
         val shouldHookMethodList = mutableSetOf<MethodNode>()
-        val uncheckViewOnClickAnnotation = trackConfig.uncheckViewOnClickAnnotation
+        val skipOnClickAnnotation = trackConfig.skipOnClickAnnotation
         methods.forEach { methodNode ->
             when {
-                uncheckViewOnClickAnnotation.isNotBlank() &&
-                        methodNode.hasAnnotation(annotationClassName = uncheckViewOnClickAnnotation) -> {
+                skipOnClickAnnotation.isNotBlank() &&
+                        methodNode.hasAnnotation(annotationClassName = skipOnClickAnnotation) -> {
                 }
 
-                methodNode.isHookPoint() -> {
+                methodNode.isViewOnClickMethod() -> {
                     shouldHookMethodList.add(element = methodNode)
                 }
             }
@@ -93,7 +93,7 @@ private class ViewClickClassVisitor(
         }
         if (shouldHookMethodList.isNotEmpty()) {
             shouldHookMethodList.forEach {
-                hookMethod(modeNode = it)
+                hookMethod(methodNode = it)
             }
             log {
                 "$name 发现 ${shouldHookMethodList.size} 个 View.OnClickListener 指令，完成处理..."
@@ -101,13 +101,13 @@ private class ViewClickClassVisitor(
         }
     }
 
-    private fun hookMethod(modeNode: MethodNode) {
-        val argumentTypes = Type.getArgumentTypes(modeNode.desc)
+    private fun hookMethod(methodNode: MethodNode) {
+        val argumentTypes = Type.getArgumentTypes(methodNode.desc)
         val viewArgumentIndex = argumentTypes?.indexOfFirst {
             it.descriptor == viewObjectDesc
         } ?: -1
         if (viewArgumentIndex >= 0) {
-            val instructions = modeNode.instructions
+            val instructions = methodNode.instructions
             if (instructions != null && instructions.size() > 0) {
                 val list = InsnList()
                 list.add(
@@ -116,16 +116,16 @@ private class ViewClickClassVisitor(
                         getVisitPosition(
                             argumentTypes,
                             viewArgumentIndex,
-                            modeNode.isStatic
+                            methodNode.isStatic
                         )
                     )
                 )
                 list.add(
                     MethodInsnNode(
                         Opcodes.INVOKESTATIC,
-                        replacePeriodWithSlash(className = trackConfig.onClickClass),
-                        trackConfig.onClickMethodName,
-                        proxyOnClickMethodDesc
+                        replacePeriodWithSlash(className = trackConfig.clickHandlerClass),
+                        trackConfig.clickMethodName,
+                        clickHandlerMethodDesc
                     )
                 )
                 val labelNode = LabelNode()
@@ -160,7 +160,7 @@ private class ViewClickClassVisitor(
         }
     }
 
-    private fun MethodNode.isHookPoint(): Boolean {
+    private fun MethodNode.isViewOnClickMethod(): Boolean {
         val myInterfaces = interfaces
         if (myInterfaces.isNullOrEmpty()) {
             return false

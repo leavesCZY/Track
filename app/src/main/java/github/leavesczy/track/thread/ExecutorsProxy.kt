@@ -11,14 +11,14 @@ import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
 
-internal object OptimizedExecutors {
+internal object ExecutorsProxy {
 
     private const val DEFAULT_THREAD_KEEP_ALIVE_TIME = 3000L
 
     @JvmStatic
     @JvmOverloads
     fun newSingleThreadExecutor(threadFactory: ThreadFactory? = null): ExecutorService {
-        return getOptimizedExecutorService(
+        return createExecutorService(
             corePoolSize = 1,
             maximumPoolSize = 1,
             keepAliveTime = 0L,
@@ -31,7 +31,7 @@ internal object OptimizedExecutors {
     @JvmStatic
     @JvmOverloads
     fun newCachedThreadPool(threadFactory: ThreadFactory? = null): ExecutorService {
-        return getOptimizedExecutorService(
+        return createExecutorService(
             corePoolSize = 0,
             maximumPoolSize = Integer.MAX_VALUE,
             keepAliveTime = 60L,
@@ -47,7 +47,7 @@ internal object OptimizedExecutors {
         corePoolSize: Int,
         threadFactory: ThreadFactory? = null
     ): ExecutorService {
-        return getOptimizedExecutorService(
+        return createExecutorService(
             corePoolSize = corePoolSize,
             maximumPoolSize = corePoolSize,
             keepAliveTime = 0L,
@@ -63,7 +63,7 @@ internal object OptimizedExecutors {
         corePoolSize: Int,
         threadFactory: ThreadFactory? = null
     ): ScheduledExecutorService {
-        return getOptimizedScheduledExecutorService(
+        return createScheduledExecutorService(
             corePoolSize = corePoolSize,
             threadFactory = threadFactory
         )
@@ -78,7 +78,7 @@ internal object OptimizedExecutors {
         )
     }
 
-    private fun getOptimizedExecutorService(
+    private fun createExecutorService(
         corePoolSize: Int,
         maximumPoolSize: Int,
         keepAliveTime: Long,
@@ -97,7 +97,7 @@ internal object OptimizedExecutors {
         return executor
     }
 
-    private fun getOptimizedScheduledExecutorService(
+    private fun createScheduledExecutorService(
         corePoolSize: Int,
         threadFactory: ThreadFactory?
     ): ScheduledExecutorService {

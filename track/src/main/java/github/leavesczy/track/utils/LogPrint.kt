@@ -10,13 +10,13 @@ internal object LogPrint {
         println(buildLog(tag = tag, msg = msg).error)
     }
 
-    private fun buildLog(tag: String, msg: () -> String): LogUI {
-        return LogUI(text = "[${tag}]: " + msg())
+    private fun buildLog(tag: String, msg: () -> String): ColoredLog {
+        return ColoredLog(text = "[${tag}]: " + msg())
     }
 
 }
 
-private class LogUI(val text: String) {
+private class ColoredLog(val text: String) {
 
     val error: String
         get() = "\u001B[31m$text\u001B[0m"
