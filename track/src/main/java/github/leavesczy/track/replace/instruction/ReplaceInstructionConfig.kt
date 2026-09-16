@@ -20,9 +20,9 @@ internal data class ReplaceInstructionConfig(
 }
 
 open class ReplaceInstructionPluginParameter(
+    var instructions: Set<ReplaceInstruction> = emptySet(),
     var include: Set<String> = emptySet(),
-    var exclude: Set<String> = emptySet(),
-    var instructions: Set<ReplaceInstruction> = emptySet()
+    var exclude: Set<String> = emptySet()
 )
 
 open class ReplaceInstruction(
@@ -33,14 +33,14 @@ open class ReplaceInstruction(
 )
 
 open class ToastPluginParameter(
+    var proxyOwner: String = "",
     var include: Set<String> = emptySet(),
-    var exclude: Set<String> = emptySet(),
-    var proxyOwner: String = ""
+    var exclude: Set<String> = emptySet()
 )
 
 open class OptimizedThreadPluginParameter(
-    var include: Set<String> = emptySet(),
-    var exclude: Set<String> = emptySet(),
     var proxyOwner: String = "",
-    var methods: Set<String> = setOf()
+    var methods: Set<String> = setOf(),
+    var include: Set<String> = emptySet(),
+    var exclude: Set<String> = emptySet()
 )

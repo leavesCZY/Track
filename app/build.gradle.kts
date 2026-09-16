@@ -120,11 +120,11 @@ dependencies {
 }
 
 viewClickTrack {
-    include = setOf()
-    exclude = setOf()
     onClickClass = "github.leavesczy.track.click.view.ViewClickMonitor"
     onClickMethodName = "isEnabled"
     uncheckViewOnClickAnnotation = "github.leavesczy.track.click.view.UncheckViewOnClick"
+    include = setOf()
+    exclude = setOf()
 }
 
 composeClickTrack {
@@ -133,14 +133,12 @@ composeClickTrack {
 }
 
 toastTrack {
+    proxyOwner = "github.leavesczy.track.toast.ToastProxy"
     include = setOf()
     exclude = setOf()
-    proxyOwner = "github.leavesczy.track.toast.ToastProxy"
 }
 
 optimizedThreadTrack {
-    include = setOf()
-    exclude = setOf()
     proxyOwner = "github.leavesczy.track.thread.OptimizedExecutors"
     methods = setOf(
         "newSingleThreadExecutor",
@@ -149,18 +147,18 @@ optimizedThreadTrack {
         "newScheduledThreadPool",
         "newSingleThreadScheduledExecutor"
     )
+    include = setOf()
+    exclude = setOf()
 }
 
 replaceClassTrack {
-    include = setOf()
-    exclude = setOf(".*\\.IgnoreImageView$")
     originClass = "android.widget.ImageView"
     targetClass = "github.leavesczy.track.replace.clazz.MonitorImageView"
+    include = setOf()
+    exclude = setOf(".*\\.IgnoreImageView$")
 }
 
 replaceFieldTrack {
-    include = setOf()
-    exclude = setOf()
     instructions = setOf(
         ReplaceInstruction(
             owner = "android.os.Build",
@@ -169,11 +167,11 @@ replaceFieldTrack {
             proxyOwner = "github.leavesczy.track.replace.instruction.SystemFieldProxy"
         )
     )
+    include = setOf()
+    exclude = setOf()
 }
 
 replaceMethodTrack {
-    include = setOf()
-    exclude = setOf()
     val systemMethodProxyOwner = "github.leavesczy.track.replace.instruction.SystemMethodProxy"
     instructions = setOf(
         ReplaceInstruction(
@@ -195,4 +193,6 @@ replaceMethodTrack {
             proxyOwner = systemMethodProxyOwner
         )
     )
+    include = setOf()
+    exclude = setOf()
 }

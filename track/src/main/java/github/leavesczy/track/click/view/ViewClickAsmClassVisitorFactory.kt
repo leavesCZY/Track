@@ -70,7 +70,6 @@ private class ViewClickClassVisitor(
             when {
                 uncheckViewOnClickAnnotation.isNotBlank() &&
                         methodNode.hasAnnotation(annotationClassName = uncheckViewOnClickAnnotation) -> {
-
                 }
 
                 methodNode.isHookPoint() -> {

@@ -11,8 +11,8 @@ internal data class ReplaceClassConfig(
 ) : BaseTrackConfig
 
 open class ReplaceClassPluginParameter(
-    var include: Set<String> = emptySet(),
-    var exclude: Set<String> = emptySet(),
     var originClass: String = "",
-    var targetClass: String = ""
+    var targetClass: String = "",
+    var include: Set<String> = emptySet(),
+    var exclude: Set<String> = emptySet()
 )

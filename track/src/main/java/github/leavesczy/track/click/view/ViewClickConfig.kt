@@ -12,9 +12,9 @@ internal data class ViewClickConfig(
 ) : BaseTrackConfig
 
 open class ViewClickPluginParameter(
-    var include: Set<String> = emptySet(),
-    var exclude: Set<String> = emptySet(),
     var onClickClass: String = "",
     var onClickMethodName: String = "",
-    var uncheckViewOnClickAnnotation: String = ""
+    var uncheckViewOnClickAnnotation: String = "",
+    var include: Set<String> = emptySet(),
+    var exclude: Set<String> = emptySet()
 )
