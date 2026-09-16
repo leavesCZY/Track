@@ -1,6 +1,7 @@
 package github.leavesczy.track.click.view
 
 import github.leavesczy.track.BaseTrackConfig
+import github.leavesczy.track.BaseTrackConfigParameters
 
 internal data class ViewClickConfig(
     override val include: Set<String>,
@@ -18,3 +19,5 @@ open class ViewClickPluginParameter(
     var include: Set<String> = emptySet(),
     var exclude: Set<String> = emptySet()
 )
+
+internal interface ViewClickConfigParameters : BaseTrackConfigParameters<ViewClickConfig>

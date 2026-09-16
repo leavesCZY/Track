@@ -4,7 +4,6 @@ import com.android.build.api.instrumentation.ClassContext
 import com.android.build.api.instrumentation.ClassData
 import github.leavesczy.track.BaseTrackAsmClassVisitorFactory
 import github.leavesczy.track.BaseTrackClassNode
-import github.leavesczy.track.BaseTrackConfigParameters
 import github.leavesczy.track.utils.InitMethodName
 import github.leavesczy.track.utils.replacePeriodWithSlash
 import org.objectweb.asm.ClassVisitor
@@ -38,7 +37,7 @@ private const val DEFAULT_CONSTRUCTOR_MARKER_CLASS_NAME =
     "kotlin.jvm.internal.DefaultConstructorMarker"
 
 internal abstract class ComposeClickAsmClassVisitorFactory :
-    BaseTrackAsmClassVisitorFactory<BaseTrackConfigParameters, ComposeClickConfig> {
+    BaseTrackAsmClassVisitorFactory<ComposeClickConfigParameters, ComposeClickConfig> {
 
     override fun createClassVisitor(
         classContext: ClassContext,

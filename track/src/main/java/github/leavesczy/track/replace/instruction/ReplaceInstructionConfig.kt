@@ -1,6 +1,7 @@
 package github.leavesczy.track.replace.instruction
 
 import github.leavesczy.track.BaseTrackConfig
+import github.leavesczy.track.BaseTrackConfigParameters
 import java.io.Serializable
 
 internal data class ReplaceInstructionConfig(
@@ -24,6 +25,9 @@ open class ReplaceInstructionPluginParameter(
     var include: Set<String> = emptySet(),
     var exclude: Set<String> = emptySet()
 )
+
+internal interface ReplaceInstructionConfigParameters :
+    BaseTrackConfigParameters<ReplaceInstructionConfig>
 
 open class ReplaceInstruction(
     var owner: String,

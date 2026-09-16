@@ -4,7 +4,6 @@ import com.android.build.api.instrumentation.ClassContext
 import com.android.build.api.instrumentation.ClassData
 import github.leavesczy.track.BaseTrackAsmClassVisitorFactory
 import github.leavesczy.track.BaseTrackClassNode
-import github.leavesczy.track.BaseTrackConfigParameters
 import github.leavesczy.track.utils.filterLambda
 import github.leavesczy.track.utils.hasAnnotation
 import github.leavesczy.track.utils.isStatic
@@ -22,7 +21,7 @@ import org.objectweb.asm.tree.MethodNode
 import org.objectweb.asm.tree.VarInsnNode
 
 internal abstract class ViewClickAsmClassVisitorFactory :
-    BaseTrackAsmClassVisitorFactory<BaseTrackConfigParameters, ViewClickConfig> {
+    BaseTrackAsmClassVisitorFactory<ViewClickConfigParameters, ViewClickConfig> {
 
     override fun createClassVisitor(
         classContext: ClassContext,

@@ -31,19 +31,22 @@ internal interface BaseTrackConfig : Serializable {
 
 }
 
-internal interface BaseTrackConfigParameters : InstrumentationParameters {
+internal interface BaseTrackConfigParameters<TrackConfig : BaseTrackConfig> :
+    InstrumentationParameters {
 
     @get:Input
-    val trackConfig: Property<BaseTrackConfig>
+    val trackConfig: Property<TrackConfig>
 
 }
 
-internal interface BaseTrackAsmClassVisitorFactory<Parameters : BaseTrackConfigParameters, TrackConfig : BaseTrackConfig> :
-    AsmClassVisitorFactory<Parameters> {
+internal interface BaseTrackAsmClassVisitorFactory<
+        Parameters : BaseTrackConfigParameters<TrackConfig>,
+        TrackConfig : BaseTrackConfig
+        > : AsmClassVisitorFactory<Parameters> {
 
     @get:Input
     val trackConfig: TrackConfig
-        get() = parameters.get().trackConfig.get() as TrackConfig
+        get() = parameters.get().trackConfig.get()
 
     override fun createClassVisitor(
         classContext: ClassContext,

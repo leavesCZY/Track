@@ -4,7 +4,6 @@ import com.android.build.api.instrumentation.ClassContext
 import com.android.build.api.instrumentation.ClassData
 import github.leavesczy.track.BaseTrackAsmClassVisitorFactory
 import github.leavesczy.track.BaseTrackClassNode
-import github.leavesczy.track.BaseTrackConfigParameters
 import github.leavesczy.track.utils.ApiOpcodes
 import github.leavesczy.track.utils.InitMethodName
 import github.leavesczy.track.utils.replacePeriodWithSlash
@@ -13,7 +12,7 @@ import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes
 
 internal abstract class ReplaceClassAsmClassVisitorFactory :
-    BaseTrackAsmClassVisitorFactory<BaseTrackConfigParameters, ReplaceClassConfig> {
+    BaseTrackAsmClassVisitorFactory<ReplaceClassConfigParameters, ReplaceClassConfig> {
 
     override fun createClassVisitor(
         classContext: ClassContext,
