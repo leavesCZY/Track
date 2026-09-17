@@ -9,12 +9,15 @@ import github.leavesczy.track.utils.replacePeriodWithSlash
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.Opcodes
 import org.objectweb.asm.Type
+import org.objectweb.asm.tree.AbstractInsnNode
 import org.objectweb.asm.tree.FieldInsnNode
+import org.objectweb.asm.tree.FrameNode
 import org.objectweb.asm.tree.InsnList
 import org.objectweb.asm.tree.InsnNode
 import org.objectweb.asm.tree.JumpInsnNode
 import org.objectweb.asm.tree.LabelNode
 import org.objectweb.asm.tree.LdcInsnNode
+import org.objectweb.asm.tree.LineNumberNode
 import org.objectweb.asm.tree.MethodInsnNode
 import org.objectweb.asm.tree.MethodNode
 import org.objectweb.asm.tree.TypeInsnNode
@@ -25,9 +28,9 @@ private const val CLICKABLE_ELEMENT_CLASS_NAME = "androidx.compose.foundation.Cl
 private const val COMBINED_CLICKABLE_ELEMENT_CLASS_NAME =
     "androidx.compose.foundation.CombinedClickableElement"
 
-private const val ON_CLICK_LABEL_PARAM_NAME = "onClickLabel"
+private const val ON_CLICK_LABEL_FIELD_NAME = "onClickLabel"
 
-private const val ON_CLICK_PARAM_NAME = "onClick"
+private const val ON_CLICK_FIELD_NAME = "onClick"
 
 private const val STRING_DESC = "Ljava/lang/String;"
 
@@ -59,7 +62,7 @@ internal abstract class ComposeClickAsmClassVisitorFactory :
 private class ComposeClickClassVisitor(
     private val nextClassVisitor: ClassVisitor,
     override val trackConfig: ComposeClickConfig
-) : BaseTrackClassNode(trackConfig = trackConfig) {
+) : BaseTrackClassNode(trackConfig = trackConfig, logTag = "composeClickTrack") {
 
     override fun visitEnd() {
         super.visitEnd()
@@ -96,24 +99,20 @@ private class ComposeClickClassVisitor(
         ) {
             return false
         }
-        val classInternalName = this@ComposeClickClassVisitor.name
-        return instructions.any { insn ->
-            insn is FieldInsnNode &&
-                    insn.opcode == Opcodes.PUTFIELD &&
-                    insn.owner == classInternalName &&
-                    insn.name == ON_CLICK_PARAM_NAME &&
-                    insn.desc == FUNCTION0_DESC
-        }
+        return findPutFieldInsns(
+            fieldName = ON_CLICK_FIELD_NAME,
+            fieldDesc = FUNCTION0_DESC
+        ).isNotEmpty()
     }
 
     private fun handleComposeClick(methodNode: MethodNode) {
-        val onClickLabelSlot = methodNode.findRequiredParamSlot(
-            paramName = ON_CLICK_LABEL_PARAM_NAME,
-            expectedDesc = STRING_DESC
+        val onClickLabelSlot = methodNode.findSlotByPutField(
+            fieldName = ON_CLICK_LABEL_FIELD_NAME,
+            fieldDesc = STRING_DESC
         )
-        val onClickSlot = methodNode.findRequiredParamSlot(
-            paramName = ON_CLICK_PARAM_NAME,
-            expectedDesc = FUNCTION0_DESC
+        val onClickSlot = methodNode.findSlotByPutField(
+            fieldName = ON_CLICK_FIELD_NAME,
+            fieldDesc = FUNCTION0_DESC
         )
         insertInstructions(
             methodNode = methodNode,
@@ -122,31 +121,95 @@ private class ComposeClickClassVisitor(
         )
     }
 
-    private fun MethodNode.findRequiredParamSlot(paramName: String, expectedDesc: String): Int {
-        val localVariables = localVariables
+    /**
+     * 从 `PUTFIELD fieldName` 向前反推为其供值的 `ALOAD` 槽位。
+     * 按字段名区分 CombinedClickableElement 中多个 Function0，不依赖 LVT 参数名。
+     */
+    private fun MethodNode.findSlotByPutField(fieldName: String, fieldDesc: String): Int {
+        val putFields = findPutFieldInsns(fieldName = fieldName, fieldDesc = fieldDesc)
+        if (putFields.isEmpty()) {
+            throw composeClickTrackError(
+                detail = "method <${this.name} $desc> 未找到 putfield $fieldName:$fieldDesc"
+            )
+        }
+        if (putFields.size > 1) {
+            throw composeClickTrackError(
+                detail = "method <${this.name} $desc> 发现多处 putfield $fieldName:$fieldDesc，拒绝猜测"
+            )
+        }
+        val valueLoader = putFields[0].findPrecedingValueLoader()
             ?: throw composeClickTrackError(
-                detail = "method <${this.name} $desc> 缺少 LocalVariableTable，无法按参数名定位 $paramName"
+                detail = "method <${this.name} $desc> 无法从 putfield $fieldName:$fieldDesc 反推供值指令"
             )
-        val matched = localVariables.filter { local ->
-            local.name == paramName && local.desc == expectedDesc
-        }
-        if (matched.isEmpty()) {
+        if (valueLoader.opcode != Opcodes.ALOAD) {
             throw composeClickTrackError(
-                detail = "method <${this.name} $desc> 未找到参数 $paramName:$expectedDesc"
+                detail = "method <${this.name} $desc> putfield $fieldName:$fieldDesc 的供值不是 ALOAD（opcode=${valueLoader.opcode}），拒绝继续编译"
             )
         }
-        if (matched.size > 1) {
+        val slot = valueLoader.`var`
+        if (!isConstructorParameterSlot(slot = slot)) {
             throw composeClickTrackError(
-                detail = "method <${this.name} $desc> 发现多个参数 $paramName:$expectedDesc，拒绝猜测"
+                detail = "method <${this.name} $desc> putfield $fieldName:$fieldDesc 反推到的槽位 $slot 不是构造参数槽，拒绝继续编译"
             )
         }
-        return matched[0].index
+        return slot
+    }
+
+    private fun MethodNode.findPutFieldInsns(
+        fieldName: String,
+        fieldDesc: String
+    ): List<FieldInsnNode> {
+        val classInternalName = this@ComposeClickClassVisitor.name
+        return instructions.mapNotNull { insn ->
+            if (insn is FieldInsnNode &&
+                insn.opcode == Opcodes.PUTFIELD &&
+                insn.owner == classInternalName &&
+                insn.name == fieldName &&
+                insn.desc == fieldDesc
+            ) {
+                insn
+            } else {
+                null
+            }
+        }
+    }
+
+    private fun FieldInsnNode.findPrecedingValueLoader(): VarInsnNode? {
+        var insn: AbstractInsnNode? = previous
+        while (insn != null && insn.isIgnorable()) {
+            insn = insn.previous
+        }
+        if (insn is TypeInsnNode && insn.opcode == Opcodes.CHECKCAST) {
+            insn = insn.previous
+            while (insn != null && insn.isIgnorable()) {
+                insn = insn.previous
+            }
+        }
+        return insn as? VarInsnNode
+    }
+
+    private fun AbstractInsnNode.isIgnorable(): Boolean {
+        return this is LabelNode || this is LineNumberNode || this is FrameNode
+    }
+
+    private fun MethodNode.isConstructorParameterSlot(slot: Int): Boolean {
+        if (slot < 1) {
+            return false
+        }
+        var nextSlot = 1
+        Type.getArgumentTypes(desc).forEach { argumentType ->
+            if (slot == nextSlot) {
+                return true
+            }
+            nextSlot += argumentType.size
+        }
+        return false
     }
 
     private fun composeClickTrackError(detail: String): IllegalStateException {
         return IllegalStateException(
             "composeClickTrack 插桩失败：$name 。$detail 。" +
-                    "请确认 Compose Foundation 中 ClickableElement / CombinedClickableElement 构造参数仍包含 onClick / onClickLabel。"
+                    "请确认 Compose Foundation 中 ClickableElement / CombinedClickableElement 仍会 putfield onClick / onClickLabel。"
         )
     }
 
@@ -167,7 +230,8 @@ private class ComposeClickClassVisitor(
                 false
             )
         )
-        val clickWrapperClassFormat = replacePeriodWithSlash(className = trackConfig.clickWrapperClass)
+        val clickWrapperClassFormat =
+            replacePeriodWithSlash(className = trackConfig.clickWrapperClass)
         val label = LabelNode()
         input.add(JumpInsnNode(Opcodes.IFNE, label))
         input.add(TypeInsnNode(Opcodes.NEW, clickWrapperClassFormat))

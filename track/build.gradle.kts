@@ -1,22 +1,15 @@
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 plugins {
     alias(libs.plugins.jetbrains.kotlin.jvm)
     alias(libs.plugins.gradle.plugin.publish)
 }
 
-java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
-    withJavadocJar()
-    withSourcesJar()
+kotlin {
+    jvmToolchain(17)
 }
 
-tasks.withType<KotlinCompile>().configureEach {
-    compilerOptions {
-        jvmTarget.value(JvmTarget.JVM_17)
-    }
+java {
+    withJavadocJar()
+    withSourcesJar()
 }
 
 group = "io.github.leavesczy"
@@ -29,9 +22,10 @@ gradlePlugin {
         create("TrackPlugin") {
             id = "${group}.track"
             implementationClass = "github.leavesczy.track.TrackPlugin"
-            displayName = "Android Developer Gradle Plugin"
-            description = "Android Developer Gradle Plugin"
-            tags.set(setOf("agp"))
+            displayName = "Track"
+            description =
+                "Android ASM instrumentation for click debounce, superclass rewriting, and field/method member replacement."
+            tags.set(setOf("android", "agp", "asm", "bytecode", "instrumentation"))
         }
     }
 }

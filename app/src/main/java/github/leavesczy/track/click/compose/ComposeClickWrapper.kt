@@ -3,7 +3,7 @@ package github.leavesczy.track.click.compose
 import android.os.SystemClock
 import android.util.Log
 
-class ComposeClickWrapper(private val onClick: () -> Unit) : Function0<Unit> {
+internal class ComposeClickWrapper(private val onClick: () -> Unit) : Function0<Unit> {
 
     companion object {
 

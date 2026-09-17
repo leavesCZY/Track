@@ -1,4 +1,4 @@
-package github.leavesczy.track.click.compose
+package github.leavesczy.track.ui
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text

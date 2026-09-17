@@ -6,7 +6,6 @@ import github.leavesczy.track.BaseTrackConfigParameters
 internal data class ViewClickConfig(
     override val include: Set<String>,
     override val exclude: Set<String>,
-    override val extensionName: String,
     val clickHandlerClass: String,
     val clickMethodName: String,
     val skipOnClickAnnotation: String

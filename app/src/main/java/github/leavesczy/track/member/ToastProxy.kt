@@ -1,4 +1,4 @@
-package github.leavesczy.track.toast
+package github.leavesczy.track.member
 
 import android.annotation.SuppressLint
 import android.os.Build
@@ -6,12 +6,12 @@ import android.os.Handler
 import android.os.Message
 import android.widget.Toast
 
-object ToastProxy {
+internal object ToastProxy {
 
     @JvmStatic
     fun show(toast: Toast) {
         hookToastIfNeed(toast)
-        toast.setText("Toast 内容被修改了 ~")
+        toast.setText("Toast.show 已被 ToastProxy 接管")
         toast.show()
     }
 
@@ -23,8 +23,7 @@ object ToastProxy {
                 val tnField = toastClass.getDeclaredField("mTN")
                 tnField.isAccessible = true
                 val tn = tnField.get(toast)
-                val tnClass = tn.javaClass
-                val handlerField = tnClass.getDeclaredField("mHandler")
+                val handlerField = tn.javaClass.getDeclaredField("mHandler")
                 handlerField.isAccessible = true
                 handlerField.set(tn, ProxyHandler(handlerField.get(tn) as Handler))
             } catch (e: Throwable) {

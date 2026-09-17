@@ -1,4 +1,4 @@
-package github.leavesczy.track.replace.inheritance
+package github.leavesczy.track.superclass
 
 import android.os.Bundle
 import androidx.activity.compose.setContent
@@ -23,16 +23,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import github.leavesczy.track.BaseActivity
-import github.leavesczy.track.click.compose.TrackTheme
-import github.leavesczy.track.click.compose.TrackTopAppBar
+import github.leavesczy.track.ui.TrackTheme
+import github.leavesczy.track.ui.TrackTopAppBar
 
-class ReplaceClassTrackActivity : BaseActivity() {
+class SuperclassTrackActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             TrackTheme {
-                ReplaceClassTrackScreen()
+                SuperclassTrackScreen()
             }
         }
     }
@@ -40,14 +40,14 @@ class ReplaceClassTrackActivity : BaseActivity() {
 }
 
 @Composable
-private fun ReplaceClassTrackScreen() {
+private fun SuperclassTrackScreen() {
     var name by remember { mutableStateOf(value = "Track") }
     var result by remember { mutableStateOf(value = "") }
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         containerColor = MaterialTheme.colorScheme.surface,
         topBar = {
-            TrackTopAppBar(title = "ReplaceClassTrack")
+            TrackTopAppBar(title = "SuperclassTrack")
         }
     ) { innerPadding ->
         Column(
@@ -59,7 +59,7 @@ private fun ReplaceClassTrackScreen() {
             verticalArrangement = Arrangement.spacedBy(space = 12.dp)
         ) {
             Text(
-                text = "OriginGreeter → ProxyGreeter。AppGreeter 应被替换，ExcludedGreeter 被 exclude。",
+                text = "规则 1 用 exclude 拦住 ExcludedGreeter；规则 2 用 include 只放行 AppLogger（OutsideLogger 应保持原父类）。",
                 fontSize = 13.sp,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -73,16 +73,16 @@ private fun ReplaceClassTrackScreen() {
             Button(
                 modifier = Modifier.fillMaxWidth(),
                 onClick = {
-                    result = buildReplaceClassResult(name = name.ifBlank { "Track" })
+                    result = buildSuperclassResult(name = name.ifBlank { "Track" })
                 }
             ) {
-                Text(text = "调用 greet() 并检查继承关系")
+                Text(text = "检查 exclude / include")
             }
             Text(text = "结果", fontSize = 16.sp)
             Text(
                 modifier = Modifier.fillMaxWidth(),
                 text = result.ifBlank {
-                    "点击上方按钮查看：父类是否换成 ProxyGreeter，以及 super.greet() 实际落到谁"
+                    "点击上方按钮查看：exclude 与 include 是否分别拦住 ExcludedGreeter / OutsideLogger"
                 },
                 fontSize = 13.sp,
                 color = MaterialTheme.colorScheme.onSurface
@@ -91,20 +91,28 @@ private fun ReplaceClassTrackScreen() {
     }
 }
 
-private fun buildReplaceClassResult(name: String): String {
+private fun buildSuperclassResult(name: String): String {
     val appGreeter = AppGreeter()
     val excludedGreeter = ExcludedGreeter()
+    val appLogger = AppLogger()
+    val outsideLogger = OutsideLogger()
     return buildString {
-        appendLine("【AppGreeter — 应被替换】")
-        appendLine("class = ${appGreeter.javaClass.name}")
-        appendLine("super = ${appGreeter.javaClass.superclass?.name}")
-        appendLine("super is ProxyGreeter = ${appGreeter.javaClass.superclass == ProxyGreeter::class.java}")
+        appendLine("【规则 1：exclude】OriginGreeter → ProxyGreeter")
+        appendLine("AppGreeter.super = ${appGreeter.javaClass.superclass?.name}")
+        appendLine("命中 ProxyGreeter = ${appGreeter.javaClass.superclass == ProxyGreeter::class.java}")
         appendLine("greet() = ${appGreeter.greet(name)}")
         appendLine()
-        appendLine("【ExcludedGreeter — exclude，应保持原父类】")
-        appendLine("class = ${excludedGreeter.javaClass.name}")
-        appendLine("super = ${excludedGreeter.javaClass.superclass?.name}")
-        appendLine("super is ProxyGreeter = ${excludedGreeter.javaClass.superclass == ProxyGreeter::class.java}")
-        append("greet() = ${excludedGreeter.greet(name)}")
+        appendLine("ExcludedGreeter.super = ${excludedGreeter.javaClass.superclass?.name}")
+        appendLine("仍为 OriginGreeter = ${excludedGreeter.javaClass.superclass == OriginGreeter::class.java}")
+        appendLine("greet() = ${excludedGreeter.greet(name)}")
+        appendLine()
+        appendLine("【规则 2：include】OriginLogger → ProxyLogger")
+        appendLine("AppLogger.super = ${appLogger.javaClass.superclass?.name}")
+        appendLine("命中 ProxyLogger = ${appLogger.javaClass.superclass == ProxyLogger::class.java}")
+        appendLine("log() = ${appLogger.log(message = name)}")
+        appendLine()
+        appendLine("OutsideLogger.super = ${outsideLogger.javaClass.superclass?.name}")
+        appendLine("仍为 OriginLogger = ${outsideLogger.javaClass.superclass == OriginLogger::class.java}")
+        append("log() = ${outsideLogger.log(message = name)}")
     }
 }

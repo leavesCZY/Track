@@ -1,4 +1,4 @@
-package github.leavesczy.track.replace.rule
+package github.leavesczy.track.member
 
 import com.android.build.api.instrumentation.ClassContext
 import com.android.build.api.instrumentation.ClassData
@@ -12,14 +12,14 @@ import org.objectweb.asm.Opcodes
 import org.objectweb.asm.Type
 import org.objectweb.asm.tree.ClassNode
 
-internal abstract class ReplaceRuleAsmClassVisitorFactory :
-    BaseTrackAsmClassVisitorFactory<ReplaceRuleConfigParameters, ReplaceRuleConfig> {
+internal abstract class MemberAsmClassVisitorFactory :
+    BaseTrackAsmClassVisitorFactory<MemberConfigParameters, MemberConfig> {
 
     override fun createClassVisitor(
         classContext: ClassContext,
         nextClassVisitor: ClassVisitor
     ): BaseTrackClassNode {
-        return ReplaceRuleClassVisitor(
+        return MemberClassVisitor(
             nextClassVisitor = nextClassVisitor,
             trackConfig = trackConfig
         )
@@ -31,10 +31,10 @@ internal abstract class ReplaceRuleAsmClassVisitorFactory :
 
 }
 
-private class ReplaceRuleClassVisitor(
+private class MemberClassVisitor(
     private val nextClassVisitor: ClassVisitor,
-    override val trackConfig: ReplaceRuleConfig
-) : BaseTrackClassNode(trackConfig = trackConfig) {
+    override val trackConfig: MemberConfig
+) : BaseTrackClassNode(trackConfig = trackConfig, logTag = "memberTrack") {
 
     override fun visitMethod(
         access: Int,
@@ -44,7 +44,7 @@ private class ReplaceRuleClassVisitor(
         exceptions: Array<out String>?
     ): MethodVisitor {
         val methodVisitor = super.visitMethod(access, name, descriptor, signature, exceptions)
-        return ReplaceRuleMethodVisitor(
+        return MemberMethodVisitor(
             api = api,
             methodVisitor = methodVisitor,
             classNode = this,
@@ -59,11 +59,11 @@ private class ReplaceRuleClassVisitor(
 
 }
 
-private class ReplaceRuleMethodVisitor(
+private class MemberMethodVisitor(
     api: Int,
     methodVisitor: MethodVisitor,
     private val classNode: ClassNode,
-    private val config: ReplaceRuleConfig
+    private val config: MemberConfig
 ) : MethodVisitor(api, methodVisitor) {
 
     override fun visitFieldInsn(
@@ -73,14 +73,15 @@ private class ReplaceRuleMethodVisitor(
         descriptor: String?
     ) {
         val find = config.replacements.find {
-            it.ownerClass == owner &&
+            it.kind == MemberKind.FIELD &&
+                    it.ownerClass == owner &&
                     it.memberName == name &&
                     matchesDescriptor(ruleDescriptor = it.descriptor, actualDescriptor = descriptor)
         }
         if (find != null && opcode == Opcodes.GETSTATIC) {
             val proxyClass = replacePeriodWithSlash(className = find.proxyClass)
             super.visitFieldInsn(opcode, proxyClass, name, descriptor)
-            LogPrint.normal(tag = config.extensionName) {
+            LogPrint.normal(tag = "memberTrack") {
                 "${classNode.name} 发现符合规则的指令：$owner $name $descriptor , 替换为 $proxyClass $name $descriptor ，完成处理..."
             }
         } else {
@@ -96,41 +97,42 @@ private class ReplaceRuleMethodVisitor(
         isInterface: Boolean
     ) {
         val find = config.replacements.find {
-            it.ownerClass == owner &&
+            it.kind == MemberKind.METHOD &&
+                    it.ownerClass == owner &&
                     it.memberName == name &&
                     matchesDescriptor(ruleDescriptor = it.descriptor, actualDescriptor = descriptor)
         }
+        if (find == null) {
+            super.visitMethodInsn(opcode, owner, name, descriptor, isInterface)
+            return
+        }
+        // INVOKESPECIAL（private / super / <init>）改 owner 会导致非法字节码，直接跳过。
+        if (opcode == Opcodes.INVOKESPECIAL) {
+            super.visitMethodInsn(opcode, owner, name, descriptor, isInterface)
+            return
+        }
+        val resultOwner = replacePeriodWithSlash(className = find.proxyClass)
         val resultOpcode: Int
-        val resultOwner: String
         val resultDescriptor: String
         val resultIsInterface: Boolean
-        if (find != null) {
-            resultOwner = replacePeriodWithSlash(className = find.proxyClass)
-            if (opcode == Opcodes.INVOKEVIRTUAL || opcode == Opcodes.INVOKEINTERFACE) {
-                resultOpcode = Opcodes.INVOKESTATIC
-                resultDescriptor = insertAsFirstArgument(descriptor = descriptor, owner = owner)
-                resultIsInterface = false
-            } else {
-                resultOpcode = opcode
-                resultDescriptor = descriptor
-                resultIsInterface = isInterface
-            }
-            LogPrint.normal(tag = config.extensionName) {
-                "${classNode.name} 发现符合规则的指令：$owner $name $descriptor , 替换为 $resultOwner $name $resultDescriptor ，完成处理..."
-            }
+        if (opcode == Opcodes.INVOKEVIRTUAL || opcode == Opcodes.INVOKEINTERFACE) {
+            resultOpcode = Opcodes.INVOKESTATIC
+            resultDescriptor = insertAsFirstArgument(descriptor = descriptor, owner = owner)
+            resultIsInterface = false
         } else {
+            // INVOKESTATIC：保持静态调用，仅替换 owner。
             resultOpcode = opcode
-            resultOwner = owner
             resultDescriptor = descriptor
             resultIsInterface = isInterface
+        }
+        LogPrint.normal(tag = "memberTrack") {
+            "${classNode.name} 发现符合规则的指令：$owner $name $descriptor , 替换为 $resultOwner $name $resultDescriptor ，完成处理..."
         }
         super.visitMethodInsn(resultOpcode, resultOwner, name, resultDescriptor, resultIsInterface)
     }
 
     private fun matchesDescriptor(ruleDescriptor: String, actualDescriptor: String?): Boolean {
-        return ruleDescriptor == ReplaceFieldRule.MATCH_ALL_TYPE_DESCRIPTORS ||
-                ruleDescriptor == ReplaceMethodRule.MATCH_ALL_METHOD_DESCRIPTORS ||
-                ruleDescriptor == actualDescriptor
+        return ruleDescriptor == MATCH_ALL_DESCRIPTORS || ruleDescriptor == actualDescriptor
     }
 
     private fun insertAsFirstArgument(descriptor: String, owner: String): String {

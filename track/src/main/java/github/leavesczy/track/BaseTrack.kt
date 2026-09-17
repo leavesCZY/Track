@@ -12,11 +12,13 @@ import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.tree.ClassNode
 import java.io.Serializable
 
-internal abstract class BaseTrackClassNode(protected open val trackConfig: BaseTrackConfig) :
-    ClassNode(AsmApi) {
+internal abstract class BaseTrackClassNode(
+    protected open val trackConfig: BaseTrackConfig,
+    private val logTag: String
+) : ClassNode(AsmApi) {
 
     fun log(msg: () -> String) {
-        LogPrint.normal(tag = trackConfig.extensionName, msg = msg)
+        LogPrint.normal(tag = logTag, msg = msg)
     }
 
 }
@@ -26,8 +28,6 @@ internal interface BaseTrackConfig : Serializable {
     val include: Set<String>
 
     val exclude: Set<String>
-
-    val extensionName: String
 
 }
 

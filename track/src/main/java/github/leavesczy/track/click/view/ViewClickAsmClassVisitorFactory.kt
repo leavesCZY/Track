@@ -42,7 +42,7 @@ internal abstract class ViewClickAsmClassVisitorFactory :
 private class ViewClickClassVisitor(
     private val nextClassVisitor: ClassVisitor,
     override val trackConfig: ViewClickConfig
-) : BaseTrackClassNode(trackConfig = trackConfig) {
+) : BaseTrackClassNode(trackConfig = trackConfig, logTag = "viewClickTrack") {
 
     private val viewObjectDesc = "Landroid/view/View;"
 

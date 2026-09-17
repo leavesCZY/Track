@@ -1,5 +1,6 @@
-import github.leavesczy.track.replace.rule.ReplaceFieldRule
-import github.leavesczy.track.replace.rule.ReplaceMethodRule
+import github.leavesczy.track.member.MemberFieldRule
+import github.leavesczy.track.member.MemberMethodRule
+import github.leavesczy.track.superclass.SuperclassRule
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.text.SimpleDateFormat
@@ -134,67 +135,57 @@ composeClickTrack {
     skipOnClickLabel = "skip"
 }
 
-toastTrack {
-    proxyClass = "github.leavesczy.track.toast.ToastProxy"
-    include = setOf()
-    exclude = setOf()
-}
-
-optimizedThreadTrack {
-    proxyClass = "github.leavesczy.track.thread.ExecutorsProxy"
-    methodNames = setOf(
-        "newSingleThreadExecutor",
-        "newCachedThreadPool",
-        "newFixedThreadPool",
-        "newScheduledThreadPool",
-        "newSingleThreadScheduledExecutor"
-    )
-    include = setOf()
-    exclude = setOf()
-}
-
-replaceClassTrack {
-    originClass = "github.leavesczy.track.replace.inheritance.OriginGreeter"
-    targetClass = "github.leavesczy.track.replace.inheritance.ProxyGreeter"
-    include = setOf()
-    exclude = setOf(".*\\.ExcludedGreeter$")
-}
-
-replaceFieldTrack {
-    replacements = setOf(
-        ReplaceFieldRule(
-            ownerClass = "android.os.Build",
-            fieldName = "BRAND",
-            typeDescriptor = "Ljava/lang/String;",
-            proxyClass = "github.leavesczy.track.replace.rule.SystemFieldProxy"
+superclassTrack {
+    rules = setOf(
+        SuperclassRule(
+            originClass = "github.leavesczy.track.superclass.OriginGreeter",
+            targetClass = "github.leavesczy.track.superclass.ProxyGreeter",
+            exclude = setOf(".*\\.ExcludedGreeter$")
+        ),
+        SuperclassRule(
+            originClass = "github.leavesczy.track.superclass.OriginLogger",
+            targetClass = "github.leavesczy.track.superclass.ProxyLogger",
+            include = setOf(".*\\.AppLogger$")
         )
     )
-    include = setOf()
-    exclude = setOf()
 }
 
-replaceMethodTrack {
-    val systemMethodProxyClass = "github.leavesczy.track.replace.rule.SystemMethodProxy"
-    replacements = setOf(
-        ReplaceMethodRule(
-            ownerClass = "android.telephony.TelephonyManager",
-            methodName = "getDeviceId",
-            methodDescriptor = "()Ljava/lang/String;",
-            proxyClass = systemMethodProxyClass
+memberTrack {
+    val toastProxy = "github.leavesczy.track.member.ToastProxy"
+    val systemMethodProxy = "github.leavesczy.track.member.SystemMethodProxy"
+    val systemFieldProxy = "github.leavesczy.track.member.SystemFieldProxy"
+    val echoProxy = "github.leavesczy.track.member.EchoProxy"
+    val memberTrackInclude = setOf(".*\\.MemberTrackActivity$")
+    methods = setOf(
+        MemberMethodRule(
+            ownerClass = "android.widget.Toast",
+            methodName = "show",
+            methodDescriptor = "()V",
+            proxyClass = toastProxy,
+            include = memberTrackInclude
         ),
-        ReplaceMethodRule(
-            ownerClass = "android.telephony.TelephonyManager",
-            methodName = "getImei",
-            methodDescriptor = "(I)Ljava/lang/String;",
-            proxyClass = systemMethodProxyClass
-        ),
-        ReplaceMethodRule(
+        MemberMethodRule(
             ownerClass = $$"android.provider.Settings$Secure",
             methodName = "getString",
             methodDescriptor = "(Landroid/content/ContentResolver;Ljava/lang/String;)Ljava/lang/String;",
-            proxyClass = systemMethodProxyClass
+            proxyClass = systemMethodProxy,
+            include = memberTrackInclude
+        ),
+        MemberMethodRule(
+            ownerClass = "github.leavesczy.track.member.Echo",
+            methodName = "echo",
+            methodDescriptor = MemberMethodRule.MATCH_ALL_METHOD_DESCRIPTORS,
+            proxyClass = echoProxy,
+            include = memberTrackInclude
         )
     )
-    include = setOf()
-    exclude = setOf()
+    fields = setOf(
+        MemberFieldRule(
+            ownerClass = "android.os.Build",
+            fieldName = "BRAND",
+            typeDescriptor = "Ljava/lang/String;",
+            proxyClass = systemFieldProxy,
+            include = memberTrackInclude
+        )
+    )
 }

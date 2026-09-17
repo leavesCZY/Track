@@ -28,6 +28,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import github.leavesczy.track.BaseActivity
 import github.leavesczy.track.R
+import github.leavesczy.track.ui.TrackTheme
+import github.leavesczy.track.ui.TrackTopAppBar
 
 class ComposeClickTrackActivity : BaseActivity() {
 

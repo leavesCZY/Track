@@ -19,13 +19,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import github.leavesczy.track.click.compose.ComposeClickTrackActivity
-import github.leavesczy.track.click.compose.TrackTheme
-import github.leavesczy.track.click.compose.TrackTopAppBar
 import github.leavesczy.track.click.view.ViewClickTrackActivity
-import github.leavesczy.track.replace.inheritance.ReplaceClassTrackActivity
-import github.leavesczy.track.replace.rule.ReplaceRuleTrackActivity
-import github.leavesczy.track.thread.OptimizedThreadTrackActivity
-import github.leavesczy.track.toast.ToastTrackActivity
+import github.leavesczy.track.member.MemberTrackActivity
+import github.leavesczy.track.superclass.SuperclassTrackActivity
+import github.leavesczy.track.ui.TrackTheme
+import github.leavesczy.track.ui.TrackTopAppBar
 
 class MainActivity : BaseActivity() {
 
@@ -36,10 +34,8 @@ class MainActivity : BaseActivity() {
                 MainScreen(
                     onViewClickTrack = { startActivity<ViewClickTrackActivity>() },
                     onComposeClickTrack = { startActivity<ComposeClickTrackActivity>() },
-                    onToastTrack = { startActivity<ToastTrackActivity>() },
-                    onOptimizedThreadTrack = { startActivity<OptimizedThreadTrackActivity>() },
-                    onReplaceClassTrack = { startActivity<ReplaceClassTrackActivity>() },
-                    onReplaceRuleTrack = { startActivity<ReplaceRuleTrackActivity>() }
+                    onSuperclassTrack = { startActivity<SuperclassTrackActivity>() },
+                    onMemberTrack = { startActivity<MemberTrackActivity>() }
                 )
             }
         }
@@ -56,10 +52,8 @@ class MainActivity : BaseActivity() {
 private fun MainScreen(
     onViewClickTrack: () -> Unit,
     onComposeClickTrack: () -> Unit,
-    onToastTrack: () -> Unit,
-    onOptimizedThreadTrack: () -> Unit,
-    onReplaceClassTrack: () -> Unit,
-    onReplaceRuleTrack: () -> Unit
+    onSuperclassTrack: () -> Unit,
+    onMemberTrack: () -> Unit
 ) {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -90,27 +84,15 @@ private fun MainScreen(
             }
             Button(
                 modifier = Modifier.fillMaxWidth(),
-                onClick = onToastTrack
+                onClick = onSuperclassTrack
             ) {
-                Text(text = "ToastTrack")
+                Text(text = "SuperclassTrack")
             }
             Button(
                 modifier = Modifier.fillMaxWidth(),
-                onClick = onOptimizedThreadTrack
+                onClick = onMemberTrack
             ) {
-                Text(text = "OptimizedThreadTrack")
-            }
-            Button(
-                modifier = Modifier.fillMaxWidth(),
-                onClick = onReplaceClassTrack
-            ) {
-                Text(text = "ReplaceClassTrack")
-            }
-            Button(
-                modifier = Modifier.fillMaxWidth(),
-                onClick = onReplaceRuleTrack
-            ) {
-                Text(text = "ReplaceRuleTrack")
+                Text(text = "MemberTrack")
             }
         }
     }

@@ -6,7 +6,6 @@ import github.leavesczy.track.BaseTrackConfigParameters
 internal data class ComposeClickConfig(
     override val include: Set<String>,
     override val exclude: Set<String>,
-    override val extensionName: String,
     val clickWrapperClass: String,
     val skipOnClickLabel: String
 ) : BaseTrackConfig

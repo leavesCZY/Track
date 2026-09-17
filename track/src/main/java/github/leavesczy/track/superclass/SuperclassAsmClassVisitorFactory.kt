@@ -1,4 +1,4 @@
-package github.leavesczy.track.replace.inheritance
+package github.leavesczy.track.superclass
 
 import com.android.build.api.instrumentation.ClassContext
 import com.android.build.api.instrumentation.ClassData
@@ -10,14 +10,14 @@ import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes
 
-internal abstract class ReplaceClassAsmClassVisitorFactory :
-    BaseTrackAsmClassVisitorFactory<ReplaceClassConfigParameters, ReplaceClassConfig> {
+internal abstract class SuperclassAsmClassVisitorFactory :
+    BaseTrackAsmClassVisitorFactory<SuperclassConfigParameters, SuperclassConfig> {
 
     override fun createClassVisitor(
         classContext: ClassContext,
         nextClassVisitor: ClassVisitor
     ): BaseTrackClassNode {
-        return ReplaceClassVisitor(
+        return SuperclassClassVisitor(
             nextClassVisitor = nextClassVisitor,
             trackConfig = trackConfig
         )
@@ -25,22 +25,32 @@ internal abstract class ReplaceClassAsmClassVisitorFactory :
 
     override fun isTrackEnabled(classData: ClassData): Boolean {
         val superClasses = classData.superClasses
-        if (classData.className == trackConfig.targetClass || superClasses.isEmpty()) {
+        if (superClasses.isEmpty()) {
             return false
         }
-        return superClasses.first() == trackConfig.originClass
+        val isTargetClass = trackConfig.replacements.any { it.targetClass == classData.className }
+        if (isTargetClass) {
+            return false
+        }
+        val directSuperClass = superClasses.first()
+        return trackConfig.replacements.any { it.originClass == directSuperClass }
     }
 
 }
 
-private class ReplaceClassVisitor(
+private class SuperclassClassVisitor(
     private val nextClassVisitor: ClassVisitor,
-    override val trackConfig: ReplaceClassConfig
-) : BaseTrackClassNode(trackConfig = trackConfig) {
+    override val trackConfig: SuperclassConfig
+) : BaseTrackClassNode(trackConfig = trackConfig, logTag = "superclassTrack") {
 
-    private val oldSuperName = replacePeriodWithSlash(className = trackConfig.originClass)
+    private val replacementsByOrigin = trackConfig.replacements.associate { replacement ->
+        replacePeriodWithSlash(className = replacement.originClass) to
+                replacePeriodWithSlash(className = replacement.targetClass)
+    }
 
-    private val newSuperName = replacePeriodWithSlash(className = trackConfig.targetClass)
+    private var oldSuperName: String = ""
+
+    private var newSuperName: String = ""
 
     override fun visit(
         version: Int,
@@ -50,6 +60,8 @@ private class ReplaceClassVisitor(
         superName: String?,
         interfaces: Array<out String>?
     ) {
+        oldSuperName = superName.orEmpty()
+        newSuperName = replacementsByOrigin[oldSuperName] ?: oldSuperName
         super.visit(
             version,
             access,
@@ -58,8 +70,10 @@ private class ReplaceClassVisitor(
             newSuperName,
             interfaces
         )
-        log {
-            "$name 的父类符合规则，完成处理..."
+        if (oldSuperName != newSuperName) {
+            log {
+                "$name 的父类符合规则，完成处理..."
+            }
         }
     }
 
@@ -71,6 +85,9 @@ private class ReplaceClassVisitor(
         exceptions: Array<out String>?
     ): MethodVisitor {
         val methodVisitor = super.visitMethod(access, name, descriptor, signature, exceptions)
+        if (oldSuperName == newSuperName) {
+            return methodVisitor
+        }
         return object : MethodVisitor(AsmApi, methodVisitor) {
             override fun visitMethodInsn(
                 opcode: Int,
@@ -103,7 +120,7 @@ private class ReplaceClassVisitor(
     }
 
     private fun replaceSuperTypeInSignature(signature: String?): String? {
-        if (signature.isNullOrEmpty()) {
+        if (signature.isNullOrEmpty() || oldSuperName == newSuperName) {
             return signature
         }
         val oldType = "L$oldSuperName;"
