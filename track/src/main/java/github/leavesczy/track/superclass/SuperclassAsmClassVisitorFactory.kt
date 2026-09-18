@@ -3,8 +3,8 @@ package github.leavesczy.track.superclass
 import com.android.build.api.instrumentation.ClassContext
 import com.android.build.api.instrumentation.ClassData
 import github.leavesczy.track.BaseTrackAsmClassVisitorFactory
-import github.leavesczy.track.BaseTrackClassNode
-import github.leavesczy.track.utils.AsmApi
+import github.leavesczy.track.utils.ASM_API
+import github.leavesczy.track.utils.LogPrint
 import github.leavesczy.track.utils.replacePeriodWithSlash
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.MethodVisitor
@@ -16,7 +16,7 @@ internal abstract class SuperclassAsmClassVisitorFactory :
     override fun createClassVisitor(
         classContext: ClassContext,
         nextClassVisitor: ClassVisitor
-    ): BaseTrackClassNode {
+    ): ClassVisitor {
         return SuperclassClassVisitor(
             nextClassVisitor = nextClassVisitor,
             trackConfig = trackConfig
@@ -39,9 +39,9 @@ internal abstract class SuperclassAsmClassVisitorFactory :
 }
 
 private class SuperclassClassVisitor(
-    private val nextClassVisitor: ClassVisitor,
-    override val trackConfig: SuperclassConfig
-) : BaseTrackClassNode(trackConfig = trackConfig, logTag = "superclassTrack") {
+    nextClassVisitor: ClassVisitor,
+    trackConfig: SuperclassConfig
+) : ClassVisitor(ASM_API, nextClassVisitor) {
 
     private val replacementsByOrigin = trackConfig.replacements.associate { replacement ->
         replacePeriodWithSlash(className = replacement.originClass) to
@@ -71,7 +71,7 @@ private class SuperclassClassVisitor(
             interfaces
         )
         if (oldSuperName != newSuperName) {
-            log {
+            LogPrint.normal(tag = "superclassTrack") {
                 "$name 的父类符合规则，完成处理..."
             }
         }
@@ -88,7 +88,7 @@ private class SuperclassClassVisitor(
         if (oldSuperName == newSuperName) {
             return methodVisitor
         }
-        return object : MethodVisitor(AsmApi, methodVisitor) {
+        return object : MethodVisitor(ASM_API, methodVisitor) {
             override fun visitMethodInsn(
                 opcode: Int,
                 owner: String?,
@@ -112,11 +112,6 @@ private class SuperclassClassVisitor(
                 )
             }
         }
-    }
-
-    override fun visitEnd() {
-        super.visitEnd()
-        accept(nextClassVisitor)
     }
 
     private fun replaceSuperTypeInSignature(signature: String?): String? {

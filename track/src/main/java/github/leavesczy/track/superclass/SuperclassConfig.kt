@@ -17,7 +17,7 @@ internal data class SuperclassConfig(
 
 }
 
-open class SuperclassRule(
+data class SuperclassRule(
     var originClass: String,
     var targetClass: String,
     var include: Set<String> = emptySet(),

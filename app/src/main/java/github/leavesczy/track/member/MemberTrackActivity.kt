@@ -1,5 +1,6 @@
 package github.leavesczy.track.member
 
+import android.annotation.SuppressLint
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
@@ -47,13 +48,12 @@ class MemberTrackActivity : BaseActivity() {
         Toast.makeText(this, "原始 Toast 文案", Toast.LENGTH_SHORT).show()
     }
 
+    @SuppressLint("HardwareIds")
     private fun buildMemberCompareResult(): String {
         val brandInScope = Build.BRAND
         val brandOutside = MemberOutsideScope.readBrand()
-        val androidIdInScope = Settings.Secure.getString(
-            contentResolver,
-            Settings.Secure.ANDROID_ID
-        ) ?: ""
+        val androidIdInScope =
+            Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID) ?: ""
         val androidIdOutside = MemberOutsideScope.readAndroidId(context = this)
         val echoString = Echo.echo(value = "Track")
         val echoInt = Echo.echo(value = 42)

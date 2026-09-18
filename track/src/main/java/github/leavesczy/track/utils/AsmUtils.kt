@@ -5,9 +5,9 @@ import org.objectweb.asm.Type
 import org.objectweb.asm.tree.InvokeDynamicInsnNode
 import org.objectweb.asm.tree.MethodNode
 
-internal const val InitMethodName = "<init>"
+internal const val INIT_METHOD_NAME = "<init>"
 
-internal const val AsmApi = Opcodes.ASM9
+internal const val ASM_API = Opcodes.ASM9
 
 internal val MethodNode.isStatic: Boolean
     get() = access and Opcodes.ACC_STATIC == Opcodes.ACC_STATIC

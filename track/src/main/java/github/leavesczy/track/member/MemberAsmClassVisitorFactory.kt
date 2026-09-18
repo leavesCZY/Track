@@ -3,14 +3,13 @@ package github.leavesczy.track.member
 import com.android.build.api.instrumentation.ClassContext
 import com.android.build.api.instrumentation.ClassData
 import github.leavesczy.track.BaseTrackAsmClassVisitorFactory
-import github.leavesczy.track.BaseTrackClassNode
+import github.leavesczy.track.utils.ASM_API
 import github.leavesczy.track.utils.LogPrint
 import github.leavesczy.track.utils.replacePeriodWithSlash
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes
 import org.objectweb.asm.Type
-import org.objectweb.asm.tree.ClassNode
 
 internal abstract class MemberAsmClassVisitorFactory :
     BaseTrackAsmClassVisitorFactory<MemberConfigParameters, MemberConfig> {
@@ -18,7 +17,7 @@ internal abstract class MemberAsmClassVisitorFactory :
     override fun createClassVisitor(
         classContext: ClassContext,
         nextClassVisitor: ClassVisitor
-    ): BaseTrackClassNode {
+    ): ClassVisitor {
         return MemberClassVisitor(
             nextClassVisitor = nextClassVisitor,
             trackConfig = trackConfig
@@ -32,9 +31,23 @@ internal abstract class MemberAsmClassVisitorFactory :
 }
 
 private class MemberClassVisitor(
-    private val nextClassVisitor: ClassVisitor,
-    override val trackConfig: MemberConfig
-) : BaseTrackClassNode(trackConfig = trackConfig, logTag = "memberTrack") {
+    nextClassVisitor: ClassVisitor,
+    private val trackConfig: MemberConfig
+) : ClassVisitor(ASM_API, nextClassVisitor) {
+
+    private var className = ""
+
+    override fun visit(
+        version: Int,
+        access: Int,
+        name: String?,
+        signature: String?,
+        superName: String?,
+        interfaces: Array<out String>?
+    ) {
+        className = name.orEmpty()
+        super.visit(version, access, name, signature, superName, interfaces)
+    }
 
     override fun visitMethod(
         access: Int,
@@ -47,14 +60,9 @@ private class MemberClassVisitor(
         return MemberMethodVisitor(
             api = api,
             methodVisitor = methodVisitor,
-            classNode = this,
+            className = className,
             config = trackConfig
         )
-    }
-
-    override fun visitEnd() {
-        super.visitEnd()
-        accept(nextClassVisitor)
     }
 
 }
@@ -62,7 +70,7 @@ private class MemberClassVisitor(
 private class MemberMethodVisitor(
     api: Int,
     methodVisitor: MethodVisitor,
-    private val classNode: ClassNode,
+    private val className: String,
     private val config: MemberConfig
 ) : MethodVisitor(api, methodVisitor) {
 
@@ -82,7 +90,7 @@ private class MemberMethodVisitor(
             val proxyClass = replacePeriodWithSlash(className = find.proxyClass)
             super.visitFieldInsn(opcode, proxyClass, name, descriptor)
             LogPrint.normal(tag = "memberTrack") {
-                "${classNode.name} 发现符合规则的指令：$owner $name $descriptor , 替换为 $proxyClass $name $descriptor ，完成处理..."
+                "$className 发现符合规则的指令：$owner $name $descriptor , 替换为 $proxyClass $name $descriptor ，完成处理..."
             }
         } else {
             super.visitFieldInsn(opcode, owner, name, descriptor)
@@ -126,7 +134,7 @@ private class MemberMethodVisitor(
             resultIsInterface = isInterface
         }
         LogPrint.normal(tag = "memberTrack") {
-            "${classNode.name} 发现符合规则的指令：$owner $name $descriptor , 替换为 $resultOwner $name $resultDescriptor ，完成处理..."
+            "$className 发现符合规则的指令：$owner $name $descriptor , 替换为 $resultOwner $name $resultDescriptor ，完成处理..."
         }
         super.visitMethodInsn(resultOpcode, resultOwner, name, resultDescriptor, resultIsInterface)
     }

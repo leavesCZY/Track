@@ -4,7 +4,7 @@ import com.android.build.api.instrumentation.ClassContext
 import com.android.build.api.instrumentation.ClassData
 import github.leavesczy.track.BaseTrackAsmClassVisitorFactory
 import github.leavesczy.track.BaseTrackClassNode
-import github.leavesczy.track.utils.InitMethodName
+import github.leavesczy.track.utils.INIT_METHOD_NAME
 import github.leavesczy.track.utils.replacePeriodWithSlash
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.Opcodes
@@ -45,7 +45,7 @@ internal abstract class ComposeClickAsmClassVisitorFactory :
     override fun createClassVisitor(
         classContext: ClassContext,
         nextClassVisitor: ClassVisitor
-    ): BaseTrackClassNode {
+    ): ClassVisitor {
         return ComposeClickClassVisitor(
             nextClassVisitor = nextClassVisitor,
             trackConfig = trackConfig
@@ -67,7 +67,7 @@ private class ComposeClickClassVisitor(
     override fun visitEnd() {
         super.visitEnd()
         val primaryConstructors = methods.filter { methodNode ->
-            methodNode.name == InitMethodName && methodNode.isPrimaryClickableConstructor()
+            methodNode.name == INIT_METHOD_NAME && methodNode.isPrimaryClickableConstructor()
         }
         if (primaryConstructors.isEmpty()) {
             throw composeClickTrackError(
@@ -106,14 +106,18 @@ private class ComposeClickClassVisitor(
     }
 
     private fun handleComposeClick(methodNode: MethodNode) {
-        val onClickLabelSlot = methodNode.findSlotByPutField(
-            fieldName = ON_CLICK_LABEL_FIELD_NAME,
-            fieldDesc = STRING_DESC
-        )
         val onClickSlot = methodNode.findSlotByPutField(
             fieldName = ON_CLICK_FIELD_NAME,
             fieldDesc = FUNCTION0_DESC
         )
+        val onClickLabelSlot = if (trackConfig.skipOnClickLabel.isNotEmpty()) {
+            methodNode.findSlotByPutField(
+                fieldName = ON_CLICK_LABEL_FIELD_NAME,
+                fieldDesc = STRING_DESC
+            )
+        } else {
+            -1
+        }
         insertInstructions(
             methodNode = methodNode,
             onClickLabelSlot = onClickLabelSlot,
@@ -219,21 +223,24 @@ private class ComposeClickClassVisitor(
         onClickLabelSlot: Int
     ) {
         val input = InsnList()
-        input.add(LdcInsnNode(trackConfig.skipOnClickLabel))
-        input.add(VarInsnNode(Opcodes.ALOAD, onClickLabelSlot))
-        input.add(
-            MethodInsnNode(
-                Opcodes.INVOKEVIRTUAL,
-                "java/lang/String",
-                "equals",
-                "(Ljava/lang/Object;)Z",
-                false
-            )
-        )
         val clickWrapperClassFormat =
             replacePeriodWithSlash(className = trackConfig.clickWrapperClass)
-        val label = LabelNode()
-        input.add(JumpInsnNode(Opcodes.IFNE, label))
+        val afterWrap = LabelNode()
+        val skipOnClickLabel = trackConfig.skipOnClickLabel
+        if (skipOnClickLabel.isNotEmpty()) {
+            input.add(LdcInsnNode(skipOnClickLabel))
+            input.add(VarInsnNode(Opcodes.ALOAD, onClickLabelSlot))
+            input.add(
+                MethodInsnNode(
+                    Opcodes.INVOKEVIRTUAL,
+                    "java/lang/String",
+                    "equals",
+                    "(Ljava/lang/Object;)Z",
+                    false
+                )
+            )
+            input.add(JumpInsnNode(Opcodes.IFNE, afterWrap))
+        }
         input.add(TypeInsnNode(Opcodes.NEW, clickWrapperClassFormat))
         input.add(InsnNode(Opcodes.DUP))
         input.add(VarInsnNode(Opcodes.ALOAD, onClickSlot))
@@ -241,13 +248,13 @@ private class ComposeClickClassVisitor(
             MethodInsnNode(
                 Opcodes.INVOKESPECIAL,
                 clickWrapperClassFormat,
-                InitMethodName,
+                INIT_METHOD_NAME,
                 "(Lkotlin/jvm/functions/Function0;)V",
                 false
             )
         )
         input.add(VarInsnNode(Opcodes.ASTORE, onClickSlot))
-        input.add(label)
+        input.add(afterWrap)
         methodNode.instructions.insert(input)
     }
 

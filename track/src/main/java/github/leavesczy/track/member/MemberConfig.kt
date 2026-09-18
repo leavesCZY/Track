@@ -31,7 +31,7 @@ internal data class MemberConfig(
 internal interface MemberConfigParameters :
     BaseTrackConfigParameters<MemberConfig>
 
-open class MemberFieldRule(
+data class MemberFieldRule(
     var ownerClass: String,
     var fieldName: String,
     var typeDescriptor: String,
@@ -45,7 +45,7 @@ open class MemberFieldRule(
     }
 }
 
-open class MemberMethodRule(
+data class MemberMethodRule(
     var ownerClass: String,
     var methodName: String,
     var methodDescriptor: String,

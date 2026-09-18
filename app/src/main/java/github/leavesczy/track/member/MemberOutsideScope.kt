@@ -1,5 +1,6 @@
 package github.leavesczy.track.member
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Build
 import android.provider.Settings
@@ -14,11 +15,9 @@ internal object MemberOutsideScope {
         return Build.BRAND
     }
 
+    @SuppressLint("HardwareIds")
     fun readAndroidId(context: Context): String {
-        return Settings.Secure.getString(
-            context.contentResolver,
-            Settings.Secure.ANDROID_ID
-        ) ?: ""
+        return Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID) ?: ""
     }
 
     fun showToast(context: Context) {

@@ -4,18 +4,19 @@ import com.android.build.api.instrumentation.AsmClassVisitorFactory
 import com.android.build.api.instrumentation.ClassContext
 import com.android.build.api.instrumentation.ClassData
 import com.android.build.api.instrumentation.InstrumentationParameters
-import github.leavesczy.track.utils.AsmApi
+import github.leavesczy.track.utils.ASM_API
 import github.leavesczy.track.utils.LogPrint
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.tree.ClassNode
 import java.io.Serializable
+import java.util.concurrent.ConcurrentHashMap
 
 internal abstract class BaseTrackClassNode(
     protected open val trackConfig: BaseTrackConfig,
     private val logTag: String
-) : ClassNode(AsmApi) {
+) : ClassNode(ASM_API) {
 
     fun log(msg: () -> String) {
         LogPrint.normal(tag = logTag, msg = msg)
@@ -51,15 +52,11 @@ internal interface BaseTrackAsmClassVisitorFactory<
     override fun createClassVisitor(
         classContext: ClassContext,
         nextClassVisitor: ClassVisitor
-    ): BaseTrackClassNode
+    ): ClassVisitor
 
     override fun isInstrumentable(classData: ClassData): Boolean {
-        val include = trackConfig.include.map {
-            Regex(it)
-        }
-        val exclude = trackConfig.exclude.map {
-            Regex(it)
-        }
+        val include = RegexPatternCache.compileAll(patterns = trackConfig.include)
+        val exclude = RegexPatternCache.compileAll(patterns = trackConfig.exclude)
         if (include.isEmpty()) {
             if (classData.matches(rules = exclude)) {
                 return false
@@ -84,5 +81,27 @@ internal interface BaseTrackAsmClassVisitorFactory<
     }
 
     fun isTrackEnabled(classData: ClassData): Boolean
+
+}
+
+/**
+ * 跨 class 复用已编译的 [Regex]，避免 ALL scope 下每个类都重新编译同一批 pattern。
+ */
+private object RegexPatternCache {
+
+    private val patternCache = ConcurrentHashMap<String, Regex>()
+
+    private val patternSetCache = ConcurrentHashMap<Set<String>, List<Regex>>()
+
+    fun compileAll(patterns: Set<String>): List<Regex> {
+        if (patterns.isEmpty()) {
+            return emptyList()
+        }
+        return patternSetCache.getOrPut(patterns) {
+            patterns.map { pattern ->
+                patternCache.getOrPut(pattern) { Regex(pattern) }
+            }
+        }
+    }
 
 }

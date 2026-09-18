@@ -26,7 +26,7 @@ internal abstract class ViewClickAsmClassVisitorFactory :
     override fun createClassVisitor(
         classContext: ClassContext,
         nextClassVisitor: ClassVisitor
-    ): BaseTrackClassNode {
+    ): ClassVisitor {
         return ViewClickClassVisitor(
             nextClassVisitor = nextClassVisitor,
             trackConfig = trackConfig
@@ -48,7 +48,7 @@ private class ViewClickClassVisitor(
 
     private val onClickListenerInterfaceName = "android/view/View\$OnClickListener"
 
-    private val onClickListenerInterfaceObjectDes = "L${onClickListenerInterfaceName};"
+    private val onClickListenerInterfaceObjectDesc = "L${onClickListenerInterfaceName};"
 
     private val onClickMethodName = "onClick"
 
@@ -76,7 +76,7 @@ private class ViewClickClassVisitor(
                 }
             }
             val dynamicNodes = methodNode.filterLambda {
-                it.name == onClickMethodName && it.desc.endsWith(suffix = onClickListenerInterfaceObjectDes)
+                it.name == onClickMethodName && it.desc.endsWith(suffix = onClickListenerInterfaceObjectDesc)
             }
             dynamicNodes.forEach { node ->
                 val handle = node.bsmArgs[1] as? Handle
