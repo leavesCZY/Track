@@ -20,8 +20,20 @@ internal object MemberOutsideScope {
         return Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID) ?: ""
     }
 
-    fun showToast(context: Context) {
-        Toast.makeText(context, "OutsideScope 原始 Toast", Toast.LENGTH_SHORT).show()
+    fun showRawToast(context: Context, message: String) {
+        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+    }
+
+    fun echoString(value: String): String {
+        return Echo.echo(value = value)
+    }
+
+    fun echoInt(value: Int): String {
+        return Echo.echo(value = value)
+    }
+
+    fun readModel(): String {
+        return DeviceInfo().model
     }
 
 }

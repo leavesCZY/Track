@@ -1,4 +1,4 @@
-package github.leavesczy.track.click.compose
+package github.leavesczy.track.composeclick
 
 import com.android.build.api.instrumentation.ClassContext
 import com.android.build.api.instrumentation.ClassData
@@ -23,6 +23,7 @@ import org.objectweb.asm.tree.MethodNode
 import org.objectweb.asm.tree.TypeInsnNode
 import org.objectweb.asm.tree.VarInsnNode
 
+// Compose Foundation 内部实现类：所有 clickable / combinedClickable 最终会构造它们。
 private const val CLICKABLE_ELEMENT_CLASS_NAME = "androidx.compose.foundation.ClickableElement"
 
 private const val COMBINED_CLICKABLE_ELEMENT_CLASS_NAME =
@@ -39,6 +40,12 @@ private const val FUNCTION0_DESC = "Lkotlin/jvm/functions/Function0;"
 private const val DEFAULT_CONSTRUCTOR_MARKER_CLASS_NAME =
     "kotlin.jvm.internal.DefaultConstructorMarker"
 
+/**
+ * Compose 点击防抖：改写 ClickableElement / CombinedClickableElement 主构造，
+ * 在 putfield onClick 之前用 clickWrapper 包装 Function0。
+ *
+ * 依赖 Foundation 内部结构；结构变化时主动失败，避免静默漏插或重复包装。
+ */
 internal abstract class ComposeClickAsmClassVisitorFactory :
     BaseTrackAsmClassVisitorFactory<ComposeClickConfigParameters, ComposeClickConfig> {
 
@@ -110,6 +117,7 @@ private class ComposeClickClassVisitor(
             fieldName = ON_CLICK_FIELD_NAME,
             fieldDesc = FUNCTION0_DESC
         )
+        // skipOnClickLabel 为空时不做 label 判断，所有点击都会被包装。
         val onClickLabelSlot = if (trackConfig.skipOnClickLabel.isNotEmpty()) {
             methodNode.findSlotByPutField(
                 fieldName = ON_CLICK_LABEL_FIELD_NAME,
@@ -178,6 +186,7 @@ private class ComposeClickClassVisitor(
         }
     }
 
+    /** 跳过 Label/LineNumber/Frame，并容忍 putfield 前的 CHECKCAST。 */
     private fun FieldInsnNode.findPrecedingValueLoader(): VarInsnNode? {
         var insn: AbstractInsnNode? = previous
         while (insn != null && insn.isIgnorable()) {
@@ -217,6 +226,10 @@ private class ComposeClickClassVisitor(
         )
     }
 
+    /**
+     * 构造入口处：若配置了 skip label 且 equals 命中则跳过包装；
+     * 否则 `onClick = ClickWrapper(onClick)`，再走后续 putfield。
+     */
     private fun insertInstructions(
         methodNode: MethodNode,
         onClickSlot: Int,
@@ -228,6 +241,7 @@ private class ComposeClickClassVisitor(
         val afterWrap = LabelNode()
         val skipOnClickLabel = trackConfig.skipOnClickLabel
         if (skipOnClickLabel.isNotEmpty()) {
+            // skipLabel.equals(onClickLabel)：label 为 null 时 equals 返回 false，不会 NPE。
             input.add(LdcInsnNode(skipOnClickLabel))
             input.add(VarInsnNode(Opcodes.ALOAD, onClickLabelSlot))
             input.add(

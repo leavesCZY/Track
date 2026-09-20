@@ -5,7 +5,7 @@ import github.leavesczy.track.BaseTrackConfigParameters
 import java.io.Serializable
 
 /** 匹配全部 descriptor（字段类型或方法重载）。 */
-const val MATCH_ALL_DESCRIPTORS = "*"
+internal const val MATCH_ALL_DESCRIPTORS = "*"
 
 internal enum class MemberKind {
     FIELD,
@@ -18,6 +18,10 @@ internal data class MemberConfig(
     val replacements: Set<MemberReplacement>
 ) : BaseTrackConfig {
 
+    /**
+     * @param ownerClass ASM 内部名（斜杠分隔）
+     * @param proxyClass 点分全限定名，改写时再转内部名
+     */
     data class MemberReplacement(
         val kind: MemberKind,
         val ownerClass: String,
@@ -31,6 +35,7 @@ internal data class MemberConfig(
 internal interface MemberConfigParameters :
     BaseTrackConfigParameters<MemberConfig>
 
+/** 字段读替换规则；[typeDescriptor] 可用 [MATCH_ALL_TYPE_DESCRIPTORS]。 */
 data class MemberFieldRule(
     var ownerClass: String,
     var fieldName: String,
@@ -45,6 +50,7 @@ data class MemberFieldRule(
     }
 }
 
+/** 方法调用替换规则；[methodDescriptor] 可用 [MATCH_ALL_METHOD_DESCRIPTORS]。 */
 data class MemberMethodRule(
     var ownerClass: String,
     var methodName: String,

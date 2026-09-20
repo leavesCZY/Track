@@ -1,4 +1,4 @@
-package github.leavesczy.track.click.view
+package github.leavesczy.track.viewclick
 
 @Target(AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.BINARY)

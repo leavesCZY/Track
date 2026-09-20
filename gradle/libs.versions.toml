@@ -1,5 +1,5 @@
 [versions]
-android-plugin = "9.4.0"
+android-plugin = "9.4.1"
 kotlin-plugin = "2.4.20"
 gradle-plugin-publish-plugin = "2.2.1"
 

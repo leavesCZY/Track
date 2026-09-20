@@ -4,12 +4,10 @@ import com.android.build.api.instrumentation.FramesComputationMode
 import com.android.build.api.instrumentation.InstrumentationScope
 import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.api.variant.Variant
-import github.leavesczy.track.click.compose.ComposeClickAsmClassVisitorFactory
-import github.leavesczy.track.click.compose.ComposeClickConfig
-import github.leavesczy.track.click.compose.ComposeClickTrackPluginParameter
-import github.leavesczy.track.click.view.ViewClickAsmClassVisitorFactory
-import github.leavesczy.track.click.view.ViewClickConfig
-import github.leavesczy.track.click.view.ViewClickTrackPluginParameter
+import github.leavesczy.track.composeclick.ComposeClickAsmClassVisitorFactory
+import github.leavesczy.track.composeclick.ComposeClickConfig
+import github.leavesczy.track.composeclick.ComposeClickTrackPluginParameter
+import github.leavesczy.track.member.MATCH_ALL_DESCRIPTORS
 import github.leavesczy.track.member.MemberAsmClassVisitorFactory
 import github.leavesczy.track.member.MemberConfig
 import github.leavesczy.track.member.MemberConfig.MemberReplacement
@@ -23,10 +21,18 @@ import github.leavesczy.track.superclass.SuperclassConfig.SuperclassReplacement
 import github.leavesczy.track.superclass.SuperclassRule
 import github.leavesczy.track.superclass.SuperclassTrackPluginParameter
 import github.leavesczy.track.utils.replacePeriodWithSlash
+import github.leavesczy.track.viewclick.ViewClickAsmClassVisitorFactory
+import github.leavesczy.track.viewclick.ViewClickConfig
+import github.leavesczy.track.viewclick.ViewClickTrackPluginParameter
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 
+/**
+ * Track 插件入口：注册四套 Gradle Extension，并在各 Variant 上挂载对应的 ASM ClassVisitor。
+ *
+ * 未配置的能力不会注册插桩；已写部分字段但不完整时直接失败，避免半残配置悄悄放行。
+ */
 class TrackPlugin : Plugin<Project> {
 
     private val viewClickTrack = "viewClickTrack"
@@ -62,6 +68,7 @@ class TrackPlugin : Plugin<Project> {
             handleComposeClickTrack(project = project, variant = variant)
             handleSuperclassTrack(project = project, variant = variant)
             handleMemberTrack(project = project, variant = variant)
+            // 插桩后栈帧可能失效，仅对改过的方法重算，避免全量 COMPUTE_MAXS 的额外开销。
             variant.instrumentation.setAsmFramesComputationMode(FramesComputationMode.COMPUTE_FRAMES_FOR_INSTRUMENTED_METHODS)
         }
     }
@@ -87,6 +94,7 @@ class TrackPlugin : Plugin<Project> {
             isComplete = isComplete,
             missingDetail = "缺少必填参数 clickHandlerClass / clickMethodName"
         ) {
+            // ALL：匿名 OnClickListener / lambda 生成类不一定在 project 模块内。
             variant.instrumentation.apply {
                 transformClassesWith(
                     classVisitorFactoryImplClass = ViewClickAsmClassVisitorFactory::class.java,
@@ -120,6 +128,7 @@ class TrackPlugin : Plugin<Project> {
             isComplete = isComplete,
             missingDetail = "缺少必填参数 clickWrapperClass"
         ) {
+            // 目标是 Compose Foundation 内部类，必须扫依赖；include/exclude 由 isTrackEnabled 收窄。
             variant.instrumentation.apply {
                 transformClassesWith(
                     classVisitorFactoryImplClass = ComposeClickAsmClassVisitorFactory::class.java,
@@ -150,6 +159,7 @@ class TrackPlugin : Plugin<Project> {
             isComplete = hasAnyConfig,
             missingDetail = "缺少必填参数 rules"
         ) {
+            // 同一 include/exclude 合并为一次 transform；不同过滤条件分桶注册，避免互相覆盖。
             val buckets =
                 linkedMapOf<Pair<Set<String>, Set<String>>, MutableSet<SuperclassReplacement>>()
             rules.forEach { rule ->
@@ -232,15 +242,20 @@ class TrackPlugin : Plugin<Project> {
             isComplete = hasAnyConfig,
             missingDetail = "缺少必填参数 methods / fields"
         ) {
+            // 与 superclass 相同：按 include/exclude 分桶，桶内校验成员规则是否冲突。
             val buckets =
                 linkedMapOf<Pair<Set<String>, Set<String>>, MutableSet<MemberReplacement>>()
             methods.forEach { rule ->
-                val parameter = validateMemberMethodRule(rule = rule)
-                buckets.getOrPut(rule.include to rule.exclude) { mutableSetOf() }.add(parameter)
+                addMemberReplacement(
+                    bucket = buckets.getOrPut(rule.include to rule.exclude) { mutableSetOf() },
+                    replacement = validateMemberMethodRule(rule = rule)
+                )
             }
             fields.forEach { rule ->
-                val parameter = validateMemberFieldRule(rule = rule)
-                buckets.getOrPut(rule.include to rule.exclude) { mutableSetOf() }.add(parameter)
+                addMemberReplacement(
+                    bucket = buckets.getOrPut(rule.include to rule.exclude) { mutableSetOf() },
+                    replacement = validateMemberFieldRule(rule = rule)
+                )
             }
             buckets.forEach { (filter, replacements) ->
                 val (include, exclude) = filter
@@ -252,6 +267,39 @@ class TrackPlugin : Plugin<Project> {
                 )
             }
         }
+    }
+
+    private fun addMemberReplacement(
+        bucket: MutableSet<MemberReplacement>,
+        replacement: MemberReplacement
+    ) {
+        val duplicated = bucket.find { existing ->
+            existing.conflictsWith(other = replacement)
+        }
+        if (duplicated != null) {
+            throw trackConfigError(
+                extensionName = memberTrack,
+                detail = "同一 include/exclude 下成员规则冲突：" +
+                        "${replacement.kind} ${replacement.ownerClass}.${replacement.memberName} " +
+                        "descriptor=${replacement.descriptor} → ${replacement.proxyClass}，" +
+                        "与已有规则 descriptor=${duplicated.descriptor} → ${duplicated.proxyClass} 重叠"
+            )
+        }
+        bucket.add(replacement)
+    }
+
+    private fun MemberReplacement.conflictsWith(other: MemberReplacement): Boolean {
+        if (kind != other.kind ||
+            ownerClass != other.ownerClass ||
+            memberName != other.memberName
+        ) {
+            return false
+        }
+        if (descriptor == other.descriptor) {
+            return true
+        }
+        // "*" 会匹配全部重载/类型，不能再与同名具体 descriptor 并存。
+        return descriptor == MATCH_ALL_DESCRIPTORS || other.descriptor == MATCH_ALL_DESCRIPTORS
     }
 
     private fun validateMemberFieldRule(rule: MemberFieldRule): MemberReplacement {
@@ -267,6 +315,7 @@ class TrackPlugin : Plugin<Project> {
         }
         return MemberReplacement(
             kind = MemberKind.FIELD,
+            // 字节码 owner 使用内部名（斜杠分隔），与 visitFieldInsn 对齐。
             ownerClass = replacePeriodWithSlash(className = ownerClass),
             memberName = fieldName,
             descriptor = typeDescriptor,
@@ -316,6 +365,9 @@ class TrackPlugin : Plugin<Project> {
         }
     }
 
+    /**
+     * 未配置 → 跳过；配置不完整 → 抛错；完整 → 注册插桩。
+     */
     private inline fun guardTrackConfig(
         extensionName: String,
         hasAnyConfig: Boolean,

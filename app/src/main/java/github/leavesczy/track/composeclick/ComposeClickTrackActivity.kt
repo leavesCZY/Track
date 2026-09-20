@@ -1,4 +1,4 @@
-package github.leavesczy.track.click.compose
+package github.leavesczy.track.composeclick
 
 import android.os.Bundle
 import androidx.activity.compose.setContent

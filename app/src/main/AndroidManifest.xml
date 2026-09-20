@@ -18,14 +18,14 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".click.view.ViewClickTrackActivity"
+            android:name=".viewclick.ViewClickTrackActivity"
             android:configChanges="keyboard|keyboardHidden|screenLayout|screenSize|orientation|uiMode"
             android:exported="false"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.Track"
             tools:ignore="DiscouragedApi,LockedOrientationActivity" />
         <activity
-            android:name=".click.compose.ComposeClickTrackActivity"
+            android:name=".composeclick.ComposeClickTrackActivity"
             android:configChanges="keyboard|keyboardHidden|screenLayout|screenSize|orientation|uiMode"
             android:exported="false"
             android:screenOrientation="portrait"

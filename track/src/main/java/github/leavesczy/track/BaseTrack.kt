@@ -13,6 +13,7 @@ import org.objectweb.asm.tree.ClassNode
 import java.io.Serializable
 import java.util.concurrent.ConcurrentHashMap
 
+/** Tree API 基类：先收集完整 ClassNode，再在 visitEnd 里改写后 accept 下游。 */
 internal abstract class BaseTrackClassNode(
     protected open val trackConfig: BaseTrackConfig,
     private val logTag: String
@@ -26,8 +27,10 @@ internal abstract class BaseTrackClassNode(
 
 internal interface BaseTrackConfig : Serializable {
 
+    /** 类名正则；空表示不限制（仍受 exclude / isTrackEnabled 约束）。 */
     val include: Set<String>
 
+    /** 类名正则；命中则跳过。 */
     val exclude: Set<String>
 
 }
@@ -40,6 +43,13 @@ internal interface BaseTrackConfigParameters<TrackConfig : BaseTrackConfig> :
 
 }
 
+/**
+ * 各插桩 Factory 的公共过滤：先按 include/exclude 筛类名，再交给 [isTrackEnabled]。
+ *
+ * - 仅 exclude：排除名单外全部可进
+ * - 仅 include：必须命中 include
+ * - 两者都有：须命中 include 且不命中 exclude
+ */
 internal interface BaseTrackAsmClassVisitorFactory<
         Parameters : BaseTrackConfigParameters<TrackConfig>,
         TrackConfig : BaseTrackConfig
@@ -80,6 +90,7 @@ internal interface BaseTrackAsmClassVisitorFactory<
         return false
     }
 
+    /** 业务侧额外过滤（如只处理特定类、跳过 proxy）。 */
     fun isTrackEnabled(classData: ClassData): Boolean
 
 }

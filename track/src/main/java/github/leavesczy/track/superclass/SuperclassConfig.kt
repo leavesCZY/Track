@@ -17,6 +17,7 @@ internal data class SuperclassConfig(
 
 }
 
+/** 将直接继承 [originClass] 的类改为继承 [targetClass]。 */
 data class SuperclassRule(
     var originClass: String,
     var targetClass: String,

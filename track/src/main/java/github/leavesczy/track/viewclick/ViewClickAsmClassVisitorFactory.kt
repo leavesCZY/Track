@@ -1,4 +1,4 @@
-package github.leavesczy.track.click.view
+package github.leavesczy.track.viewclick
 
 import com.android.build.api.instrumentation.ClassContext
 import com.android.build.api.instrumentation.ClassData
@@ -20,6 +20,12 @@ import org.objectweb.asm.tree.MethodInsnNode
 import org.objectweb.asm.tree.MethodNode
 import org.objectweb.asm.tree.VarInsnNode
 
+/**
+ * View 点击防抖：在 OnClickListener.onClick / 对应 lambda 方法入口插入闸门调用。
+ *
+ * 约定 clickHandler 签名为 `(Landroid/view/View;)Z`：返回 true 继续执行原逻辑，false 则直接 return。
+ * 不覆盖 XML `android:onClick` 反射回调（Activity 上未必实现 OnClickListener）。
+ */
 internal abstract class ViewClickAsmClassVisitorFactory :
     BaseTrackAsmClassVisitorFactory<ViewClickConfigParameters, ViewClickConfig> {
 
@@ -64,17 +70,16 @@ private class ViewClickClassVisitor(
 
     private fun handleViewClick() {
         val shouldHookMethodList = mutableSetOf<MethodNode>()
-        val skipOnClickAnnotation = trackConfig.skipOnClickAnnotation
         methods.forEach { methodNode ->
             when {
-                skipOnClickAnnotation.isNotBlank() &&
-                        methodNode.hasAnnotation(annotationClassName = skipOnClickAnnotation) -> {
+                // 仅对「带 skip 注解的 onClick 实现」本身生效；lambda 字面量通常挂不上注解。
+                methodNode.isSkipOnClick() -> {
                 }
-
                 methodNode.isViewOnClickMethod() -> {
                     shouldHookMethodList.add(element = methodNode)
                 }
             }
+            // Kotlin/Java lambda → OnClickListener 会生成 invokedynamic，bsmArgs[1] 指向实现方法。
             val dynamicNodes = methodNode.filterLambda {
                 it.name == onClickMethodName && it.desc.endsWith(suffix = onClickListenerInterfaceObjectDesc)
             }
@@ -101,6 +106,20 @@ private class ViewClickClassVisitor(
         }
     }
 
+    private fun MethodNode.isSkipOnClick(): Boolean {
+        val skipOnClickAnnotation = trackConfig.skipOnClickAnnotation
+        return skipOnClickAnnotation.isNotBlank() &&
+                hasAnnotation(annotationClassName = skipOnClickAnnotation)
+    }
+
+    /**
+     * 在方法入口插入：
+     *   ALOAD view
+     *   INVOKESTATIC handler.shouldHandleClick(View)Z
+     *   IFNE continue
+     *   RETURN
+     * continue:
+     */
     private fun hookMethod(methodNode: MethodNode) {
         val argumentTypes = Type.getArgumentTypes(methodNode.desc)
         val viewArgumentIndex = argumentTypes?.indexOfFirst {
@@ -137,6 +156,7 @@ private class ViewClickClassVisitor(
         }
     }
 
+    /** 将形参下标换算为局部变量槽位（实例方法 slot0 为 this；long/double 占两槽）。 */
     private fun getVisitPosition(
         argumentTypes: Array<Type>,
         parameterIndex: Int,
@@ -160,6 +180,7 @@ private class ViewClickClassVisitor(
         }
     }
 
+    /** 当前类实现了 OnClickListener，且本方法正是 onClick(View)。 */
     private fun MethodNode.isViewOnClickMethod(): Boolean {
         val myInterfaces = interfaces
         if (myInterfaces.isNullOrEmpty()) {

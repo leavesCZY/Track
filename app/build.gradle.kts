@@ -35,7 +35,7 @@ android {
     }
     signingConfigs {
         create("release") {
-            storeFile = File(File(rootDir, "doc"), "key.jks")
+            storeFile = File(rootDir, "key.jks")
             keyAlias = "leavesCZY"
             keyPassword = "123456"
             storePassword = "123456"
@@ -123,15 +123,15 @@ dependencies {
 }
 
 viewClickTrack {
-    clickHandlerClass = "github.leavesczy.track.click.view.ViewClickHandler"
+    clickHandlerClass = "github.leavesczy.track.viewclick.ViewClickHandler"
     clickMethodName = "shouldHandleClick"
-    skipOnClickAnnotation = "github.leavesczy.track.click.view.SkipViewOnClick"
+    skipOnClickAnnotation = "github.leavesczy.track.viewclick.SkipViewOnClick"
     include = setOf()
     exclude = setOf()
 }
 
 composeClickTrack {
-    clickWrapperClass = "github.leavesczy.track.click.compose.ComposeClickWrapper"
+    clickWrapperClass = "github.leavesczy.track.composeclick.ComposeClickWrapper"
     skipOnClickLabel = "skip"
 }
 
@@ -151,31 +151,27 @@ superclassTrack {
 }
 
 memberTrack {
-    val toastProxy = "github.leavesczy.track.member.ToastProxy"
-    val systemMethodProxy = "github.leavesczy.track.member.SystemMethodProxy"
-    val systemFieldProxy = "github.leavesczy.track.member.SystemFieldProxy"
-    val echoProxy = "github.leavesczy.track.member.EchoProxy"
     val memberTrackInclude = setOf(".*\\.MemberTrackActivity$")
     methods = setOf(
         MemberMethodRule(
             ownerClass = "android.widget.Toast",
             methodName = "show",
             methodDescriptor = "()V",
-            proxyClass = toastProxy,
+            proxyClass = "github.leavesczy.track.member.ToastProxy",
             include = memberTrackInclude
         ),
         MemberMethodRule(
             ownerClass = $$"android.provider.Settings$Secure",
             methodName = "getString",
             methodDescriptor = "(Landroid/content/ContentResolver;Ljava/lang/String;)Ljava/lang/String;",
-            proxyClass = systemMethodProxy,
+            proxyClass = "github.leavesczy.track.member.SystemMethodProxy",
             include = memberTrackInclude
         ),
         MemberMethodRule(
             ownerClass = "github.leavesczy.track.member.Echo",
             methodName = "echo",
-            methodDescriptor = MemberMethodRule.MATCH_ALL_METHOD_DESCRIPTORS,
-            proxyClass = echoProxy,
+            methodDescriptor = "*",
+            proxyClass = "github.leavesczy.track.member.EchoProxy",
             include = memberTrackInclude
         )
     )
@@ -184,7 +180,14 @@ memberTrack {
             ownerClass = "android.os.Build",
             fieldName = "BRAND",
             typeDescriptor = "Ljava/lang/String;",
-            proxyClass = systemFieldProxy,
+            proxyClass = "github.leavesczy.track.member.SystemFieldProxy",
+            include = memberTrackInclude
+        ),
+        MemberFieldRule(
+            ownerClass = "github.leavesczy.track.member.DeviceInfo",
+            fieldName = "model",
+            typeDescriptor = "Ljava/lang/String;",
+            proxyClass = "github.leavesczy.track.member.DeviceInfoProxy",
             include = memberTrackInclude
         )
     )

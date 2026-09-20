@@ -36,9 +36,14 @@ class MemberTrackActivity : BaseActivity() {
         setContent {
             TrackTheme {
                 MemberTrackScreen(
-                    onShowToastInScope = ::showTrackedToast,
-                    onShowToastOutsideScope = { MemberOutsideScope.showToast(context = this) },
-                    onCompareMembers = ::buildMemberCompareResult
+                    onShowOriginal = {
+                        showOriginalToast()
+                        buildMemberText(instrumented = false)
+                    },
+                    onShowInstrumented = {
+                        showTrackedToast()
+                        buildMemberText(instrumented = true)
+                    }
                 )
             }
         }
@@ -48,44 +53,62 @@ class MemberTrackActivity : BaseActivity() {
         Toast.makeText(this, "原始 Toast 文案", Toast.LENGTH_SHORT).show()
     }
 
+    private fun showOriginalToast() {
+        MemberOutsideScope.showRawToast(context = this, message = "原始 Toast 文案")
+    }
+
     @SuppressLint("HardwareIds")
-    private fun buildMemberCompareResult(): String {
-        val brandInScope = Build.BRAND
-        val brandOutside = MemberOutsideScope.readBrand()
-        val androidIdInScope =
+    private fun buildMemberText(instrumented: Boolean): String {
+        val brandInstrumented = Build.BRAND
+        val brandOriginal = MemberOutsideScope.readBrand()
+        val androidIdInstrumented =
             Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID) ?: ""
-        val androidIdOutside = MemberOutsideScope.readAndroidId(context = this)
-        val echoString = Echo.echo(value = "Track")
-        val echoInt = Echo.echo(value = 42)
-        return buildString {
-            appendLine("【include 对照：仅 MemberTrackActivity 会被改写】")
-            appendLine("Activity Build.BRAND = $brandInScope")
-            appendLine("命中 Proxy = ${brandInScope == SystemFieldProxy.BRAND}")
-            appendLine("OutsideScope Build.BRAND = $brandOutside")
-            appendLine("Outside 保持原样 = ${brandOutside != SystemFieldProxy.BRAND}")
-            appendLine()
-            appendLine("Activity AndroidId = $androidIdInScope")
-            appendLine("命中 Proxy = ${androidIdInScope == "proxy-android-id"}")
-            appendLine("OutsideScope AndroidId = $androidIdOutside")
-            appendLine("Outside 保持原样 = ${androidIdOutside != "proxy-android-id"}")
-            appendLine()
-            appendLine("【MATCH_ALL：Echo.echo 全部重载】")
-            appendLine("echo(\"Track\") = $echoString")
-            appendLine("命中 Proxy = ${echoString.startsWith("proxy-echo:")}")
-            appendLine("echo(42) = $echoInt")
-            append("命中 Proxy = ${echoInt.startsWith("proxy-echo:")}")
+        val androidIdOriginal = MemberOutsideScope.readAndroidId(context = this)
+        val echoStringInstrumented = Echo.echo(value = "Track")
+        val echoIntInstrumented = Echo.echo(value = 42)
+        val echoStringOriginal = MemberOutsideScope.echoString(value = "Track")
+        val echoIntOriginal = MemberOutsideScope.echoInt(value = 42)
+        val modelInstrumented = DeviceInfo().model
+        val modelOriginal = MemberOutsideScope.readModel()
+        val title = if (instrumented) "【插桩后的值】" else "【原始值】"
+        val brand = if (instrumented) brandInstrumented else brandOriginal
+        val androidId = if (instrumented) androidIdInstrumented else androidIdOriginal
+        val echoString = if (instrumented) echoStringInstrumented else echoStringOriginal
+        val echoInt = if (instrumented) echoIntInstrumented else echoIntOriginal
+        val model = if (instrumented) modelInstrumented else modelOriginal
+        val toastLine = if (instrumented) {
+            "Toast：已被 ToastProxy 接管（看弹出文案）"
+        } else {
+            "Toast：原始文案（看弹出文案）"
         }
+        return """
+            $title
+
+            $toastLine
+
+            Build.BRAND（GETSTATIC）
+            · $brand
+
+            DeviceInfo.model（GETFIELD）
+            · $model
+
+            Settings.Secure.getString(ANDROID_ID)
+            · $androidId
+
+            Echo.echo（methodDescriptor = "*"）
+            · echo("Track") = $echoString
+            · echo(42) = $echoInt
+        """.trimIndent()
     }
 
 }
 
 @Composable
 private fun MemberTrackScreen(
-    onShowToastInScope: () -> Unit,
-    onShowToastOutsideScope: () -> Unit,
-    onCompareMembers: () -> String
+    onShowOriginal: () -> String,
+    onShowInstrumented: () -> String
 ) {
-    var result by remember { mutableStateOf(value = "") }
+    var result by remember { mutableStateOf(value = "点击下方按钮查看结果") }
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         containerColor = MaterialTheme.colorScheme.surface,
@@ -101,36 +124,30 @@ private fun MemberTrackScreen(
                 .verticalScroll(state = rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(space = 12.dp)
         ) {
+            Button(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                onClick = {
+                    result = onShowOriginal()
+                }
+            ) {
+                Text(text = "原始值")
+            }
+            Button(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                onClick = {
+                    result = onShowInstrumented()
+                }
+            ) {
+                Text(text = "插桩后的值")
+            }
             Text(
-                text = "include 仅覆盖 MemberTrackActivity；OutsideScope 同名调用应保持原样。Echo.echo 用 \"*\" 匹配全部重载。",
-                fontSize = 13.sp,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Button(
-                modifier = Modifier.fillMaxWidth(),
-                onClick = onShowToastInScope
-            ) {
-                Text(text = "Toast.show（Activity，应被改写）")
-            }
-            Button(
-                modifier = Modifier.fillMaxWidth(),
-                onClick = onShowToastOutsideScope
-            ) {
-                Text(text = "Toast.show（OutsideScope，应保持原样）")
-            }
-            Button(
-                modifier = Modifier.fillMaxWidth(),
-                onClick = { result = onCompareMembers() }
-            ) {
-                Text(text = "对照 include / MATCH_ALL")
-            }
-            Text(text = "结果", fontSize = 16.sp)
-            Text(
-                modifier = Modifier.fillMaxWidth(),
-                text = result.ifBlank {
-                    "先分别点两个 Toast 对比文案；再点对照按钮查看字段、静态方法与 Echo 重载是否符合预期"
-                },
-                fontSize = 13.sp,
+                modifier = Modifier
+                    .fillMaxWidth(),
+                text = result,
+                fontSize = 14.sp,
+                lineHeight = 22.sp,
                 color = MaterialTheme.colorScheme.onSurface
             )
         }

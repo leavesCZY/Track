@@ -11,7 +11,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -41,10 +40,10 @@ class SuperclassTrackActivity : BaseActivity() {
 
 @Composable
 private fun SuperclassTrackScreen() {
-    var name by remember { mutableStateOf(value = "Track") }
-    var result by remember { mutableStateOf(value = "") }
+    var result by remember { mutableStateOf(value = "点击下方按钮查看结果") }
     Scaffold(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize(),
         containerColor = MaterialTheme.colorScheme.surface,
         topBar = {
             TrackTopAppBar(title = "SuperclassTrack")
@@ -58,61 +57,76 @@ private fun SuperclassTrackScreen() {
                 .verticalScroll(state = rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(space = 12.dp)
         ) {
-            Text(
-                text = "规则 1 用 exclude 拦住 ExcludedGreeter；规则 2 用 include 只放行 AppLogger（OutsideLogger 应保持原父类）。",
-                fontSize = 13.sp,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            OutlinedTextField(
-                modifier = Modifier.fillMaxWidth(),
-                value = name,
-                onValueChange = { name = it },
-                singleLine = true,
-                label = { Text(text = "name") }
-            )
             Button(
-                modifier = Modifier.fillMaxWidth(),
-                onClick = {
-                    result = buildSuperclassResult(name = name.ifBlank { "Track" })
-                }
+                modifier = Modifier
+                    .fillMaxWidth(),
+                onClick = { result = buildSuperclassText(instrumented = false) }
             ) {
-                Text(text = "检查 exclude / include")
+                Text(text = "原始值")
             }
-            Text(text = "结果", fontSize = 16.sp)
+            Button(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                onClick = { result = buildSuperclassText(instrumented = true) }
+            ) {
+                Text(text = "插桩后的值")
+            }
             Text(
-                modifier = Modifier.fillMaxWidth(),
-                text = result.ifBlank {
-                    "点击上方按钮查看：exclude 与 include 是否分别拦住 ExcludedGreeter / OutsideLogger"
-                },
-                fontSize = 13.sp,
+                modifier = Modifier
+                    .fillMaxWidth(),
+                text = result,
+                fontSize = 14.sp,
+                lineHeight = 22.sp,
                 color = MaterialTheme.colorScheme.onSurface
             )
         }
     }
 }
 
-private fun buildSuperclassResult(name: String): String {
+private fun buildSuperclassText(instrumented: Boolean): String {
+    val name = "Track"
     val appGreeter = AppGreeter()
     val excludedGreeter = ExcludedGreeter()
     val appLogger = AppLogger()
     val outsideLogger = OutsideLogger()
-    return buildString {
-        appendLine("【规则 1：exclude】OriginGreeter → ProxyGreeter")
-        appendLine("AppGreeter.super = ${appGreeter.javaClass.superclass?.name}")
-        appendLine("命中 ProxyGreeter = ${appGreeter.javaClass.superclass == ProxyGreeter::class.java}")
-        appendLine("greet() = ${appGreeter.greet(name)}")
-        appendLine()
-        appendLine("ExcludedGreeter.super = ${excludedGreeter.javaClass.superclass?.name}")
-        appendLine("仍为 OriginGreeter = ${excludedGreeter.javaClass.superclass == OriginGreeter::class.java}")
-        appendLine("greet() = ${excludedGreeter.greet(name)}")
-        appendLine()
-        appendLine("【规则 2：include】OriginLogger → ProxyLogger")
-        appendLine("AppLogger.super = ${appLogger.javaClass.superclass?.name}")
-        appendLine("命中 ProxyLogger = ${appLogger.javaClass.superclass == ProxyLogger::class.java}")
-        appendLine("log() = ${appLogger.log(message = name)}")
-        appendLine()
-        appendLine("OutsideLogger.super = ${outsideLogger.javaClass.superclass?.name}")
-        appendLine("仍为 OriginLogger = ${outsideLogger.javaClass.superclass == OriginLogger::class.java}")
-        append("log() = ${outsideLogger.log(message = name)}")
+    val title = if (instrumented) "【插桩后的值】" else "【原始值】"
+    val appGreeterSuper = if (instrumented) {
+        appGreeter.javaClass.superclass?.simpleName.orEmpty()
+    } else {
+        OriginGreeter::class.java.simpleName
     }
+    val appGreeterResult = if (instrumented) {
+        appGreeter.greet(name)
+    } else {
+        "${OriginGreeter().greet(name)} (via AppGreeter)"
+    }
+    val appLoggerSuper = if (instrumented) {
+        appLogger.javaClass.superclass?.simpleName.orEmpty()
+    } else {
+        OriginLogger::class.java.simpleName
+    }
+    val appLoggerResult = if (instrumented) {
+        appLogger.log(message = name)
+    } else {
+        "${OriginLogger().log(message = name)} (via AppLogger)"
+    }
+    return """
+        $title
+
+        OriginGreeter → ProxyGreeter（exclude ExcludedGreeter）
+        · AppGreeter
+          父类：$appGreeterSuper
+          结果：$appGreeterResult
+        · ExcludedGreeter
+          父类：${excludedGreeter.javaClass.superclass?.simpleName}
+          结果：${excludedGreeter.greet(name)}
+
+        OriginLogger → ProxyLogger（仅 include AppLogger）
+        · AppLogger
+          父类：$appLoggerSuper
+          结果：$appLoggerResult
+        · OutsideLogger
+          父类：${outsideLogger.javaClass.superclass?.simpleName}
+          结果：${outsideLogger.log(message = name)}
+    """.trimIndent()
 }

@@ -18,12 +18,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import github.leavesczy.track.click.compose.ComposeClickTrackActivity
-import github.leavesczy.track.click.view.ViewClickTrackActivity
+import github.leavesczy.track.composeclick.ComposeClickTrackActivity
 import github.leavesczy.track.member.MemberTrackActivity
 import github.leavesczy.track.superclass.SuperclassTrackActivity
 import github.leavesczy.track.ui.TrackTheme
 import github.leavesczy.track.ui.TrackTopAppBar
+import github.leavesczy.track.viewclick.ViewClickTrackActivity
 
 class MainActivity : BaseActivity() {
 

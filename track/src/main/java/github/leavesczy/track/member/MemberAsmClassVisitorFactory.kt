@@ -11,6 +11,15 @@ import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes
 import org.objectweb.asm.Type
 
+/**
+ * 成员替换：在调用点改写字段读 / 方法调用的 owner（及必要时的调用约定）。
+ *
+ * - GETSTATIC：只换 owner，proxy 提供同名同类型字段
+ * - GETFIELD：改为 INVOKESTATIC proxy.name(receiver)
+ * - INVOKESTATIC：只换 owner
+ * - INVOKEVIRTUAL / INVOKEINTERFACE：改为 INVOKESTATIC，并把 receiver 插入为第一参数
+ * - INVOKESPECIAL、PUT*：不改写
+ */
 internal abstract class MemberAsmClassVisitorFactory :
     BaseTrackAsmClassVisitorFactory<MemberConfigParameters, MemberConfig> {
 
@@ -24,6 +33,7 @@ internal abstract class MemberAsmClassVisitorFactory :
         )
     }
 
+    /** 跳过 proxy 自身，避免 ToastProxy.show → Toast.show 再被改回造成递归。 */
     override fun isTrackEnabled(classData: ClassData): Boolean {
         return trackConfig.replacements.find { it.proxyClass == classData.className } == null
     }
@@ -80,20 +90,51 @@ private class MemberMethodVisitor(
         name: String?,
         descriptor: String?
     ) {
+        if (owner == null || name == null || descriptor == null) {
+            super.visitFieldInsn(opcode, owner, name, descriptor)
+            return
+        }
         val find = config.replacements.find {
             it.kind == MemberKind.FIELD &&
                     it.ownerClass == owner &&
                     it.memberName == name &&
                     matchesDescriptor(ruleDescriptor = it.descriptor, actualDescriptor = descriptor)
         }
-        if (find != null && opcode == Opcodes.GETSTATIC) {
-            val proxyClass = replacePeriodWithSlash(className = find.proxyClass)
-            super.visitFieldInsn(opcode, proxyClass, name, descriptor)
-            LogPrint.normal(tag = "memberTrack") {
-                "$className 发现符合规则的指令：$owner $name $descriptor , 替换为 $proxyClass $name $descriptor ，完成处理..."
-            }
-        } else {
+        if (find == null) {
             super.visitFieldInsn(opcode, owner, name, descriptor)
+            return
+        }
+        val proxyClass = replacePeriodWithSlash(className = find.proxyClass)
+        when (opcode) {
+            Opcodes.GETSTATIC -> {
+                // 静态字段：只换 owner，proxy 需提供同名同类型字段（如 @JvmField）。
+                super.visitFieldInsn(opcode, proxyClass, name, descriptor)
+                LogPrint.normal(tag = "memberTrack") {
+                    "$className 发现符合规则的指令：GETSTATIC $owner $name $descriptor , 替换为 GETSTATIC $proxyClass $name $descriptor ，完成处理..."
+                }
+            }
+            Opcodes.GETFIELD -> {
+                // 实例字段：改为静态方法，receiver 作为首参，proxy 需
+                // @JvmStatic fun fieldName(owner: Owner): FieldType
+                val methodDescriptor = Type.getMethodDescriptor(
+                    Type.getType(descriptor),
+                    Type.getObjectType(owner)
+                )
+                super.visitMethodInsn(
+                    Opcodes.INVOKESTATIC,
+                    proxyClass,
+                    name,
+                    methodDescriptor,
+                    false
+                )
+                LogPrint.normal(tag = "memberTrack") {
+                    "$className 发现符合规则的指令：GETFIELD $owner $name $descriptor , 替换为 INVOKESTATIC $proxyClass $name $methodDescriptor ，完成处理..."
+                }
+            }
+            else -> {
+                // PUTSTATIC / PUTFIELD 暂不改写。
+                super.visitFieldInsn(opcode, owner, name, descriptor)
+            }
         }
     }
 
@@ -124,6 +165,7 @@ private class MemberMethodVisitor(
         val resultDescriptor: String
         val resultIsInterface: Boolean
         if (opcode == Opcodes.INVOKEVIRTUAL || opcode == Opcodes.INVOKEINTERFACE) {
+            // 实例/接口调用 → 静态代理，descriptor 前面插入原 owner 类型作为 receiver。
             resultOpcode = Opcodes.INVOKESTATIC
             resultDescriptor = insertAsFirstArgument(descriptor = descriptor, owner = owner)
             resultIsInterface = false

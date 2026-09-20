@@ -1,5 +1,6 @@
 package github.leavesczy.track.utils
 
+/** 插桩过程日志（带 ANSI 颜色，便于在 Gradle 控制台区分）。 */
 internal object LogPrint {
 
     fun normal(tag: String, msg: () -> String) {

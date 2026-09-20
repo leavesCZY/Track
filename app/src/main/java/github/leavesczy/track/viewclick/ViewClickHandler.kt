@@ -1,4 +1,4 @@
-package github.leavesczy.track.click.view
+package github.leavesczy.track.viewclick
 
 import android.os.SystemClock
 import android.util.Log

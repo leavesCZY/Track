@@ -10,6 +10,12 @@ import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes
 
+/**
+ * 父类替换：把「直接继承 originClass」的类改为继承 targetClass，
+ * 并改写对本父类的 INVOKESPECIAL（含 `<init>` 与 `super.xxx()`）。
+ *
+ * 不改间接继承链；也不改写 targetClass 自身（避免代理再被改）。
+ */
 internal abstract class SuperclassAsmClassVisitorFactory :
     BaseTrackAsmClassVisitorFactory<SuperclassConfigParameters, SuperclassConfig> {
 
@@ -32,6 +38,7 @@ internal abstract class SuperclassAsmClassVisitorFactory :
         if (isTargetClass) {
             return false
         }
+        // ClassData.superClasses 首项为直接父类。
         val directSuperClass = superClasses.first()
         return trackConfig.replacements.any { it.originClass == directSuperClass }
     }
@@ -114,6 +121,7 @@ private class SuperclassClassVisitor(
         }
     }
 
+    /** 同步泛型签名里的父类类型描述符，避免 signature 与 superName 不一致。 */
     private fun replaceSuperTypeInSignature(signature: String?): String? {
         if (signature.isNullOrEmpty() || oldSuperName == newSuperName) {
             return signature
