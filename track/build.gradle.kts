@@ -13,7 +13,7 @@ java {
 }
 
 group = "io.github.leavesczy"
-version = "1.1.7"
+version = "2.0.0"
 
 gradlePlugin {
     website.set("https://github.com/leavesCZY/Track")
