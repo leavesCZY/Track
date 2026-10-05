@@ -5,6 +5,7 @@ import android.content.Context
 import android.util.AttributeSet
 import android.widget.ImageView
 
+/** 命中 superclassTrack 的 exclude，直接父类保持 ImageView。 */
 @SuppressLint("AppCompatCustomView")
 class IgnoreImageView @JvmOverloads constructor(
     context: Context,

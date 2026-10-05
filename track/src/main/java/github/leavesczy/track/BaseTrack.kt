@@ -30,7 +30,6 @@ internal interface BaseTrackConfig : Serializable {
     /** 类名正则；空表示不限制（仍受 exclude / isTrackEnabled 约束）。 */
     val include: Set<String>
 
-    /** 类名正则；命中则跳过。 */
     val exclude: Set<String>
 
 }
@@ -90,7 +89,6 @@ internal interface BaseTrackAsmClassVisitorFactory<
         return false
     }
 
-    /** 业务侧额外过滤（如只处理特定类、跳过 proxy）。 */
     fun isTrackEnabled(classData: ClassData): Boolean
 
 }

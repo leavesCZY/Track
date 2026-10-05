@@ -11,6 +11,7 @@ import android.util.AttributeSet
 import android.util.Log
 import android.widget.ImageView
 
+/** superclassTrack 的目标父类；自身不参与改写。 */
 @SuppressLint("AppCompatCustomView")
 open class MonitorImageView @JvmOverloads constructor(
     context: Context,

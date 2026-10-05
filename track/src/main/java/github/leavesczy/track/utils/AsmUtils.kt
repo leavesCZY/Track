@@ -12,7 +12,6 @@ internal const val ASM_API = Opcodes.ASM9
 internal val MethodNode.isStatic: Boolean
     get() = access and Opcodes.ACC_STATIC == Opcodes.ACC_STATIC
 
-/** 点分全限定名 → ASM 内部名。 */
 internal fun replacePeriodWithSlash(className: String): String {
     return className.replace(".", "/")
 }

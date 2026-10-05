@@ -4,6 +4,7 @@ import android.os.SystemClock
 import android.util.Log
 import android.view.View
 
+/** clickHandler 约定：静态方法 `(View)Z`，返回 true 继续执行原点击。 */
 internal object ViewClickHandler {
 
     private var lastClickTime = 0L

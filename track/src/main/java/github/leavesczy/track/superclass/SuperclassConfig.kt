@@ -10,6 +10,10 @@ internal data class SuperclassConfig(
     val replacements: Set<SuperclassReplacement>
 ) : BaseTrackConfig {
 
+    val originClasses: Set<String> = replacements.mapTo(destination = mutableSetOf()) { it.originClass }
+
+    val targetClasses: Set<String> = replacements.mapTo(destination = mutableSetOf()) { it.targetClass }
+
     data class SuperclassReplacement(
         val originClass: String,
         val targetClass: String

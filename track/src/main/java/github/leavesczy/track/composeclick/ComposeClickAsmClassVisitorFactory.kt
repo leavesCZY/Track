@@ -23,7 +23,7 @@ import org.objectweb.asm.tree.MethodNode
 import org.objectweb.asm.tree.TypeInsnNode
 import org.objectweb.asm.tree.VarInsnNode
 
-// Compose Foundation 内部实现类：所有 clickable / combinedClickable 最终会构造它们。
+// clickable / combinedClickable 最终会构造这两个 Foundation 内部类。
 private const val CLICKABLE_ELEMENT_CLASS_NAME = "androidx.compose.foundation.ClickableElement"
 
 private const val COMBINED_CLICKABLE_ELEMENT_CLASS_NAME =
@@ -94,10 +94,7 @@ private class ComposeClickClassVisitor(
     }
 
     /**
-     * ClickableKt 有多组 clickable / combinedClickable 重载，最终都会走到
-     * ClickableElement / CombinedClickableElement 的主构造。
-     * 只改「真正 putfield onClick」的主构造，跳过带 DefaultConstructorMarker 的 synthetic 转发构造，
-     * 避免同一点击被重复包装。
+     * 只改 putfield onClick 的主构造；带 DefaultConstructorMarker 的 synthetic 构造不改，避免重复包装。
      */
     private fun MethodNode.isPrimaryClickableConstructor(): Boolean {
         val argumentTypes = Type.getArgumentTypes(desc)
@@ -113,11 +110,15 @@ private class ComposeClickClassVisitor(
     }
 
     private fun handleComposeClick(methodNode: MethodNode) {
-        val onClickSlot = methodNode.findSlotByPutField(
+        val onClickPuts = methodNode.findPutFieldInsns(
             fieldName = ON_CLICK_FIELD_NAME,
             fieldDesc = FUNCTION0_DESC
         )
-        // skipOnClickLabel 为空时不做 label 判断，所有点击都会被包装。
+        val onClickSlot = methodNode.findSlotByPutField(
+            fieldName = ON_CLICK_FIELD_NAME,
+            fieldDesc = FUNCTION0_DESC,
+            putFields = onClickPuts
+        )
         val onClickLabelSlot = if (trackConfig.skipOnClickLabel.isNotEmpty()) {
             methodNode.findSlotByPutField(
                 fieldName = ON_CLICK_LABEL_FIELD_NAME,
@@ -134,11 +135,13 @@ private class ComposeClickClassVisitor(
     }
 
     /**
-     * 从 `PUTFIELD fieldName` 向前反推为其供值的 `ALOAD` 槽位。
-     * 按字段名区分 CombinedClickableElement 中多个 Function0，不依赖 LVT 参数名。
+     * 由 PUTFIELD 向前反推供值 ALOAD 槽位；用字段名区分多个 Function0。
      */
-    private fun MethodNode.findSlotByPutField(fieldName: String, fieldDesc: String): Int {
-        val putFields = findPutFieldInsns(fieldName = fieldName, fieldDesc = fieldDesc)
+    private fun MethodNode.findSlotByPutField(
+        fieldName: String,
+        fieldDesc: String,
+        putFields: List<FieldInsnNode> = findPutFieldInsns(fieldName = fieldName, fieldDesc = fieldDesc)
+    ): Int {
         if (putFields.isEmpty()) {
             throw composeClickTrackError(
                 detail = "method <${this.name} $desc> 未找到 putfield $fieldName:$fieldDesc"
@@ -186,7 +189,7 @@ private class ComposeClickClassVisitor(
         }
     }
 
-    /** 跳过 Label/LineNumber/Frame，并容忍 putfield 前的 CHECKCAST。 */
+    /** 忽略 Label / LineNumber / Frame；PUTFIELD 前允许 CHECKCAST。 */
     private fun FieldInsnNode.findPrecedingValueLoader(): VarInsnNode? {
         var insn: AbstractInsnNode? = previous
         while (insn != null && insn.isIgnorable()) {
@@ -226,10 +229,6 @@ private class ComposeClickClassVisitor(
         )
     }
 
-    /**
-     * 构造入口处：若配置了 skip label 且 equals 命中则跳过包装；
-     * 否则 `onClick = ClickWrapper(onClick)`，再走后续 putfield。
-     */
     private fun insertInstructions(
         methodNode: MethodNode,
         onClickSlot: Int,
@@ -241,7 +240,7 @@ private class ComposeClickClassVisitor(
         val afterWrap = LabelNode()
         val skipOnClickLabel = trackConfig.skipOnClickLabel
         if (skipOnClickLabel.isNotEmpty()) {
-            // skipLabel.equals(onClickLabel)：label 为 null 时 equals 返回 false，不会 NPE。
+            // skipLabel.equals(onClickLabel)：onClickLabel 为 null 时返回 false，不会 NPE。
             input.add(LdcInsnNode(skipOnClickLabel))
             input.add(VarInsnNode(Opcodes.ALOAD, onClickLabelSlot))
             input.add(

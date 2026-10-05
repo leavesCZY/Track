@@ -5,6 +5,7 @@ import android.content.ContentResolver
 import android.provider.Settings
 import android.telephony.TelephonyManager
 
+/** 实例方法改写为 INVOKESTATIC，receiver 作为第一参数，故使用 @JvmStatic。 */
 @SuppressLint("MissingPermission", "HardwareIds", "NewApi")
 internal object SystemMethodProxy {
 

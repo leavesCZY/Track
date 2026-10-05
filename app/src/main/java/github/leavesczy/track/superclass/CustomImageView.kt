@@ -5,6 +5,7 @@ import android.content.Context
 import android.util.AttributeSet
 import android.widget.ImageView
 
+/** 源码继承 ImageView，插桩后直接父类改为 [MonitorImageView]。 */
 @SuppressLint("AppCompatCustomView")
 class CustomImageView @JvmOverloads constructor(
     context: Context,

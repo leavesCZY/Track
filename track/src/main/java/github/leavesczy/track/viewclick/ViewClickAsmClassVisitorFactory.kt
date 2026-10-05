@@ -24,7 +24,8 @@ import org.objectweb.asm.tree.VarInsnNode
  * View 点击防抖：在 OnClickListener.onClick / 对应 lambda 方法入口插入闸门调用。
  *
  * 约定 clickHandler 签名为 `(Landroid/view/View;)Z`：返回 true 继续执行原逻辑，false 则直接 return。
- * 不覆盖 XML `android:onClick` 反射回调（Activity 上未必实现 OnClickListener）。
+ * Activity 上的 XML `android:onClick` 方法本身不会被改写；AppCompat 的 DeclaredOnClickListener
+ * 若落在 include 范围内仍会被插桩。
  */
 internal abstract class ViewClickAsmClassVisitorFactory :
     BaseTrackAsmClassVisitorFactory<ViewClickConfigParameters, ViewClickConfig> {
@@ -70,27 +71,28 @@ private class ViewClickClassVisitor(
 
     private fun handleViewClick() {
         val shouldHookMethodList = mutableSetOf<MethodNode>()
+        val methodsByNameDesc = HashMap<String, MethodNode>(methods.size)
+        methods.forEach { methodNode ->
+            methodsByNameDesc[methodNode.name + methodNode.desc] = methodNode
+        }
         methods.forEach { methodNode ->
             when {
-                // 仅对「带 skip 注解的 onClick 实现」本身生效；lambda 字面量通常挂不上注解。
                 methodNode.isSkipOnClick() -> {
+                    // 带 skip 注解的 onClick 本身不插桩；方法体内的 lambda 仍会扫描。
                 }
                 methodNode.isViewOnClickMethod() -> {
                     shouldHookMethodList.add(element = methodNode)
                 }
             }
-            // Kotlin/Java lambda → OnClickListener 会生成 invokedynamic，bsmArgs[1] 指向实现方法。
+            // lambda → OnClickListener 的 invokedynamic 中，bsmArgs[1] 指向实现方法。
             val dynamicNodes = methodNode.filterLambda {
                 it.name == onClickMethodName && it.desc.endsWith(suffix = onClickListenerInterfaceObjectDesc)
             }
             dynamicNodes.forEach { node ->
                 val handle = node.bsmArgs[1] as? Handle
                 if (handle != null) {
-                    val nameWithDesc = handle.name + handle.desc
-                    val method = methods.find { method ->
-                        method.name + method.desc == nameWithDesc
-                    }
-                    if (method != null) {
+                    val method = methodsByNameDesc[handle.name + handle.desc]
+                    if (method != null && !method.isSkipOnClick()) {
                         shouldHookMethodList.add(element = method)
                     }
                 }
@@ -112,19 +114,11 @@ private class ViewClickClassVisitor(
                 hasAnnotation(annotationClassName = skipOnClickAnnotation)
     }
 
-    /**
-     * 在方法入口插入：
-     *   ALOAD view
-     *   INVOKESTATIC handler.shouldHandleClick(View)Z
-     *   IFNE continue
-     *   RETURN
-     * continue:
-     */
     private fun hookMethod(methodNode: MethodNode) {
         val argumentTypes = Type.getArgumentTypes(methodNode.desc)
-        val viewArgumentIndex = argumentTypes?.indexOfFirst {
+        val viewArgumentIndex = argumentTypes.indexOfFirst {
             it.descriptor == viewObjectDesc
-        } ?: -1
+        }
         if (viewArgumentIndex >= 0) {
             val instructions = methodNode.instructions
             if (instructions != null && instructions.size() > 0) {
@@ -156,31 +150,26 @@ private class ViewClickClassVisitor(
         }
     }
 
-    /** 将形参下标换算为局部变量槽位（实例方法 slot0 为 this；long/double 占两槽）。 */
+    /** 形参下标 → 局部变量槽；实例方法 slot0 为 this，long/double 占两槽。 */
     private fun getVisitPosition(
         argumentTypes: Array<Type>,
         parameterIndex: Int,
         isStaticMethod: Boolean
     ): Int {
         if (parameterIndex < 0 || parameterIndex >= argumentTypes.size) {
-            throw Error("getVisitPosition error")
+            throw IllegalArgumentException("getVisitPosition error")
         }
-        return if (parameterIndex == 0) {
-            if (isStaticMethod) {
-                0
-            } else {
-                1
-            }
+        var slot = if (isStaticMethod) {
+            0
         } else {
-            getVisitPosition(
-                argumentTypes,
-                parameterIndex - 1,
-                isStaticMethod
-            ) + argumentTypes[parameterIndex - 1].size
+            1
         }
+        for (index in 0 until parameterIndex) {
+            slot += argumentTypes[index].size
+        }
+        return slot
     }
 
-    /** 当前类实现了 OnClickListener，且本方法正是 onClick(View)。 */
     private fun MethodNode.isViewOnClickMethod(): Boolean {
         val myInterfaces = interfaces
         if (myInterfaces.isNullOrEmpty()) {

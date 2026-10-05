@@ -34,13 +34,11 @@ internal abstract class SuperclassAsmClassVisitorFactory :
         if (superClasses.isEmpty()) {
             return false
         }
-        val isTargetClass = trackConfig.replacements.any { it.targetClass == classData.className }
-        if (isTargetClass) {
+        if (classData.className in trackConfig.targetClasses) {
             return false
         }
         // ClassData.superClasses 首项为直接父类。
-        val directSuperClass = superClasses.first()
-        return trackConfig.replacements.any { it.originClass == directSuperClass }
+        return superClasses.first() in trackConfig.originClasses
     }
 
 }
@@ -103,9 +101,8 @@ private class SuperclassClassVisitor(
                 methodDescriptor: String?,
                 isInterface: Boolean
             ) {
-                // 编译器生成的 super.xxx() / super(...) 都是 INVOKESPECIAL，且 owner 为直接父类。
-                // 仅改写 <init> 会漏掉业务方法上的 super 调用，从而绕过新父类覆写。
                 val currentOwner = if (opcode == Opcodes.INVOKESPECIAL && owner == oldSuperName) {
+                    // <init> 与 super.xxx() 的 owner 都是直接父类。
                     newSuperName
                 } else {
                     owner
@@ -121,7 +118,7 @@ private class SuperclassClassVisitor(
         }
     }
 
-    /** 同步泛型签名里的父类类型描述符，避免 signature 与 superName 不一致。 */
+    /** 同步 signature 中的父类类型，使其与 superName 一致。 */
     private fun replaceSuperTypeInSignature(signature: String?): String? {
         if (signature.isNullOrEmpty() || oldSuperName == newSuperName) {
             return signature

@@ -10,7 +10,7 @@ class ViewClickTrackActivity : BaseActivity() {
 
     private var clickIndex = 1
 
-    @Suppress("ObjectLiteralToLambda")
+    @Suppress("ObjectLiteralToLambda") // 保留匿名内部类与 lambda 两条插桩路径
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_view_click_track)

@@ -2,6 +2,7 @@ package github.leavesczy.track.member
 
 import github.leavesczy.track.BaseTrackConfig
 import github.leavesczy.track.BaseTrackConfigParameters
+import github.leavesczy.track.utils.replacePeriodWithSlash
 import java.io.Serializable
 
 /** 匹配全部 descriptor（字段类型或方法重载）。 */
@@ -18,9 +19,11 @@ internal data class MemberConfig(
     val replacements: Set<MemberReplacement>
 ) : BaseTrackConfig {
 
+    val proxyClasses: Set<String> = replacements.mapTo(destination = mutableSetOf()) { it.proxyClass }
+
     /**
      * @param ownerClass ASM 内部名（斜杠分隔）
-     * @param proxyClass 点分全限定名，改写时再转内部名
+     * @param proxyClass 点分全限定名；[proxyOwner] 为对应内部名
      */
     data class MemberReplacement(
         val kind: MemberKind,
@@ -28,7 +31,11 @@ internal data class MemberConfig(
         val memberName: String,
         val descriptor: String,
         val proxyClass: String
-    ) : Serializable
+    ) : Serializable {
+
+        val proxyOwner: String = replacePeriodWithSlash(className = proxyClass)
+
+    }
 
 }
 
@@ -45,7 +52,6 @@ data class MemberFieldRule(
     var exclude: Set<String> = emptySet()
 ) {
     companion object {
-        /** 匹配同名全部字段类型。 */
         const val MATCH_ALL_TYPE_DESCRIPTORS = MATCH_ALL_DESCRIPTORS
     }
 }
@@ -60,7 +66,6 @@ data class MemberMethodRule(
     var exclude: Set<String> = emptySet()
 ) {
     companion object {
-        /** 匹配同名全部方法重载。 */
         const val MATCH_ALL_METHOD_DESCRIPTORS = MATCH_ALL_DESCRIPTORS
     }
 }

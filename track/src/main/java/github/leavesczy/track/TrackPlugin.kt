@@ -64,19 +64,21 @@ class TrackPlugin : Plugin<Project> {
         }
         val androidComponents = project.extensions.getByType(AndroidComponentsExtension::class.java)
         androidComponents.onVariants { variant ->
-            handleViewClickTrack(project = project, variant = variant)
-            handleComposeClickTrack(project = project, variant = variant)
-            handleSuperclassTrack(project = project, variant = variant)
-            handleMemberTrack(project = project, variant = variant)
-            // 插桩后栈帧可能失效，仅对改过的方法重算，避免全量 COMPUTE_MAXS 的额外开销。
-            variant.instrumentation.setAsmFramesComputationMode(FramesComputationMode.COMPUTE_FRAMES_FOR_INSTRUMENTED_METHODS)
+            val viewClick = handleViewClickTrack(project = project, variant = variant)
+            val composeClick = handleComposeClickTrack(project = project, variant = variant)
+            val superclass = handleSuperclassTrack(project = project, variant = variant)
+            val member = handleMemberTrack(project = project, variant = variant)
+            if (viewClick || composeClick || superclass || member) {
+                // 插桩改写方法后需重算栈帧，只对改过的方法做，避免全量 COMPUTE_MAXS。
+                variant.instrumentation.setAsmFramesComputationMode(FramesComputationMode.COMPUTE_FRAMES_FOR_INSTRUMENTED_METHODS)
+            }
         }
     }
 
-    private fun handleViewClickTrack(project: Project, variant: Variant) {
+    private fun handleViewClickTrack(project: Project, variant: Variant): Boolean {
         val pluginParameter =
             project.extensions.findByType(ViewClickTrackPluginParameter::class.java)
-                ?: return
+                ?: return false
         val clickHandlerClass = pluginParameter.clickHandlerClass
         val clickMethodName = pluginParameter.clickMethodName
         val skipOnClickAnnotation = pluginParameter.skipOnClickAnnotation
@@ -88,13 +90,13 @@ class TrackPlugin : Plugin<Project> {
                 include.isNotEmpty() ||
                 exclude.isNotEmpty()
         val isComplete = clickHandlerClass.isNotBlank() && clickMethodName.isNotBlank()
-        guardTrackConfig(
+        return guardTrackConfig(
             extensionName = viewClickTrack,
             hasAnyConfig = hasAnyConfig,
             isComplete = isComplete,
             missingDetail = "缺少必填参数 clickHandlerClass / clickMethodName"
         ) {
-            // ALL：匿名 OnClickListener / lambda 生成类不一定在 project 模块内。
+            // 匿名 OnClickListener / lambda 生成类可能落在依赖里，scope 必须为 ALL。
             variant.instrumentation.apply {
                 transformClassesWith(
                     classVisitorFactoryImplClass = ViewClickAsmClassVisitorFactory::class.java,
@@ -114,21 +116,21 @@ class TrackPlugin : Plugin<Project> {
         }
     }
 
-    private fun handleComposeClickTrack(project: Project, variant: Variant) {
+    private fun handleComposeClickTrack(project: Project, variant: Variant): Boolean {
         val pluginParameter =
             project.extensions.findByType(ComposeClickTrackPluginParameter::class.java)
-                ?: return
+                ?: return false
         val clickWrapperClass = pluginParameter.clickWrapperClass
         val skipOnClickLabel = pluginParameter.skipOnClickLabel
         val hasAnyConfig = clickWrapperClass.isNotBlank() || skipOnClickLabel.isNotBlank()
         val isComplete = clickWrapperClass.isNotBlank()
-        guardTrackConfig(
+        return guardTrackConfig(
             extensionName = composeClickTrack,
             hasAnyConfig = hasAnyConfig,
             isComplete = isComplete,
             missingDetail = "缺少必填参数 clickWrapperClass"
         ) {
-            // 目标是 Compose Foundation 内部类，必须扫依赖；include/exclude 由 isTrackEnabled 收窄。
+            // ClickableElement 在 Compose Foundation 依赖中，scope 必须为 ALL。
             variant.instrumentation.apply {
                 transformClassesWith(
                     classVisitorFactoryImplClass = ComposeClickAsmClassVisitorFactory::class.java,
@@ -147,19 +149,19 @@ class TrackPlugin : Plugin<Project> {
         }
     }
 
-    private fun handleSuperclassTrack(project: Project, variant: Variant) {
+    private fun handleSuperclassTrack(project: Project, variant: Variant): Boolean {
         val pluginParameter =
             project.extensions.findByType(SuperclassTrackPluginParameter::class.java)
-                ?: return
+                ?: return false
         val rules = pluginParameter.rules
         val hasAnyConfig = rules.isNotEmpty()
-        guardTrackConfig(
+        return guardTrackConfig(
             extensionName = superclassTrack,
             hasAnyConfig = hasAnyConfig,
             isComplete = hasAnyConfig,
             missingDetail = "缺少必填参数 rules"
         ) {
-            // 同一 include/exclude 合并为一次 transform；不同过滤条件分桶注册，避免互相覆盖。
+            // include/exclude 相同的规则合并为一次 transform，不同过滤条件分桶注册。
             val buckets =
                 linkedMapOf<Pair<Set<String>, Set<String>>, MutableSet<SuperclassReplacement>>()
             rules.forEach { rule ->
@@ -229,20 +231,20 @@ class TrackPlugin : Plugin<Project> {
         }
     }
 
-    private fun handleMemberTrack(project: Project, variant: Variant) {
+    private fun handleMemberTrack(project: Project, variant: Variant): Boolean {
         val pluginParameter =
             project.extensions.findByType(MemberTrackPluginParameter::class.java)
-                ?: return
+                ?: return false
         val methods = pluginParameter.methods
         val fields = pluginParameter.fields
         val hasAnyConfig = methods.isNotEmpty() || fields.isNotEmpty()
-        guardTrackConfig(
+        return guardTrackConfig(
             extensionName = memberTrack,
             hasAnyConfig = hasAnyConfig,
             isComplete = hasAnyConfig,
             missingDetail = "缺少必填参数 methods / fields"
         ) {
-            // 与 superclass 相同：按 include/exclude 分桶，桶内校验成员规则是否冲突。
+            // include/exclude 相同的规则合并为一次 transform，桶内校验成员规则是否冲突。
             val buckets =
                 linkedMapOf<Pair<Set<String>, Set<String>>, MutableSet<MemberReplacement>>()
             methods.forEach { rule ->
@@ -298,7 +300,7 @@ class TrackPlugin : Plugin<Project> {
         if (descriptor == other.descriptor) {
             return true
         }
-        // "*" 会匹配全部重载/类型，不能再与同名具体 descriptor 并存。
+        // "*" 与同名具体 descriptor 不能并存。
         return descriptor == MATCH_ALL_DESCRIPTORS || other.descriptor == MATCH_ALL_DESCRIPTORS
     }
 
@@ -315,7 +317,6 @@ class TrackPlugin : Plugin<Project> {
         }
         return MemberReplacement(
             kind = MemberKind.FIELD,
-            // 字节码 owner 使用内部名（斜杠分隔），与 visitFieldInsn 对齐。
             ownerClass = replacePeriodWithSlash(className = ownerClass),
             memberName = fieldName,
             descriptor = typeDescriptor,
@@ -365,18 +366,15 @@ class TrackPlugin : Plugin<Project> {
         }
     }
 
-    /**
-     * 未配置 → 跳过；配置不完整 → 抛错；完整 → 注册插桩。
-     */
     private inline fun guardTrackConfig(
         extensionName: String,
         hasAnyConfig: Boolean,
         isComplete: Boolean,
         missingDetail: String,
         register: () -> Unit
-    ) {
+    ): Boolean {
         if (!hasAnyConfig) {
-            return
+            return false
         }
         if (!isComplete) {
             throw trackConfigError(
@@ -385,6 +383,7 @@ class TrackPlugin : Plugin<Project> {
             )
         }
         register()
+        return true
     }
 
     private fun trackConfigError(extensionName: String, detail: String): GradleException {
