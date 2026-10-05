@@ -75,12 +75,12 @@ android {
         archivesName.set("track_v${defaultConfig.versionName}_${defaultConfig.versionCode}_${time}")
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
     tasks.withType<KotlinCompile>().configureEach {
         compilerOptions {
-            jvmTarget.value(JvmTarget.JVM_17)
+            jvmTarget.value(JvmTarget.JVM_21)
             optIn.add("androidx.compose.material3.ExperimentalMaterial3Api")
         }
     }
