@@ -1,10 +1,11 @@
 package github.leavesczy.track.member
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
-import android.widget.Toast
+import android.telephony.TelephonyManager
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -31,84 +32,94 @@ import github.leavesczy.track.ui.TrackTopAppBar
 
 class MemberTrackActivity : BaseActivity() {
 
+    companion object {
+
+        var isProxyEnabled = true
+
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        isProxyEnabled = true
+        SystemFieldProxy.onProxyEnabledChanged()
         setContent {
             TrackTheme {
                 MemberTrackScreen(
-                    onShowOriginal = {
-                        showOriginalToast()
-                        buildMemberText(instrumented = false)
+                    onToggleProxy = {
+                        isProxyEnabled = !isProxyEnabled
+                        SystemFieldProxy.onProxyEnabledChanged()
+                        isProxyEnabled
                     },
-                    onShowInstrumented = {
-                        showTrackedToast()
-                        buildMemberText(instrumented = true)
+                    onReadInstructions = {
+                        buildInstructionLog()
                     }
                 )
             }
         }
     }
 
-    private fun showTrackedToast() {
-        Toast.makeText(this, "原始 Toast 文案", Toast.LENGTH_SHORT).show()
-    }
-
-    private fun showOriginalToast() {
-        MemberOutsideScope.showRawToast(context = this, message = "原始 Toast 文案")
-    }
-
-    @SuppressLint("HardwareIds")
-    private fun buildMemberText(instrumented: Boolean): String {
-        val brandInstrumented = Build.BRAND
-        val brandOriginal = MemberOutsideScope.readBrand()
-        val androidIdInstrumented =
-            Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID) ?: ""
-        val androidIdOriginal = MemberOutsideScope.readAndroidId(context = this)
-        val echoStringInstrumented = Echo.echo(value = "Track")
-        val echoIntInstrumented = Echo.echo(value = 42)
-        val echoStringOriginal = MemberOutsideScope.echoString(value = "Track")
-        val echoIntOriginal = MemberOutsideScope.echoInt(value = 42)
-        val modelInstrumented = DeviceInfo().model
-        val modelOriginal = MemberOutsideScope.readModel()
-        val title = if (instrumented) "【插桩后的值】" else "【原始值】"
-        val brand = if (instrumented) brandInstrumented else brandOriginal
-        val androidId = if (instrumented) androidIdInstrumented else androidIdOriginal
-        val echoString = if (instrumented) echoStringInstrumented else echoStringOriginal
-        val echoInt = if (instrumented) echoIntInstrumented else echoIntOriginal
-        val model = if (instrumented) modelInstrumented else modelOriginal
-        val toastLine = if (instrumented) {
-            "Toast：已被 ToastProxy 接管（看弹出文案）"
-        } else {
-            "Toast：原始文案（看弹出文案）"
+    @SuppressLint("MissingPermission")
+    private fun getDeviceId(context: Context): String {
+        return try {
+            val telephonyManager =
+                context.getSystemService(TELEPHONY_SERVICE) as? TelephonyManager
+            telephonyManager?.deviceId ?: ""
+        } catch (throwable: Throwable) {
+            throwable.printStackTrace()
+            ""
         }
-        return """
-            $title
+    }
 
-            $toastLine
+    @SuppressLint("MissingPermission")
+    private fun getImei(context: Context): String {
+        return try {
+            val telephonyManager =
+                context.getSystemService(TELEPHONY_SERVICE) as? TelephonyManager
+            telephonyManager?.getImei(1) ?: ""
+        } catch (throwable: Throwable) {
+            throwable.printStackTrace()
+            ""
+        }
+    }
 
-            Build.BRAND（GETSTATIC）
-            · $brand
+    private fun getAndroidId(context: Context): String {
+        return try {
+            Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID) ?: ""
+        } catch (throwable: Throwable) {
+            throwable.printStackTrace()
+            ""
+        }
+    }
 
-            DeviceInfo.model（GETFIELD）
-            · $model
+    private fun getBrand(): String {
+        return Build.BRAND
+    }
 
-            Settings.Secure.getString(ANDROID_ID)
-            · $androidId
-
-            Echo.echo（methodDescriptor = "*"）
-            · echo("Track") = $echoString
-            · echo(42) = $echoInt
-        """.trimIndent()
+    private fun buildInstructionLog(): String {
+        return buildString {
+            append("DeviceId: " + getDeviceId(context = this@MemberTrackActivity))
+            append("\n")
+            append("Imei: " + getImei(context = this@MemberTrackActivity))
+            append("\n")
+            append("AndroidId: " + getAndroidId(context = this@MemberTrackActivity))
+            append("\n")
+            append("Brand: " + getBrand())
+        }
     }
 
 }
 
 @Composable
 private fun MemberTrackScreen(
-    onShowOriginal: () -> String,
-    onShowInstrumented: () -> String
+    onToggleProxy: () -> Boolean,
+    onReadInstructions: () -> String
 ) {
-    var result by remember { mutableStateOf(value = "点击下方按钮查看结果") }
+    var proxyEnabled by remember {
+        mutableStateOf(value = true)
+    }
+    var log by remember {
+        mutableStateOf(value = "")
+    }
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         containerColor = MaterialTheme.colorScheme.surface,
@@ -125,27 +136,28 @@ private fun MemberTrackScreen(
             verticalArrangement = Arrangement.spacedBy(space = 12.dp)
         ) {
             Button(
-                modifier = Modifier
-                    .fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth(),
                 onClick = {
-                    result = onShowOriginal()
+                    log = if (log.isEmpty()) {
+                        onReadInstructions()
+                    } else {
+                        log + "\n\n" + onReadInstructions()
+                    }
                 }
             ) {
-                Text(text = "原始值")
+                Text(text = "输出指定字段 & 指定方法的返回值")
             }
             Button(
-                modifier = Modifier
-                    .fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth(),
                 onClick = {
-                    result = onShowInstrumented()
+                    proxyEnabled = onToggleProxy()
                 }
             ) {
-                Text(text = "插桩后的值")
+                Text(text = "是否替换 : $proxyEnabled")
             }
             Text(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                text = result,
+                modifier = Modifier.fillMaxWidth(),
+                text = log,
                 fontSize = 14.sp,
                 lineHeight = 22.sp,
                 color = MaterialTheme.colorScheme.onSurface

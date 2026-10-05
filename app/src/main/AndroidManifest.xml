@@ -35,6 +35,7 @@
             android:configChanges="keyboard|keyboardHidden|screenLayout|screenSize|orientation|uiMode"
             android:exported="false"
             android:screenOrientation="portrait"
+            android:theme="@style/Theme.Track"
             tools:ignore="DiscouragedApi,LockedOrientationActivity" />
         <activity
             android:name=".member.MemberTrackActivity"

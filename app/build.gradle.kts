@@ -138,41 +138,32 @@ composeClickTrack {
 superclassTrack {
     rules = setOf(
         SuperclassRule(
-            originClass = "github.leavesczy.track.superclass.OriginGreeter",
-            targetClass = "github.leavesczy.track.superclass.ProxyGreeter",
-            exclude = setOf(".*\\.ExcludedGreeter$")
-        ),
-        SuperclassRule(
-            originClass = "github.leavesczy.track.superclass.OriginLogger",
-            targetClass = "github.leavesczy.track.superclass.ProxyLogger",
-            include = setOf(".*\\.AppLogger$")
+            originClass = "android.widget.ImageView",
+            targetClass = "github.leavesczy.track.superclass.MonitorImageView",
+            exclude = setOf(".*\\.IgnoreImageView$")
         )
     )
 }
 
 memberTrack {
-    val memberTrackInclude = setOf(".*\\.MemberTrackActivity$")
     methods = setOf(
         MemberMethodRule(
-            ownerClass = "android.widget.Toast",
-            methodName = "show",
-            methodDescriptor = "()V",
-            proxyClass = "github.leavesczy.track.member.ToastProxy",
-            include = memberTrackInclude
+            ownerClass = "android.telephony.TelephonyManager",
+            methodName = "getDeviceId",
+            methodDescriptor = "()Ljava/lang/String;",
+            proxyClass = "github.leavesczy.track.member.SystemMethodProxy"
+        ),
+        MemberMethodRule(
+            ownerClass = "android.telephony.TelephonyManager",
+            methodName = "getImei",
+            methodDescriptor = "(I)Ljava/lang/String;",
+            proxyClass = "github.leavesczy.track.member.SystemMethodProxy"
         ),
         MemberMethodRule(
             ownerClass = $$"android.provider.Settings$Secure",
             methodName = "getString",
             methodDescriptor = "(Landroid/content/ContentResolver;Ljava/lang/String;)Ljava/lang/String;",
-            proxyClass = "github.leavesczy.track.member.SystemMethodProxy",
-            include = memberTrackInclude
-        ),
-        MemberMethodRule(
-            ownerClass = "github.leavesczy.track.member.Echo",
-            methodName = "echo",
-            methodDescriptor = "*",
-            proxyClass = "github.leavesczy.track.member.EchoProxy",
-            include = memberTrackInclude
+            proxyClass = "github.leavesczy.track.member.SystemMethodProxy"
         )
     )
     fields = setOf(
@@ -180,15 +171,7 @@ memberTrack {
             ownerClass = "android.os.Build",
             fieldName = "BRAND",
             typeDescriptor = "Ljava/lang/String;",
-            proxyClass = "github.leavesczy.track.member.SystemFieldProxy",
-            include = memberTrackInclude
-        ),
-        MemberFieldRule(
-            ownerClass = "github.leavesczy.track.member.DeviceInfo",
-            fieldName = "model",
-            typeDescriptor = "Ljava/lang/String;",
-            proxyClass = "github.leavesczy.track.member.DeviceInfoProxy",
-            include = memberTrackInclude
+            proxyClass = "github.leavesczy.track.member.SystemFieldProxy"
         )
     )
 }
